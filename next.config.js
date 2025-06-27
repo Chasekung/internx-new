@@ -16,6 +16,12 @@ const nextConfig = {
       ...config.resolve.fallback,
       fs: false,
     };
+    
+    // Suppress warnings about critical dependencies
+    config.ignoreWarnings = [
+      { module: /@supabase\/realtime-js/ }
+    ];
+    
     return config;
   },
 }
