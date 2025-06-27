@@ -1,0 +1,554 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
+import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import supabase from '@/lib/supabaseClient';
+
+export default function CompanyDash() {
+  const [companyName, setCompanyName] = useState("");
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [activeTab, setActiveTab] = useState('applications');
+  const [isPostingsOpen, setIsPostingsOpen] = useState(true);
+  const [postings, setPostings] = useState<any[]>([]);
+  const [expandedPostings, setExpandedPostings] = useState<string[]>([]);
+  const [expandedManagePostings, setExpandedManagePostings] = useState<string[]>([]);
+  const [expandedApplications, setExpandedApplications] = useState<string[]>([]);
+  const [applicationCounts, setApplicationCounts] = useState<Record<string, number>>({});
+  const router = useRouter();
+
+  useEffect(() => {
+    const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+    if (!userStr) {
+      router.replace('/company-sign-in');
+      return;
+    }
+    try {
+      const user = JSON.parse(userStr);
+      if (user.role !== 'COMPANY') {
+        router.replace('/company-sign-in');
+        return;
+      }
+    } catch {
+      router.replace('/company-sign-in');
+      return;
+    }
+    if (typeof window !== "undefined") {
+      const userStr = localStorage.getItem("user");
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          setCompanyName(user.name || "");
+        } catch (e) {
+          setCompanyName("");
+        }
+      }
+    }
+    // Fetch companyId from Supabase Auth and contact_name from companies table
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id;
+      setCompanyId(userId || null);
+      
+      if (userId) {
+        // Fetch company contact name
+        const { data: companyData, error: companyError } = await supabase
+          .from('companies')
+          .select('contact_name')
+          .eq('id', userId)
+          .single();
+          
+        if (!companyError && companyData && companyData.contact_name) {
+          setContactName(companyData.contact_name);
+        }
+
+        // Fetch postings for this company using the userId from auth
+        const fetchPostings = async () => {
+          try {
+            const { data: postingsData, error: postingsError } = await supabase
+              .from('internships')
+              .select('id, category, position')
+              .eq('company_id', userId);
+
+            if (postingsError) throw postingsError;
+            
+            setPostings(postingsData || []);
+
+            // Fetch application counts for each posting
+            const counts: Record<string, number> = {};
+            for (const posting of postingsData || []) {
+              const { count, error } = await supabase
+                .from('applications')
+                .select('*', { count: 'exact' })
+                .eq('internship_id', posting.id);
+              
+              if (!error) {
+                counts[posting.id] = count || 0;
+              }
+            }
+            setApplicationCounts(counts);
+          } catch (error) {
+            console.error('Error fetching postings:', error);
+          }
+        };
+        
+        fetchPostings();
+      }
+    };
+    
+    fetchUser();
+  }, []);
+
+  const handleSignOut = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      router.replace('/company-sign-in');
+    }
+  };
+
+  // Helper function to get category-specific styles
+  const getCategoryStyles = (category: string) => {
+    const styles = {
+      'Software Engineering': {
+        icon: CodeBracketIcon,
+        color: 'text-blue-600',
+        bgLight: 'bg-gradient-to-br from-blue-50 to-purple-50',
+        border: 'border-blue-200'
+      },
+      'Data Science': {
+        icon: PresentationChartBarIcon,
+        color: 'text-purple-600',
+        bgLight: 'bg-gradient-to-br from-purple-50 to-fuchsia-50',
+        border: 'border-purple-200'
+      },
+      'Marketing': {
+        icon: MegaphoneIcon,
+        color: 'text-pink-600',
+        bgLight: 'bg-gradient-to-br from-pink-50 to-purple-50',
+        border: 'border-pink-200'
+      },
+      'Design': {
+        icon: PaintBrushIcon,
+        color: 'text-indigo-600',
+        bgLight: 'bg-gradient-to-br from-indigo-50 to-purple-50',
+        border: 'border-indigo-200'
+      },
+      'Business': {
+        icon: BriefcaseIcon,
+        color: 'text-amber-600',
+        bgLight: 'bg-gradient-to-br from-amber-50 to-purple-50',
+        border: 'border-amber-200'
+      },
+      'Operations': {
+        icon: BuildingOfficeIcon,
+        color: 'text-emerald-600',
+        bgLight: 'bg-gradient-to-br from-emerald-50 to-purple-50',
+        border: 'border-emerald-200'
+      },
+      'Education': {
+        icon: AcademicCapIcon,
+        color: 'text-cyan-600',
+        bgLight: 'bg-gradient-to-br from-cyan-50 to-purple-50',
+        border: 'border-cyan-200'
+      },
+      'Research': {
+        icon: BeakerIcon,
+        color: 'text-teal-600',
+        bgLight: 'bg-gradient-to-br from-teal-50 to-purple-50',
+        border: 'border-teal-200'
+      },
+      'Healthcare': {
+        icon: HeartIcon,
+        color: 'text-rose-600',
+        bgLight: 'bg-gradient-to-br from-rose-50 to-purple-50',
+        border: 'border-rose-200'
+      }
+    };
+    return styles[category as keyof typeof styles] || {
+      icon: SparklesIcon,
+      color: 'text-gray-600',
+      bgLight: 'bg-gradient-to-br from-gray-50 to-purple-50',
+      border: 'border-gray-200'
+    };
+  };
+
+  // Helper function to generate the URL-safe company name
+  const getUrlSafeString = (str: string) => {
+    return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+      {/* Decorative grid pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+
+      {/* Settings Icon */}
+      <div className="absolute top-4 right-4">
+        <div className="relative">
+          <button
+            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+            className="p-2 rounded-full hover:bg-white/20 transition-colors duration-200"
+          >
+            <Cog6ToothIcon className="h-6 w-6 text-gray-600" />
+          </button>
+          {isSettingsOpen && (
+            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+              <div className="py-1" role="menu" aria-orientation="vertical">
+                <button
+                  onClick={handleSignOut}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  role="menuitem"
+                >
+                  Sign out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 pt-24">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-8"
+        >
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            Welcome{contactName ? `, ${contactName}` : companyName ? `, ${companyName}` : ", Employer"}!
+          </h1>
+          <p className="text-gray-600 mb-8">
+            This is your company dashboard. Manage your postings, find top interns, and grow your team.
+          </p>
+          {/* Tabs */}
+          <div className="flex space-x-4 border-b border-gray-200 mb-6">
+            <button
+              className={`px-4 py-2 font-medium text-base focus:outline-none border-b-2 transition-colors duration-200 ${activeTab === 'applications' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-blue-700'}`}
+              onClick={() => setActiveTab('applications')}
+            >
+              Applications
+            </button>
+            <button
+              className={`px-4 py-2 font-medium text-base focus:outline-none border-b-2 transition-colors duration-200 ${activeTab === 'manage' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-blue-700'}`}
+              onClick={() => setActiveTab('manage')}
+            >
+              Manage Postings
+            </button>
+            <button
+              className={`px-4 py-2 font-medium text-base focus:outline-none border-b-2 transition-colors duration-200 ${activeTab === 'team' ? 'border-blue-600 text-blue-700' : 'border-transparent text-gray-500 hover:text-blue-700'}`}
+              onClick={() => setActiveTab('team')}
+            >
+              {companyName ? `${companyName} Team` : 'Team'}
+            </button>
+          </div>
+          {/* Tab Content */}
+          <div>
+            {activeTab === 'applications' && (
+              <div>
+                {/* Expandable Postings Section */}
+                <div className="bg-white rounded-lg shadow border border-gray-200 mb-6">
+                  <div
+                    className="flex items-center justify-between px-6 py-4 cursor-pointer select-none border-b border-gray-100"
+                    onClick={() => setIsPostingsOpen((open) => !open)}
+                  >
+                    <h3 className="text-lg font-medium text-gray-900">Postings</h3>
+                    {isPostingsOpen ? (
+                      <ChevronUpIcon className="h-5 w-5 text-gray-400" />
+                    ) : (
+                      <ChevronDownIcon className="h-5 w-5 text-gray-400" />
+                    )}
+                  </div>
+                  {isPostingsOpen && (
+                    <div className="px-6 py-4">
+                      {postings.length === 0 ? (
+                        <div className="py-8 text-gray-600 text-lg text-center">No postings found.</div>
+                      ) : (
+                        <div className="space-y-4">
+                          {postings.map((posting) => {
+                            const categoryStyle = getCategoryStyles(posting.category);
+                            const IconComponent = categoryStyle.icon;
+                            
+                            return (
+                              <motion.div
+                                key={posting.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className={`rounded-lg border ${categoryStyle.border} overflow-hidden transition-all duration-200 hover:shadow-md hover:shadow-purple-100`}
+                              >
+                                <div
+                                  className={`flex items-center justify-between px-6 py-4 cursor-pointer select-none ${categoryStyle.bgLight}`}
+                                  onClick={() => setExpandedPostings((prev) => 
+                                    prev.includes(posting.id) 
+                                      ? prev.filter(id => id !== posting.id) 
+                                      : [...prev, posting.id]
+                                  )}
+                                >
+                                  <div className="flex items-center space-x-4">
+                                    <div className={`p-2 rounded-lg bg-white bg-opacity-60 backdrop-blur-sm`}>
+                                      <IconComponent className={`h-6 w-6 ${categoryStyle.color}`} />
+                                    </div>
+                                    <div>
+                                      <h4 className={`font-semibold ${categoryStyle.color}`}>
+                                        {posting.category}
+                                      </h4>
+                                      <p className="text-gray-600 text-sm mt-1">
+                                        {posting.position}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <motion.div
+                                    initial={false}
+                                    animate={{ rotate: expandedPostings.includes(posting.id) ? 180 : 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="bg-white bg-opacity-60 rounded-full p-1"
+                                  >
+                                    <ChevronDownIcon className={`h-5 w-5 ${categoryStyle.color}`} />
+                                  </motion.div>
+                                </div>
+                                <AnimatePresence>
+                                  {expandedPostings.includes(posting.id) && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: "auto", opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="overflow-hidden"
+                                    >
+                                      <div className="px-6 py-4 bg-white bg-opacity-90">
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div className={`p-4 rounded-lg ${categoryStyle.bgLight} backdrop-blur-sm`}>
+                                            <h5 className="text-sm font-medium text-gray-500">Category</h5>
+                                            <p className={`text-lg font-medium ${categoryStyle.color}`}>
+                                              {posting.category}
+                                            </p>
+                                          </div>
+                                          <div className={`p-4 rounded-lg ${categoryStyle.bgLight} backdrop-blur-sm`}>
+                                            <h5 className="text-sm font-medium text-gray-500">Position</h5>
+                                            <p className={`text-lg font-medium ${categoryStyle.color}`}>
+                                              {posting.position}
+                                            </p>
+                                          </div>
+                                        </div>
+
+                                        {/* Applications Section */}
+                                        <div className="mt-4">
+                                          <div
+                                            className={`rounded-lg border ${categoryStyle.border} overflow-hidden transition-all duration-200`}
+                                          >
+                                            <div
+                                              className={`flex items-center justify-between px-6 py-3 cursor-pointer select-none ${categoryStyle.bgLight}`}
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setExpandedApplications(prev =>
+                                                  prev.includes(posting.id)
+                                                    ? prev.filter(id => id !== posting.id)
+                                                    : [...prev, posting.id]
+                                                );
+                                              }}
+                                            >
+                                              <div className="flex items-center space-x-2">
+                                                <div className={`p-1.5 rounded-lg bg-white bg-opacity-60 backdrop-blur-sm`}>
+                                                  <BriefcaseIcon className={`h-4 w-4 ${categoryStyle.color}`} />
+                                                </div>
+                                                <h4 className={`font-medium ${categoryStyle.color}`}>
+                                                  Applications
+                                                  <span className="ml-2 px-2 py-0.5 text-sm bg-white bg-opacity-60 rounded-full">
+                                                    {applicationCounts[posting.id] || 0}
+                                                  </span>
+                                                </h4>
+                                              </div>
+                                              <motion.div
+                                                initial={false}
+                                                animate={{ rotate: expandedApplications.includes(posting.id) ? 180 : 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="bg-white bg-opacity-60 rounded-full p-1"
+                                              >
+                                                <ChevronDownIcon className={`h-4 w-4 ${categoryStyle.color}`} />
+                                              </motion.div>
+                                            </div>
+                                            <AnimatePresence>
+                                              {expandedApplications.includes(posting.id) && (
+                                                <motion.div
+                                                  initial={{ height: 0, opacity: 0 }}
+                                                  animate={{ height: "auto", opacity: 1 }}
+                                                  exit={{ height: 0, opacity: 0 }}
+                                                  transition={{ duration: 0.2 }}
+                                                  className="overflow-hidden"
+                                                >
+                                                  <div className="px-6 py-4 bg-white bg-opacity-90">
+                                                    <p className="text-gray-600">
+                                                      {applicationCounts[posting.id] 
+                                                        ? `You have ${applicationCounts[posting.id]} application${applicationCounts[posting.id] === 1 ? '' : 's'} for this position.`
+                                                        : 'No applications yet for this position.'}
+                                                    </p>
+                                                  </div>
+                                                </motion.div>
+                                              )}
+                                            </AnimatePresence>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {activeTab === 'manage' && (
+              <div>
+                <div className="px-6 py-4">
+                  {postings.length === 0 ? (
+                    <div className="py-8 text-gray-600 text-lg text-center">No postings found.</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {postings.map((posting) => {
+                        const categoryStyle = getCategoryStyles(posting.category);
+                        const IconComponent = categoryStyle.icon;
+                        
+                        return (
+                          <motion.div
+                            key={posting.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className={`rounded-lg border ${categoryStyle.border} overflow-hidden transition-all duration-200 hover:shadow-md hover:shadow-purple-100`}
+                          >
+                            <div
+                              className={`flex items-center justify-between px-6 py-4 cursor-pointer select-none ${categoryStyle.bgLight}`}
+                              onClick={() => setExpandedManagePostings((prev) => 
+                                prev.includes(posting.id) 
+                                  ? prev.filter(id => id !== posting.id) 
+                                  : [...prev, posting.id]
+                              )}
+                            >
+                              <div className="flex items-center space-x-4">
+                                <div className={`p-2 rounded-lg bg-white bg-opacity-60 backdrop-blur-sm`}>
+                                  <IconComponent className={`h-6 w-6 ${categoryStyle.color}`} />
+                                </div>
+                                <div>
+                                  <h4 className={`font-semibold ${categoryStyle.color}`}>
+                                    {posting.category}
+                                  </h4>
+                                  <p className="text-gray-600 text-sm mt-1">
+                                    {posting.position}
+                                  </p>
+                                </div>
+                              </div>
+                              <motion.div
+                                initial={false}
+                                animate={{ rotate: expandedManagePostings.includes(posting.id) ? 180 : 0 }}
+                                transition={{ duration: 0.2 }}
+                                className="bg-white bg-opacity-60 rounded-full p-1"
+                              >
+                                <ChevronDownIcon className={`h-5 w-5 ${categoryStyle.color}`} />
+                              </motion.div>
+                            </div>
+                            <AnimatePresence>
+                              {expandedManagePostings.includes(posting.id) && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="px-6 py-4 bg-white bg-opacity-90">
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className={`p-4 rounded-lg ${categoryStyle.bgLight} backdrop-blur-sm`}>
+                                        <h5 className="text-sm font-medium text-gray-500">Category</h5>
+                                        <p className={`text-lg font-medium ${categoryStyle.color}`}>
+                                          {posting.category}
+                                        </p>
+                                      </div>
+                                      <div className={`p-4 rounded-lg ${categoryStyle.bgLight} backdrop-blur-sm`}>
+                                        <h5 className="text-sm font-medium text-gray-500">Position</h5>
+                                        <p className={`text-lg font-medium ${categoryStyle.color}`}>
+                                          {posting.position}
+                                        </p>
+                                      </div>
+                                    </div>
+                                    <div className="mt-6">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center space-x-2">
+                                          <h5 className="text-sm font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                                            Posting URL
+                                          </h5>
+                                          <div className="h-4 w-[1px] bg-gradient-to-b from-blue-200 to-purple-200"></div>
+                                          <span className="text-xs text-gray-400">Click to view or copy</span>
+                                        </div>
+                                      </div>
+                                      <div className={`p-3 rounded-lg bg-gray-50 border border-gray-100 hover:border-blue-200 transition-colors duration-200`}>
+                                        <Link
+                                          href={`/company/postings/${posting.id}`}
+                                          target="_blank"
+                                          onClick={(e) => e.stopPropagation()}
+                                          className="block text-sm text-gray-600 hover:text-blue-600 font-medium break-all transition-colors duration-200"
+                                        >
+                                          {`/company/postings/${posting.id}`}
+                                        </Link>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            {activeTab === 'team' && (
+              <div className="py-8 text-gray-600 text-lg text-center">(Manage your company team here)</div>
+            )}
+          </div>
+        </motion.div>
+        {/* Placeholder for future analytics or widgets */}
+        {/* <CompanyAnalytics /> */}
+      </div>
+      {/* Add custom styles for animations */}
+      <style jsx global>{`
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+          animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+          animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+        .bg-grid-pattern {
+          background-image: linear-gradient(to right, #a78bfa 1px, transparent 1px),
+            linear-gradient(to bottom, #a78bfa 1px, transparent 1px);
+          background-size: 24px 24px;
+        }
+      `}</style>
+    </div>
+  );
+} 
