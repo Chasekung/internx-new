@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon, DocumentPlusIcon } from '@heroicons/react/24/outline';
 import supabase from '@/lib/supabaseClient';
 
 export default function CompanyDash() {
@@ -19,7 +19,85 @@ export default function CompanyDash() {
   const [expandedManagePostings, setExpandedManagePostings] = useState<string[]>([]);
   const [expandedApplications, setExpandedApplications] = useState<string[]>([]);
   const [applicationCounts, setApplicationCounts] = useState<Record<string, number>>({});
+  const [existingApplicationForms, setExistingApplicationForms] = useState<Record<string, boolean>>({});
   const router = useRouter();
+
+  const handleApplicationFormClick = async (postingId: string) => {
+    try {
+      // Get the current user's ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('Not authenticated');
+      }
+
+      // In our system, the user.id is the company ID for company users
+      const companyId = user.id;
+
+      // Check if a form already exists for this internship
+      const { data: existingForm, error: formError } = await supabase
+        .from('forms')
+        .select('id')
+        .eq('internship_id', postingId)
+        .eq('company_id', companyId)
+        .single();
+
+      if (formError && formError.code !== 'PGRST116') { // PGRST116 is "not found" error
+        throw formError;
+      }
+
+      if (existingForm) {
+        // Update existingApplicationForms state to show "Edit Application"
+        setExistingApplicationForms(prev => ({
+          ...prev,
+          [postingId]: true
+        }));
+        // Navigate to edit page
+        router.push(`/company/form-builder/${companyId}/${existingForm.id}`);
+      } else {
+        // Generate a random UUID for the form
+        const formId = crypto.randomUUID();
+
+        // Get internship details for form title
+        const { data: internship, error: internshipError } = await supabase
+          .from('internships')
+          .select('title, description')
+          .eq('id', postingId)
+          .single();
+
+        if (internshipError) throw internshipError;
+
+        // Create a new form with the generated ID
+        const { data: newForm, error: createError } = await supabase
+          .from('forms')
+          .insert({
+            id: formId,
+            internship_id: postingId,
+            company_id: companyId,
+            title: `${internship.title} Application Form`,
+            description: internship.description || 'Please fill out all required fields.',
+            status: 'draft',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+
+        // Update existingApplicationForms state to show "Edit Application"
+        setExistingApplicationForms(prev => ({
+          ...prev,
+          [postingId]: true
+        }));
+
+        // Navigate to the new form
+        router.push(`/company/form-builder/${companyId}/${formId}`);
+      }
+    } catch (error) {
+      console.error('Error handling form navigation:', error);
+      // Show error to user (you can add a toast notification here)
+    }
+  };
 
   useEffect(() => {
     const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
@@ -78,9 +156,12 @@ export default function CompanyDash() {
             
             setPostings(postingsData || []);
 
-            // Fetch application counts for each posting
+            // Fetch application counts and check for existing forms for each posting
             const counts: Record<string, number> = {};
+            const existingForms: Record<string, boolean> = {};
+            
             for (const posting of postingsData || []) {
+              // Get application counts
               const { count, error } = await supabase
                 .from('applications')
                 .select('*', { count: 'exact' })
@@ -89,8 +170,21 @@ export default function CompanyDash() {
               if (!error) {
                 counts[posting.id] = count || 0;
               }
+
+              // Check if form exists
+              const { data: formData, error: formError } = await supabase
+                .from('forms')
+                .select('id')
+                .eq('internship_id', posting.id)
+                .maybeSingle();
+
+              if (!formError) {
+                existingForms[posting.id] = !!formData;
+              }
             }
+            
             setApplicationCounts(counts);
+            setExistingApplicationForms(existingForms);
           } catch (error) {
             console.error('Error fetching postings:', error);
           }
@@ -339,6 +433,24 @@ export default function CompanyDash() {
                                               {posting.position}
                                             </p>
                                           </div>
+                                        </div>
+
+                                        {/* Create/Edit Application Button */}
+                                        <div className="mt-4 mb-4">
+                                          <button
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              handleApplicationFormClick(posting.id);
+                                            }}
+                                            className={`w-full flex items-center justify-center px-4 py-2 rounded-lg ${categoryStyle.bgLight} border ${categoryStyle.border} hover:shadow-md transition-all duration-200`}
+                                          >
+                                            <div className={`p-1.5 rounded-lg bg-white bg-opacity-60 backdrop-blur-sm mr-2`}>
+                                              <DocumentPlusIcon className={`h-4 w-4 ${categoryStyle.color}`} />
+                                            </div>
+                                            <span className={`text-sm font-medium ${categoryStyle.color}`}>
+                                              {existingApplicationForms[posting.id] ? 'Edit Application' : 'Create Application'}
+                                            </span>
+                                          </button>
                                         </div>
 
                                         {/* Applications Section */}
