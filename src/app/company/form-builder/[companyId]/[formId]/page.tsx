@@ -1143,7 +1143,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                   </h3>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-black mb-1">
                         Primary Color
                       </label>
                       <input
@@ -1155,7 +1155,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-black mb-1">
                         Background Color
                       </label>
                       <input
@@ -1167,53 +1167,53 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-black mb-1">
                         Font Family
                       </label>
                       <select
                         value={theme.fontFamily}
                         onChange={(e) => setTheme({ ...theme, fontFamily: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-black"
                         style={{ borderRadius: theme.borderRadius }}
                       >
-                        <option value="Inter">Inter</option>
-                        <option value="Roboto">Roboto</option>
-                        <option value="Open Sans">Open Sans</option>
-                        <option value="Montserrat">Montserrat</option>
-                        <option value="Poppins">Poppins</option>
+                        <option value="Inter" className="text-black">Inter</option>
+                        <option value="Roboto" className="text-black">Roboto</option>
+                        <option value="Open Sans" className="text-black">Open Sans</option>
+                        <option value="Montserrat" className="text-black">Montserrat</option>
+                        <option value="Poppins" className="text-black">Poppins</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-black mb-1">
                         Border Radius
                       </label>
                       <select
                         value={theme.borderRadius}
                         onChange={(e) => setTheme({ ...theme, borderRadius: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-black"
                         style={{ borderRadius: theme.borderRadius }}
                       >
-                        <option value="0">None</option>
-                        <option value="0.25rem">Small</option>
-                        <option value="0.5rem">Medium</option>
-                        <option value="1rem">Large</option>
-                        <option value="2rem">Extra Large</option>
+                        <option value="0" className="text-black">None</option>
+                        <option value="0.25rem" className="text-black">Small</option>
+                        <option value="0.5rem" className="text-black">Medium</option>
+                        <option value="1rem" className="text-black">Large</option>
+                        <option value="2rem" className="text-black">Extra Large</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                      <label className="block text-sm font-medium text-black mb-1">
                         Spacing
                       </label>
                       <select
                         value={theme.spacing}
                         onChange={(e) => setTheme({ ...theme, spacing: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-black"
                         style={{ borderRadius: theme.borderRadius }}
                       >
-                        <option value="0.5rem">Compact</option>
-                        <option value="1rem">Normal</option>
-                        <option value="1.5rem">Relaxed</option>
-                        <option value="2rem">Spacious</option>
+                        <option value="0.5rem" className="text-black">Compact</option>
+                        <option value="1rem" className="text-black">Normal</option>
+                        <option value="1.5rem" className="text-black">Relaxed</option>
+                        <option value="2rem" className="text-black">Spacious</option>
                       </select>
                     </div>
                   </div>

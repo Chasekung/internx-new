@@ -20,7 +20,7 @@ async function checkPosting() {
     const { data: posting, error } = await supabase
       .from('internships')
       .select(`
-        id,
+          id,
         title,
         company_name,
         internship_picture_1,
