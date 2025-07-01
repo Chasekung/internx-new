@@ -186,3 +186,4 @@ CREATE POLICY "Companies can view applications for their internships" ON applica
  
  
  
+ 
