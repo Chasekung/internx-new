@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import supabase from '@/lib/supabaseClient';
@@ -50,6 +50,14 @@ interface Theme {
   borderRadius: string;
   spacing: string;
 }
+
+const ThemeContext = createContext<Theme>({
+  primaryColor: '#3b82f6',
+  backgroundColor: '#ffffff',
+  fontFamily: 'Inter',
+  borderRadius: '0.5rem',
+  spacing: '1rem'
+});
 
 // Add this new component for handling text inputs
 const TextInput = ({ 
@@ -105,6 +113,14 @@ const TextInput = ({
 };
 
 const QuestionPreview = ({ question }: { question: Question }) => {
+  const theme = useContext(ThemeContext);
+  
+  const getThemedInputClass = () => `
+    block w-full rounded-md border px-3 py-2 
+    text-gray-900 placeholder-gray-500 
+    disabled:cursor-not-allowed disabled:opacity-50
+  `;
+
   const renderQuestionInput = () => {
     switch (question.type) {
       case 'short_text':
@@ -120,14 +136,22 @@ const QuestionPreview = ({ question }: { question: Question }) => {
                   type="text"
                   disabled
                   placeholder={question.placeholder || 'Enter your answer'}
-                  className="block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={getThemedInputClass()}
+                  style={{ 
+                    borderRadius: theme.borderRadius,
+                    borderColor: `${theme.primaryColor}40`,
+                  }}
                 />
               ) : (
                 <textarea
                   disabled
                   placeholder={question.placeholder || 'Enter your answer'}
                   rows={3}
-                  className="block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={getThemedInputClass()}
+                  style={{ 
+                    borderRadius: theme.borderRadius,
+                    borderColor: `${theme.primaryColor}40`,
+                  }}
                 />
               )}
               {question.hint && (
@@ -143,14 +167,17 @@ const QuestionPreview = ({ question }: { question: Question }) => {
             {question.description && (
               <p className="text-sm text-gray-600 mb-2">{question.description}</p>
             )}
-            <div className="space-y-2">
+            <div className="space-y-2" style={{ gap: theme.spacing }}>
               {(question.options || ['Option 1', 'Option 2']).map((option, index) => (
                 <div key={index} className="flex items-center">
                   <input
                     type="radio"
                     disabled
                     name={`question-${question.id}`}
-                    className="h-4 w-4 border-gray-300 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed"
+                    className="h-4 w-4 border-gray-300 disabled:cursor-not-allowed"
+                    style={{ 
+                      accentColor: theme.primaryColor,
+                    }}
                   />
                   <label className="ml-2 text-sm text-gray-700">{option}</label>
                 </div>
@@ -168,13 +195,17 @@ const QuestionPreview = ({ question }: { question: Question }) => {
             {question.description && (
               <p className="text-sm text-gray-600 mb-2">{question.description}</p>
             )}
-            <div className="space-y-2">
+            <div className="space-y-2" style={{ gap: theme.spacing }}>
               {(question.options || ['Option 1', 'Option 2']).map((option, index) => (
                 <div key={index} className="flex items-center">
                   <input
                     type="checkbox"
                     disabled
-                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:cursor-not-allowed"
+                    className="h-4 w-4 rounded border-gray-300 disabled:cursor-not-allowed"
+                    style={{ 
+                      accentColor: theme.primaryColor,
+                      borderRadius: theme.borderRadius,
+                    }}
                   />
                   <label className="ml-2 text-sm text-gray-700">{option}</label>
                 </div>
@@ -194,7 +225,11 @@ const QuestionPreview = ({ question }: { question: Question }) => {
             )}
             <select
               disabled
-              className="block w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+              className={getThemedInputClass()}
+              style={{ 
+                borderRadius: theme.borderRadius,
+                borderColor: `${theme.primaryColor}40`,
+              }}
             >
               <option value="">{question.placeholder || 'Select an option'}</option>
               {(question.options || ['Option 1', 'Option 2']).map((option, index) => (
@@ -214,7 +249,13 @@ const QuestionPreview = ({ question }: { question: Question }) => {
               <p className="text-sm text-gray-600 mb-2">{question.description}</p>
             )}
             <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-not-allowed bg-gray-50">
+              <label 
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed cursor-not-allowed bg-gray-50"
+                style={{ 
+                  borderRadius: theme.borderRadius,
+                  borderColor: `${theme.primaryColor}40`,
+                }}
+              >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <svg className="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
                     <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
@@ -244,7 +285,13 @@ const QuestionPreview = ({ question }: { question: Question }) => {
               <p className="text-sm text-gray-600 mb-2">{question.description}</p>
             )}
             <div className="flex items-center justify-center w-full">
-              <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-not-allowed bg-gray-50">
+              <label 
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed cursor-not-allowed bg-gray-50"
+                style={{ 
+                  borderRadius: theme.borderRadius,
+                  borderColor: `${theme.primaryColor}40`,
+                }}
+              >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
                   <svg className="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
                     <path stroke="currentColor" strokeLinecap="round" d="M10 5.757v8.486M5.757 10h8.486M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
@@ -270,18 +317,122 @@ const QuestionPreview = ({ question }: { question: Question }) => {
   };
 
   return (
-    <div className="mt-4 border-t border-gray-100 pt-4">
+    <div 
+      className="mt-4 border-t pt-4"
+      style={{ borderColor: `${theme.primaryColor}20` }}
+    >
       <div className="text-sm text-gray-500">Preview:</div>
       {renderQuestionInput()}
     </div>
   );
 };
 
-export default function FormBuilder({ 
-  params: { companyId, formId } 
+const ThemedSection = ({ 
+  section, 
+  children, 
+  onTitleChange, 
+  onDescriptionChange,
+  onDelete
 }: { 
-  params: { companyId: string, formId: string } 
-}) {
+  section: Section, 
+  children: React.ReactNode,
+  onTitleChange: (value: string) => void,
+  onDescriptionChange: (value: string) => void,
+  onDelete: () => void
+}) => {
+  const theme = useContext(ThemeContext);
+  
+  return (
+    <div 
+      className="bg-white shadow-sm rounded-lg overflow-hidden mb-4 group"
+      style={{
+        backgroundColor: theme.backgroundColor,
+        borderRadius: theme.borderRadius,
+        fontFamily: theme.fontFamily,
+        marginBottom: theme.spacing,
+      }}
+    >
+      <div 
+        className="border-b p-4 flex justify-between items-start"
+        style={{ borderColor: theme.primaryColor }}
+      >
+        <div className="flex-1">
+          <TextInput
+            value={section.title}
+            onChange={onTitleChange}
+            placeholder="Section Title"
+            className={`text-xl font-semibold mb-2 w-full bg-transparent border-none focus:ring-0 hover:bg-gray-50/50`}
+          />
+          <TextInput
+            value={section.description || ''}
+            onChange={onDescriptionChange}
+            placeholder="Section Description"
+            className="text-gray-600 w-full bg-transparent border-none focus:ring-0 hover:bg-gray-50/50"
+          />
+        </div>
+        <button
+          onClick={onDelete}
+          className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors duration-200 opacity-0 group-hover:opacity-100"
+          title="Delete Section"
+        >
+          <TrashIcon className="h-5 w-5" />
+        </button>
+      </div>
+      <div className="p-4" style={{ gap: theme.spacing }}>
+        {children}
+      </div>
+    </div>
+  );
+};
+
+const ThemedQuestion = ({ 
+  question, 
+  children, 
+  onDelete,
+  onConfigure
+}: { 
+  question: Question, 
+  children: React.ReactNode,
+  onDelete: () => void,
+  onConfigure: () => void
+}) => {
+  const theme = useContext(ThemeContext);
+  
+  return (
+    <div 
+      className="bg-white shadow-sm rounded-lg p-4 mb-4 group"
+      style={{
+        borderRadius: theme.borderRadius,
+        marginBottom: theme.spacing,
+        border: `1px solid ${theme.primaryColor}20`,
+      }}
+    >
+      <div className="flex items-start justify-between">
+        <div className="flex-1">
+          {children}
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={onConfigure}
+            className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-50 transition-colors duration-200"
+            title="Configure Question"
+          >
+            <Cog6ToothIcon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={onDelete}
+            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors duration-200 opacity-0 group-hover:opacity-100"
+            title="Delete Question"
+          >
+            <TrashIcon className="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function FormBuilder({ params: { companyId, formId } }: { params: { companyId: string, formId: string } }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'build' | 'settings' | 'publish'>('build');
@@ -739,70 +890,64 @@ export default function FormBuilder({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative">
-      {/* Animated background elements */}
-      <div className="fixed inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
-      </div>
-      
-      {/* Top Navigation */}
-      <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md shadow-sm z-50">
-        <div className="max-w-full px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-8">
+    <ThemeContext.Provider value={theme}>
+      <div className="min-h-screen relative" style={{ fontFamily: theme.fontFamily }}>
+        {/* Background elements - lower z-index */}
+        <div className="fixed inset-0 overflow-hidden" style={{ zIndex: 0 }}>
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+          <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+        </div>
+
+        {/* Top Navigation */}
+        <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md shadow-sm" style={{ zIndex: 40 }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between items-center py-4">
+              <div className="flex items-center space-x-8">
+                <button
+                  onClick={() => router.back()}
+                  className="text-gray-600 hover:text-gray-900"
+                >
+                  <XMarkIcon className="h-6 w-6" />
+                </button>
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => setActiveTab('build')}
+                    className={`px-4 py-2 rounded-md ${
+                      activeTab === 'build'
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <DocumentTextIcon className="h-5 w-5 inline-block mr-2" />
+                    Build
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('settings')}
+                    className={`px-4 py-2 rounded-md ${
+                      activeTab === 'settings'
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <Cog6ToothIcon className="h-5 w-5 inline-block mr-2" />
+                    Settings
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('publish')}
+                    className={`px-4 py-2 rounded-md ${
+                      activeTab === 'publish'
+                        ? 'bg-blue-50 text-blue-700'
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <EyeIcon className="h-5 w-5 inline-block mr-2" />
+                    Preview & Publish
+                  </button>
+                </div>
+              </div>
               <button
-                onClick={() => router.back()}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors duration-200 flex items-center"
-              >
-                <XMarkIcon className="h-5 w-5 mr-1" />
-                Exit
-              </button>
-              <button
-                onClick={() => setActiveTab('build')}
-                className={`px-4 py-2 rounded-md transition-colors duration-200 ${
-                  activeTab === 'build' 
-                    ? 'bg-blue-100 text-blue-700' 
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <DocumentTextIcon className="h-5 w-5 inline mr-2" />
-                Build
-              </button>
-              <button
-                onClick={() => setActiveTab('settings')}
-                className={`px-4 py-2 rounded-md transition-colors duration-200 ${
-                  activeTab === 'settings' 
-                    ? 'bg-blue-100 text-blue-700' 
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Cog6ToothIcon className="h-5 w-5 inline mr-2" />
-                Settings
-              </button>
-              <button
-                onClick={() => setActiveTab('publish')}
-                className={`px-4 py-2 rounded-md transition-colors duration-200 ${
-                  activeTab === 'publish' 
-                    ? 'bg-blue-100 text-blue-700' 
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <ArrowPathIcon className="h-5 w-5 inline mr-2" />
-                Publish
-              </button>
-            </div>
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => {}}
-                className="px-4 py-2 text-gray-600 hover:text-gray-900 transition-colors duration-200"
-              >
-                <EyeIcon className="h-5 w-5 inline mr-2" />
-                Preview
-              </button>
-              <button
-                onClick={() => {}}
+                onClick={() => {/* Save function */}}
                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
               >
                 Save
@@ -810,365 +955,284 @@ export default function FormBuilder({
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Container - Starts below fixed nav */}
-      <div className="pt-16 relative z-0">
-        <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
-          <div className="flex mx-auto max-w-[1920px]">
-            {/* Left Sidebar - Question Types */}
-            <div className="w-64 bg-white/80 backdrop-blur-md p-4 border-r border-gray-200 min-h-screen relative z-10">
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                Question Types
-              </h3>
-              <Droppable droppableId="question-types" isDropDisabled={true}>
-                {(provided) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="space-y-2"
-                  >
-                    {questionTypes.map((type, index) => (
-                      <Draggable
-                        key={type.value}
-                        draggableId={`type-${type.value}`}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`p-4 rounded-lg border border-gray-200 bg-white shadow-sm cursor-move transition-transform duration-200 ${
-                              snapshot.isDragging ? 'scale-105 shadow-md z-50' : ''
-                            }`}
-                            style={{
-                              ...provided.draggableProps.style,
-                              zIndex: snapshot.isDragging ? 9999 : 'auto'
-                            }}
-                          >
-                            <div className="flex items-center">
-                              {type.isImage ? (
-                                <div className={`flex items-center justify-center ${getContainerSize(type.value)}`}>
-                                  <Image 
-                                    src={type.icon} 
-                                    alt={type.label}
-                                    width={getIconSize(type.value)} 
-                                    height={getIconSize(type.value)} 
-                                    className="mr-3"
-                                  />
-                                </div>
-                              ) : (
-                                <span className="text-xl mr-3">{type.icon}</span>
-                              )}
-                              <span className="text-sm text-gray-700">{type.label}</span>
-                            </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
+        {/* Main Container - higher z-index and more padding top */}
+        <div className="pt-32 relative" style={{ zIndex: 30 }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Form Header */}
+            <div 
+              className="bg-white/80 backdrop-blur-md shadow-sm rounded-lg p-6 mb-8"
+              style={{ 
+                borderRadius: theme.borderRadius,
+                borderColor: `${theme.primaryColor}20`,
+                border: '1px solid',
+              }}
+            >
+              <TextInput
+                value={formTitle}
+                onChange={setFormTitle}
+                placeholder="Form Title"
+                className="text-2xl font-bold w-full border-0 focus:ring-0 p-0 mb-4 text-gray-900 bg-transparent"
+              />
+              <TextInput
+                type="textarea"
+                value={formDescription}
+                onChange={setFormDescription}
+                placeholder="Form Description"
+                className="w-full border-0 focus:ring-0 p-0 resize-none text-gray-900 bg-transparent"
+                rows={2}
+              />
             </div>
 
-            {/* Main Content Area */}
-            <div className="flex-1 p-8 min-h-screen bg-white/50 relative z-0">
-              {/* Form Header */}
-              <div className="bg-white/80 backdrop-blur-md shadow-sm rounded-lg p-6 mb-6">
-                <input
-                  type="text"
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="Form Title"
-                  className="text-2xl font-bold w-full border-0 focus:ring-0 p-0 mb-4 text-gray-900 bg-transparent"
-                />
-                <textarea
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="Form Description"
-                  className="w-full border-0 focus:ring-0 p-0 resize-none text-gray-900 bg-transparent"
-                  rows={2}
-                />
-              </div>
-
-              {/* Sections */}
-              <div className="space-y-6 pb-8">
-                {sections.map((section, sectionIndex) => (
-                  <Droppable key={section.id} droppableId={`section-${section.id}`}>
-                    {(provided, snapshot) => (
+            <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+              <div className="flex gap-8">
+                {/* Left sidebar - Question types */}
+                <div 
+                  className="w-64 bg-white/80 backdrop-blur-md p-4 rounded-lg shadow-sm self-start sticky top-32"
+                  style={{ borderRadius: theme.borderRadius }}
+                >
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                    Question Types
+                  </h3>
+                  <Droppable droppableId="question-types" isDropDisabled={true}>
+                    {(provided) => (
                       <div
-                        ref={provided.innerRef}
                         {...provided.droppableProps}
-                        className={`bg-white/80 backdrop-blur-md shadow-sm rounded-lg p-6 transition-colors duration-200 relative group ${
-                          snapshot.isDraggingOver ? 'bg-blue-50/80' : ''
-                        }`}
+                        ref={provided.innerRef}
+                        className="space-y-4"
                       >
-                        {/* Section Header with Delete Button */}
-                        <div className="flex items-center justify-between mb-4">
-                          <input
-                            type="text"
-                            value={section.title}
-                            onChange={(e) => {
-                              const newSections = [...sections];
-                              newSections[sectionIndex].title = e.target.value;
-                              setSections(newSections);
-                            }}
-                            placeholder="Section Title"
-                            className="text-lg font-semibold w-full border-0 focus:ring-0 p-0 bg-transparent"
-                          />
-                          <button
-                            onClick={() => deleteSection(section.id)}
-                            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors duration-200 opacity-0 group-hover:opacity-100"
-                            title="Delete Section"
+                        {questionTypes.map((type, index) => (
+                          <Draggable
+                            key={type.value}
+                            draggableId={`type-${type.value}`}
+                            index={index}
                           >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-
-                        {/* Section Description */}
-                        <textarea
-                          value={section.description}
-                          onChange={(e) => {
-                            const newSections = [...sections];
-                            newSections[sectionIndex].description = e.target.value;
-                            setSections(newSections);
-                          }}
-                          placeholder="Section Description"
-                          className="w-full border-0 focus:ring-0 p-0 mb-6 resize-none text-gray-900 bg-transparent"
-                          rows={2}
-                        />
-
-                        {/* Questions */}
-                        <div className="space-y-4">
-                          {section.questions.map((question, questionIndex) => (
-                            <Draggable
-                              key={question.id}
-                              draggableId={question.id}
-                              index={questionIndex}
-                            >
-                              {(provided) => (
-                                <div
-                                  ref={provided.innerRef}
-                                  {...provided.draggableProps}
-                                  {...provided.dragHandleProps}
-                                  className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 group relative"
-                                >
-                                  <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                      <input
-                                        type="text"
-                                        value={question.question_text}
-                                        onChange={(e) => {
-                                          const newSections = [...sections];
-                                          newSections[sectionIndex].questions[questionIndex].question_text = e.target.value;
-                                          setSections(newSections);
-                                        }}
-                                        placeholder="Question Text"
-                                        className="w-full border-0 focus:ring-0 p-0 font-medium text-gray-900 bg-transparent"
-                                      />
-                                      <div className="mt-1 text-sm text-gray-500">
-                                        {question.type}
-                                      </div>
-                                      
-                                      {/* Display configured details */}
-                                      {question.isConfigured && <QuestionPreview question={question} />}
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <button
-                                        onClick={() => setActiveConfigQuestion(question.id)}
-                                        className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-50 transition-colors duration-200"
-                                        title="Configure Question"
-                                      >
-                                        <Cog6ToothIcon className="h-5 w-5" />
-                                      </button>
-                                      <button
-                                        onClick={() => deleteQuestion(section.id, question.id)}
-                                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors duration-200 opacity-0 group-hover:opacity-100"
-                                        title="Delete Question"
-                                      >
-                                        <TrashIcon className="h-5 w-5" />
-                                      </button>
-                                    </div>
-                                  </div>
-
-                                  {/* Required Checkbox */}
-                                  <div className="flex items-center mt-2">
-                                    <label className="flex items-center text-sm text-gray-900">
-                                      <input
-                                        type="checkbox"
-                                        checked={question.required}
-                                        onChange={(e) => {
-                                          const newSections = [...sections];
-                                          newSections[sectionIndex].questions[questionIndex].required = e.target.checked;
-                                          setSections(newSections);
-                                        }}
-                                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 h-4 w-4 mr-2"
-                                      />
-                                      Required
-                                    </label>
-                                  </div>
+                            {(provided, snapshot) => (
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                className={`flex flex-col items-center p-4 border-2 border-dashed rounded-lg hover:border-blue-500 transition-colors duration-200 cursor-move ${
+                                  snapshot.isDragging ? 'scale-105 shadow-md' : ''
+                                }`}
+                                style={{ 
+                                  ...provided.draggableProps.style,
+                                  borderRadius: theme.borderRadius,
+                                  zIndex: snapshot.isDragging ? 9999 : 'auto'
+                                }}
+                              >
+                                <div className={getContainerSize(type.value)}>
+                                  <Image
+                                    src={type.icon}
+                                    alt={type.label}
+                                    width={getIconSize(type.value)}
+                                    height={getIconSize(type.value)}
+                                  />
                                 </div>
-                              )}
-                            </Draggable>
-                          ))}
-                          {provided.placeholder}
-                          <button
-                            onClick={() => addQuestion(section.id)}
-                            className={`w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-gray-500 hover:text-gray-700 hover:border-gray-400 flex items-center justify-center transition-colors duration-200 ${
-                              isDragging ? 'bg-blue-50 border-blue-200' : ''
-                            }`}
-                          >
-                            <PlusIcon className="h-5 w-5 mr-2" />
-                            Add Question
-                          </button>
-                        </div>
+                                <div className="mt-1 text-sm text-gray-500">
+                                  {type.label}
+                                </div>
+                              </div>
+                            )}
+                          </Draggable>
+                        ))}
+                        {provided.placeholder}
                       </div>
                     )}
                   </Droppable>
-                ))}
-              </div>
+                </div>
 
-              {/* Add Section Button */}
-              <div className="flex justify-center items-center mt-4">
-                <button
-                  onClick={addSection}
-                  className="flex items-center justify-center w-full max-w-3xl mx-auto py-6 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                {/* Main content area */}
+                <div className="flex-1">
+                  <div className="max-w-3xl mx-auto">
+                    {sections.map((section, sectionIndex) => (
+                      <Droppable key={section.id} droppableId={section.id}>
+                        {(provided, snapshot) => (
+                          <div 
+                            ref={provided.innerRef} 
+                            {...provided.droppableProps}
+                            className={snapshot.isDraggingOver ? 'bg-blue-50/50 rounded-lg' : ''}
+                          >
+                            <ThemedSection 
+                              section={section}
+                              onTitleChange={(value) => {
+                                const newSections = [...sections];
+                                newSections[sectionIndex].title = value;
+                                setSections(newSections);
+                              }}
+                              onDescriptionChange={(value) => {
+                                const newSections = [...sections];
+                                newSections[sectionIndex].description = value;
+                                setSections(newSections);
+                              }}
+                              onDelete={() => deleteSection(section.id)}
+                            >
+                              {section.questions.map((question, questionIndex) => (
+                                <Draggable key={question.id} draggableId={question.id} index={questionIndex}>
+                                  {(provided) => (
+                                    <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                    >
+                                      <ThemedQuestion 
+                                        question={question}
+                                        onDelete={() => deleteQuestion(section.id, question.id)}
+                                        onConfigure={() => setActiveConfigQuestion(question.id)}
+                                      >
+                                        <TextInput
+                                          value={question.question_text}
+                                          onChange={(value) => {
+                                            const newSections = [...sections];
+                                            newSections[sectionIndex].questions[questionIndex].question_text = value;
+                                            setSections(newSections);
+                                          }}
+                                          placeholder="Question text"
+                                          className="text-lg font-medium w-full border-0 focus:ring-0 p-0 mb-2"
+                                        />
+                                        {question.isConfigured && <QuestionPreview question={question} />}
+                                      </ThemedQuestion>
+                                    </div>
+                                  )}
+                                </Draggable>
+                              ))}
+                              {provided.placeholder}
+                              <button
+                                onClick={() => addQuestion(section.id)}
+                                className={`w-full border-2 border-dashed rounded-lg p-4 text-gray-500 hover:text-gray-700 hover:border-gray-400 flex items-center justify-center transition-colors duration-200 ${
+                                  snapshot.isDraggingOver ? 'bg-blue-50 border-blue-200' : ''
+                                }`}
+                                style={{ 
+                                  borderRadius: theme.borderRadius,
+                                  borderColor: `${theme.primaryColor}40`,
+                                }}
+                              >
+                                <PlusIcon className="h-5 w-5 mr-2" />
+                                Add Question
+                              </button>
+                            </ThemedSection>
+                          </div>
+                        )}
+                      </Droppable>
+                    ))}
+                  </div>
+
+                  {/* Add Section Button */}
+                  <div className="flex justify-center items-center mt-4">
+                    <button
+                      onClick={addSection}
+                      className="flex items-center justify-center w-full max-w-3xl mx-auto py-6 px-4 border-2 border-dashed rounded-lg text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                      style={{ 
+                        borderRadius: theme.borderRadius,
+                        borderColor: `${theme.primaryColor}40`,
+                      }}
+                    >
+                      <PlusIcon className="h-6 w-6" />
+                      <span className="ml-2 text-base font-medium">Add New Section</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Right Sidebar - Theme Customization */}
+                <div 
+                  className="w-64 bg-white/80 backdrop-blur-md p-4 rounded-lg shadow-sm self-start sticky top-32"
+                  style={{ borderRadius: theme.borderRadius }}
                 >
-                  <PlusIcon className="h-6 w-6" />
-                  <span className="ml-2 text-base font-medium">Add New Section</span>
-                </button>
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                    Theme Settings
+                  </h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Primary Color
+                      </label>
+                      <input
+                        type="color"
+                        value={theme.primaryColor}
+                        onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
+                        className="w-full h-10 rounded-md cursor-pointer"
+                        style={{ borderRadius: theme.borderRadius }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Background Color
+                      </label>
+                      <input
+                        type="color"
+                        value={theme.backgroundColor}
+                        onChange={(e) => setTheme({ ...theme, backgroundColor: e.target.value })}
+                        className="w-full h-10 rounded-md cursor-pointer"
+                        style={{ borderRadius: theme.borderRadius }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Font Family
+                      </label>
+                      <select
+                        value={theme.fontFamily}
+                        onChange={(e) => setTheme({ ...theme, fontFamily: e.target.value })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        style={{ borderRadius: theme.borderRadius }}
+                      >
+                        <option value="Inter">Inter</option>
+                        <option value="Roboto">Roboto</option>
+                        <option value="Open Sans">Open Sans</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Poppins">Poppins</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Border Radius
+                      </label>
+                      <select
+                        value={theme.borderRadius}
+                        onChange={(e) => setTheme({ ...theme, borderRadius: e.target.value })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        style={{ borderRadius: theme.borderRadius }}
+                      >
+                        <option value="0">None</option>
+                        <option value="0.25rem">Small</option>
+                        <option value="0.5rem">Medium</option>
+                        <option value="1rem">Large</option>
+                        <option value="2rem">Extra Large</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Spacing
+                      </label>
+                      <select
+                        value={theme.spacing}
+                        onChange={(e) => setTheme({ ...theme, spacing: e.target.value })}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                        style={{ borderRadius: theme.borderRadius }}
+                      >
+                        <option value="0.5rem">Compact</option>
+                        <option value="1rem">Normal</option>
+                        <option value="1.5rem">Relaxed</option>
+                        <option value="2rem">Spacious</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            {/* Right Sidebar - Theme Customization */}
-            <div className="w-64 bg-white/80 backdrop-blur-md p-4 border-l border-gray-200 min-h-screen relative z-10">
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                Theme Settings
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Primary Color
-                  </label>
-                  <input
-                    type="color"
-                    value={theme.primaryColor}
-                    onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })}
-                    className="w-full h-10 rounded-md cursor-pointer"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Background Color
-                  </label>
-                  <input
-                    type="color"
-                    value={theme.backgroundColor}
-                    onChange={(e) => setTheme({ ...theme, backgroundColor: e.target.value })}
-                    className="w-full h-10 rounded-md cursor-pointer"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Font Family
-                  </label>
-                  <select
-                    value={theme.fontFamily}
-                    onChange={(e) => setTheme({ ...theme, fontFamily: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  >
-                    <option value="Inter">Inter</option>
-                    <option value="Roboto">Roboto</option>
-                    <option value="Open Sans">Open Sans</option>
-                    <option value="Montserrat">Montserrat</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Border Radius
-                  </label>
-                  <select
-                    value={theme.borderRadius}
-                    onChange={(e) => setTheme({ ...theme, borderRadius: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  >
-                    <option value="0">None</option>
-                    <option value="0.25rem">Small</option>
-                    <option value="0.5rem">Medium</option>
-                    <option value="1rem">Large</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Spacing
-                  </label>
-                  <select
-                    value={theme.spacing}
-                    onChange={(e) => setTheme({ ...theme, spacing: e.target.value })}
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                  >
-                    <option value="0.5rem">Compact</option>
-                    <option value="1rem">Normal</option>
-                    <option value="1.5rem">Relaxed</option>
-                    <option value="2rem">Spacious</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+            </DragDropContext>
           </div>
-        </DragDropContext>
+        </div>
+
+        {/* Configuration Modal */}
+        {activeConfigQuestion && (
+          <QuestionConfig
+            question={sections.flatMap(s => s.questions).find(q => q.id === activeConfigQuestion)!}
+            sectionIndex={sections.findIndex(s => s.questions.some(q => q.id === activeConfigQuestion))}
+            questionIndex={sections.find(s => s.questions.some(q => q.id === activeConfigQuestion))!.questions.findIndex(q => q.id === activeConfigQuestion)}
+            onClose={() => setActiveConfigQuestion(null)}
+          />
+        )}
       </div>
-
-      {/* Configuration Modal */}
-      {activeConfigQuestion && (
-        <QuestionConfig
-          question={sections.flatMap(s => s.questions).find(q => q.id === activeConfigQuestion)!}
-          sectionIndex={sections.findIndex(s => s.questions.some(q => q.id === activeConfigQuestion))}
-          questionIndex={sections.find(s => s.questions.some(q => q.id === activeConfigQuestion))!.questions.findIndex(q => q.id === activeConfigQuestion)}
-          onClose={() => setActiveConfigQuestion(null)}
-        />
-      )}
-
-      <style jsx global>{`
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-        .bg-grid-pattern {
-          background-image: linear-gradient(to right, #a78bfa 1px, transparent 1px),
-            linear-gradient(to bottom, #a78bfa 1px, transparent 1px);
-          background-size: 24px 24px;
-        }
-        .scale-102 {
-          transform: scale(1.02);
-        }
-        .dragging {
-          z-index: 9999 !important;
-        }
-        /* Ensure the portal container is above everything else */
-        div[data-rbd-drag-handle-draggable-id] {
-          z-index: 9999;
-        }
-        div[data-rbd-drag-handle-context-id] {
-          z-index: 9999;
-        }
-        div[data-rbd-portal] {
-          z-index: 9999;
-        }
-      `}</style>
-    </div>
+    </ThemeContext.Provider>
   );
 } 
