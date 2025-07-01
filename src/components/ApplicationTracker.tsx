@@ -52,7 +52,7 @@ export default function ApplicationTracker() {
     {
       id: '1',
       company: 'Tech Corp',
-      position: 'Software Engineering Intern',
+      position: 'Software Engineering Intern (Example)',
       status: 'Interview',
       date: '2024-03-15',
       notes: 'Technical interview scheduled for next week',

@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
       .single();
 
     if (profileError) {
-      console.error('Profile fetch error:', profileError);
-      return NextResponse.json({ error: 'Error fetching profile' }, { status: 500 });
+        console.error('Profile fetch error:', profileError);
+        return NextResponse.json({ error: 'Error fetching profile' }, { status: 500 });
     }
 
     if (!profile) {

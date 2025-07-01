@@ -264,12 +264,13 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
             <p className="text-gray-600 whitespace-pre-wrap mb-8">{posting.description || 'No position description available.'}</p>
             
             <div className="flex justify-center">
-              <button
+              <Link
+                href={`/apply?internshipId=${posting.id}`}
                 className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl shadow-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105"
               >
                 <EnvelopeIcon className="mr-2 h-6 w-6" />
                 Apply Now
-              </button>
+              </Link>
             </div>
           </div>
         </div>

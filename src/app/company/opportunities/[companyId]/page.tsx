@@ -233,20 +233,20 @@ export default function CompanyOpportunitiesPage() {
         .from('internships')
         .insert([{
           company_id: params.companyId,
-          company_name: form.company_name,
+        company_name: form.company_name,
           title: title,
           for_profit: form.for_profit === 'true' ? 'for-profit' : 'non-profit',
-          category: form.category,
-          position: form.position,
-          address: form.address,
-          city: form.city,
-          state: form.state,
+        category: form.category,
+        position: form.position,
+        address: form.address,
+        city: form.city,
+        state: form.state,
           hours_per_week: parseInt(form.hours_per_week),
           pay: form.pay,
-          business_email: form.business_email,
+        business_email: form.business_email,
           description: form.description,
-          is_active: true,
-          created_at: new Date().toISOString(),
+        is_active: true,
+        created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }])
         .select()
@@ -513,13 +513,13 @@ export default function CompanyOpportunitiesPage() {
           ) : internships.length === 0 ? (
             <div className="bg-white/80 backdrop-blur-lg rounded-2xl p-8 text-center">
               <p className="text-gray-600 text-lg mb-4">No opportunities posted yet.</p>
-              <button
-                onClick={() => setIsModalOpen(true)}
+          <button
+            onClick={() => setIsModalOpen(true)}
                 className="text-blue-600 font-medium hover:text-blue-800"
-              >
+          >
                 Post your first internship opportunity
-              </button>
-            </div>
+          </button>
+        </div>
           ) : viewMode === 'card' ? (
             <OpportunityCardView
               internships={internships}
@@ -630,11 +630,11 @@ export default function CompanyOpportunitiesPage() {
                           value={form.description} 
                           onChange={handleChange} 
                           required 
-                          maxLength={150}
+                          maxLength={5000}
                           placeholder="Here's a suggested format: 'About The Team', 'About The Role', 'Team Focus Areas', 'In this role you will:', 'You might thrive in this role if you:'"
-                          className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black h-32 resize-none" 
+                          className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black h-64 resize-y" 
                         />
-                        <p className="mt-1 text-sm text-gray-500">{form.description.length}/150 words</p>
+                        <p className="mt-1 text-sm text-gray-500">{form.description.length}/5000 words</p>
                       </div>
 
                       <div className="space-y-4">
