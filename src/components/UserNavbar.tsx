@@ -7,6 +7,8 @@ import { FiSettings, FiChevronDown } from 'react-icons/fi';
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import supabase from '@/lib/supabaseClient';
+import { Menu } from '@headlessui/react';
+import { classNames } from '@/lib/classNames';
 
 interface User {
   id: string;
@@ -64,14 +66,14 @@ interface ProfileData {
 export default function UserNavbar() {
   const isVisible = useScrollPosition();
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAboutUsOpen, setIsAboutUsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const aboutUsRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchProfileData = useCallback(async (token: string) => {
     try {
@@ -188,26 +190,32 @@ export default function UserNavbar() {
     };
   }, [fetchProfileData]);
 
-  const handleSignOut = () => {
-    localStorage.removeItem('token');
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     localStorage.removeItem('user');
-    setIsSignedIn(false);
-    setIsDropdownOpen(false);
-    // Dispatch auth state change event
-    window.dispatchEvent(new Event('authStateChange'));
+    window.dispatchEvent(new Event('storage'));
     router.push('/');
   };
 
-  const handleEditProfile = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent default navigation
-    const token = localStorage.getItem('token');
-    if (!token) {
-      router.push('/intern-sign-in');
-      return;
-    }
-    setIsDropdownOpen(false);
-    router.push('/edit-page');
+  const handleEditProfile = () => {
+    router.push('/edit-profile');
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (aboutUsRef.current && !aboutUsRef.current.contains(event.target as Node)) {
+        setIsAboutUsOpen(false);
+      }
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   return (
     <nav className={`glass-effect fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
@@ -246,12 +254,12 @@ export default function UserNavbar() {
             </Link>
             {!isSignedIn && (
               <div 
-                className="relative" 
+                className="relative"
                 ref={aboutUsRef}
+                onMouseEnter={() => setIsAboutUsOpen(true)}
+                onMouseLeave={() => setIsAboutUsOpen(false)}
               >
                 <button
-                  onMouseEnter={() => setIsAboutUsOpen(true)}
-                  onMouseLeave={() => setIsAboutUsOpen(false)}
                   className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-base font-medium"
                 >
                   About Us
@@ -260,49 +268,32 @@ export default function UserNavbar() {
                   </div>
                 </button>
                 {isAboutUsOpen && (
-                  <>
-                    <div 
-                      className="absolute w-full h-2 -bottom-2"
-                      onMouseEnter={() => setIsAboutUsOpen(true)}
-                      onMouseLeave={() => setIsAboutUsOpen(false)}
-                    />
-                    <div 
-                      className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
-                      onMouseEnter={() => setIsAboutUsOpen(true)}
-                      onMouseLeave={() => setIsAboutUsOpen(false)}
-                    >
-                      <div className="py-2" role="menu" aria-orientation="vertical">
-                        <Link
-                          href="/about/team"
-                          className="block px-4 py-2.5 text-base text-gray-700 hover:bg-gray-100"
-                          role="menuitem"
-                        >
-                          Our Team
-                        </Link>
-                        <Link
-                          href="/about/mission"
-                          className="block px-4 py-2.5 text-base text-gray-700 hover:bg-gray-100"
-                          role="menuitem"
-                        >
-                          Our Mission
-                        </Link>
-                        <Link
-                          href="/about/careers"
-                          className="block px-4 py-2.5 text-base text-gray-700 hover:bg-gray-100"
-                          role="menuitem"
-                        >
-                          Careers
-                        </Link>
-                        <Link
-                          href="/about/contact"
-                          className="block px-4 py-2.5 text-base text-gray-700 hover:bg-gray-100"
-                          role="menuitem"
-                        >
-                          Contact Us
-                        </Link>
-                      </div>
+                  <div 
+                    className="absolute -left-2 right-0 top-full"
+                  >
+                    {/* Invisible bridge */}
+                    <div className="h-2" />
+                    <div className="absolute right-0 z-10 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <Link
+                        href="/about/step-up"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        About Step Up
+                      </Link>
+                      <Link
+                        href="/about/careers"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Careers
+                      </Link>
+                      <Link
+                        href="/about/contact"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        Contact Us
+                      </Link>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             )}
@@ -325,56 +316,79 @@ export default function UserNavbar() {
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             {isSignedIn ? (
-              <div className="relative" ref={dropdownRef}>
-                <button
+              <Menu as="div" className="relative" ref={dropdownRef}>
+                <Menu.Button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-2xl flex items-center"
                   aria-label="Settings"
                 >
                   <FiSettings />
-                </button>
+                </Menu.Button>
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  <Menu.Items className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                     <div className="py-2" role="menu" aria-orientation="vertical">
-                      <button
-                        onClick={handleEditProfile}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
-                      >
-                        Edit Profile
-                      </button>
-                      <Link
-                        href={`/public-profile/${JSON.parse(localStorage.getItem('user') || '{}').id}`}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
-                      >
-                        View Public Profile
-                      </Link>
-                      <button
-                        onClick={handleSignOut}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
-                      >
-                        Sign out
-                      </button>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={handleEditProfile}
+                            className={classNames(
+                              active ? 'bg-gray-100' : '',
+                              'block w-full text-left px-4 py-2 text-sm text-gray-700'
+                            )}
+                            role="menuitem"
+                          >
+                            Edit Profile
+                          </button>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            href={`/public-profile/${JSON.parse(localStorage.getItem('user') || '{}').id}`}
+                            className={classNames(
+                              active ? 'bg-gray-100' : '',
+                              'block w-full text-left px-4 py-2 text-sm text-gray-700'
+                            )}
+                            role="menuitem"
+                          >
+                            View Public Profile
+                          </Link>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={handleSignOut}
+                            className={classNames(
+                              active ? 'bg-gray-100' : '',
+                              'block w-full text-left px-4 py-2 text-sm text-gray-700'
+                            )}
+                            role="menuitem"
+                          >
+                            Sign out
+                          </button>
+                        )}
+                      </Menu.Item>
                     </div>
-                  </div>
+                  </Menu.Items>
                 )}
-              </div>
+              </Menu>
             ) : (
-              <Link
-                href="/intern-sign-in"
-                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-base font-medium"
-              >
-                Sign in
-              </Link>
+              <>
+                <Link
+                  href="/login"
+                  className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  href="/company"
+                  className="ml-4 bg-blue-600 text-white px-5 py-2.5 rounded-md text-base font-medium hover:bg-blue-700"
+                >
+                  For Companies
+                </Link>
+              </>
             )}
-            <Link
-              href="/company"
-              className="ml-4 bg-blue-600 text-white px-5 py-2.5 rounded-md text-base font-medium hover:bg-blue-700"
-            >
-              For Companies
-            </Link>
           </div>
         </div>
       </div>
