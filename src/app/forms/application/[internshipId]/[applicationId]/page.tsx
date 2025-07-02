@@ -93,15 +93,25 @@ export default function ApplicationForm({
 
       if (formError) throw formError;
 
-      // Sort sections and questions by order_index
-      const sortedData = {
-        ...formData,
-        form_sections: formData.form_sections
+      // Sort sections and questions by order_index and map to the correct interface
+      const sortedData: FormData = {
+        title: formData.title,
+        description: formData.description,
+        sections: formData.form_sections
           .sort((a: any, b: any) => a.order_index - b.order_index)
           .map((section: any) => ({
-            ...section,
+            id: section.id,
+            title: section.title,
+            description: section.description,
             questions: section.form_questions
               .sort((a: any, b: any) => a.order_index - b.order_index)
+              .map((q: any) => ({
+                id: q.id,
+                type: q.type,
+                question_text: q.question_text,
+                required: q.required,
+                options: q.options ? JSON.parse(q.options) : undefined
+              }))
           }))
       };
 
@@ -229,7 +239,7 @@ export default function ApplicationForm({
     );
   }
 
-  const currentSectionData = formData.form_sections[currentSection];
+  const currentSectionData = formData.sections[currentSection];
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -238,12 +248,12 @@ export default function ApplicationForm({
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
             <span>Progress</span>
-            <span>{Math.round(((currentSection + 1) / formData.form_sections.length) * 100)}%</span>
+            <span>{Math.round(((currentSection + 1) / formData.sections.length) * 100)}%</span>
           </div>
           <div className="h-2 bg-gray-200 rounded-full">
             <div
               className="h-full bg-blue-600 rounded-full transition-all duration-300"
-              style={{ width: `${((currentSection + 1) / formData.form_sections.length) * 100}%` }}
+              style={{ width: `${((currentSection + 1) / formData.sections.length) * 100}%` }}
             />
           </div>
         </div>
@@ -385,7 +395,7 @@ export default function ApplicationForm({
               Previous
             </button>
 
-            {currentSection === formData.form_sections.length - 1 ? (
+            {currentSection === formData.sections.length - 1 ? (
               <button
                 type="button"
                 onClick={handleSubmit}
