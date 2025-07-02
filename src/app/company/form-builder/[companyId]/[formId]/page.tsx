@@ -17,6 +17,8 @@ import {
   ArrowPathIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
+import { Toaster } from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
 interface Question {
   id: string;
@@ -441,6 +443,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   const [isLoading, setIsLoading] = useState(true);
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>({
     primaryColor: '#3b82f6',
@@ -505,7 +508,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
 
       const { data: form, error: formError } = await supabase
         .from('forms')
-        .select('*')
+        .select('title, description')
         .eq('id', formId)
         .eq('company_id', companyId)
         .single();
@@ -514,7 +517,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
         notFound();
       }
 
-      setFormTitle(form.title);
+      setFormTitle(form.title || '');
       setFormDescription(form.description || '');
 
       const { data: sectionsData, error: sectionsError } = await supabase
@@ -545,6 +548,37 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       setError(error instanceof Error ? error.message : 'Failed to load form');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveForm = async () => {
+    const saveToast = toast.loading('Saving form...');
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('forms')
+        .update({
+          title: formTitle,
+          description: formDescription
+        })
+        .eq('id', formId);
+
+      if (error) throw error;
+
+      toast.success('Form saved successfully', {
+        id: saveToast,
+        duration: 2000,
+        icon: '✅',
+      });
+    } catch (error) {
+      console.error('Error saving form:', error);
+      toast.error('Failed to save form. Please try again.', {
+        id: saveToast,
+        duration: 3000,
+        icon: '❌',
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -881,6 +915,16 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     );
   };
 
+  // Add navigation functions
+  const navigateToSettings = () => {
+    router.push(`/company/form-builder-settings/${companyId}/${formId}`);
+  };
+
+  const navigateToPreview = () => {
+    // TODO: Implement preview route
+    console.log('Navigate to preview');
+  };
+
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
@@ -900,64 +944,75 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
         </div>
 
         {/* Top Navigation */}
-        <div className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md shadow-sm" style={{ zIndex: 40 }}>
+        <div className="fixed top-0 left-0 right-0 bg-white shadow-sm" style={{ zIndex: 50 }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center py-4">
-              <div className="flex items-center space-x-8">
+            <div className="flex justify-between items-center py-6">
+              <div className="flex items-center space-x-10">
                 <button
-                  onClick={() => router.back()}
+                  onClick={() => router.push('/company-dash')}
                   className="text-gray-600 hover:text-gray-900"
                 >
-                  <XMarkIcon className="h-6 w-6" />
+                  <XMarkIcon className="h-8 w-8" />
                 </button>
-                <div className="flex space-x-4">
+                <div className="flex space-x-6">
                   <button
                     onClick={() => setActiveTab('build')}
-                    className={`px-4 py-2 rounded-md ${
+                    className={`px-6 py-3 rounded-md text-lg font-medium ${
                       activeTab === 'build'
                         ? 'bg-blue-50 text-blue-700'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    <DocumentTextIcon className="h-5 w-5 inline-block mr-2" />
+                    <DocumentTextIcon className="h-6 w-6 inline-block mr-3" />
                     Build
                   </button>
                   <button
-                    onClick={() => setActiveTab('settings')}
-                    className={`px-4 py-2 rounded-md ${
+                    onClick={navigateToSettings}
+                    className={`px-6 py-3 rounded-md text-lg font-medium ${
                       activeTab === 'settings'
                         ? 'bg-blue-50 text-blue-700'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    <Cog6ToothIcon className="h-5 w-5 inline-block mr-2" />
+                    <Cog6ToothIcon className="h-6 w-6 inline-block mr-3" />
                     Settings
                   </button>
                   <button
-                    onClick={() => setActiveTab('publish')}
-                    className={`px-4 py-2 rounded-md ${
+                    onClick={navigateToPreview}
+                    className={`px-6 py-3 rounded-md text-lg font-medium ${
                       activeTab === 'publish'
                         ? 'bg-blue-50 text-blue-700'
                         : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    <EyeIcon className="h-5 w-5 inline-block mr-2" />
+                    <EyeIcon className="h-6 w-6 inline-block mr-3" />
                     Preview & Publish
                   </button>
                 </div>
               </div>
               <button
-                onClick={() => {/* Save function */}}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
+                onClick={saveForm}
+                disabled={isSaving}
+                className={`px-6 py-3 text-white rounded-md transition-colors duration-200 text-lg font-medium flex items-center space-x-2 ${
+                  isSaving 
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
-                Save
+                {isSaving && (
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                )}
+                <span>{isSaving ? 'Saving...' : 'Save'}</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Main Container - higher z-index and more padding top */}
-        <div className="pt-32 relative" style={{ zIndex: 30 }}>
+        {/* Main Container - adjust top padding to account for larger navbar */}
+        <div className="pt-48 relative" style={{ zIndex: 30 }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Form Header */}
             <div 
@@ -1233,6 +1288,29 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
           />
         )}
       </div>
+      <Toaster 
+        position="bottom-right"
+        toastOptions={{
+          success: {
+            style: {
+              background: '#10B981',
+              color: 'white',
+            },
+          },
+          error: {
+            style: {
+              background: '#EF4444',
+              color: 'white',
+            },
+          },
+          loading: {
+            style: {
+              background: '#3B82F6',
+              color: 'white',
+            },
+          },
+        }}
+      />
     </ThemeContext.Provider>
   );
 } 
