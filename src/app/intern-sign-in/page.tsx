@@ -144,7 +144,7 @@ export default function InternSignIn() {
             <div className="rounded-md shadow-sm -space-y-px">
               <div>
                 <label htmlFor="identifier" className="sr-only">
-                  Email or Username
+                  Email
                 </label>
                 <input
                   id="identifier"
@@ -155,7 +155,7 @@ export default function InternSignIn() {
                   value={formData.identifier}
                   onChange={handleChange}
                   className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                  placeholder="Email or Username"
+                  placeholder="Email"
                 />
               </div>
               <div>
