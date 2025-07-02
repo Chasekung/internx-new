@@ -119,8 +119,8 @@ export default function Application({ params }: { params: { internshipId: string
 
           if (formResponseError) throw formResponseError;
 
-          if (formResponse) {
-            const form = formResponse.forms;
+          if (formResponse && formResponse.forms) {
+            const form = formResponse.forms[0] || formResponse.forms; // Handle both array and single object
             setApplicationData({
               title: form.title,
               company: form.company?.[0]?.name || 'Unknown Company',
