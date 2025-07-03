@@ -8,7 +8,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import supabase from '@/lib/supabaseClient';
 import { Menu } from '@headlessui/react';
-import { classNames } from '@/lib/classNames';
+import { classNames } from '../lib/classNames';
 
 interface User {
   id: string;
@@ -316,67 +316,56 @@ export default function UserNavbar() {
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             {isSignedIn ? (
-              <Menu as="div" className="relative" ref={dropdownRef}>
-                <Menu.Button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-2xl flex items-center"
-                  aria-label="Settings"
-                >
-                  <FiSettings />
-                </Menu.Button>
-                {isDropdownOpen && (
-                  <Menu.Items className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                    <div className="py-2" role="menu" aria-orientation="vertical">
-                      <Menu.Item>
-                        {({ active }) => (
-                          <button
-                            onClick={handleEditProfile}
-                            className={classNames(
-                              active ? 'bg-gray-100' : '',
-                              'block w-full text-left px-4 py-2 text-sm text-gray-700'
-                            )}
-                            role="menuitem"
-                          >
-                            Edit Profile
-                          </button>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <Link
-                            href={`/public-profile/${JSON.parse(localStorage.getItem('user') || '{}').id}`}
-                            className={classNames(
-                              active ? 'bg-gray-100' : '',
-                              'block w-full text-left px-4 py-2 text-sm text-gray-700'
-                            )}
-                            role="menuitem"
-                          >
-                            View Public Profile
-                          </Link>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <button
-                            onClick={handleSignOut}
-                            className={classNames(
-                              active ? 'bg-gray-100' : '',
-                              'block w-full text-left px-4 py-2 text-sm text-gray-700'
-                            )}
-                            role="menuitem"
-                          >
-                            Sign out
-                          </button>
-                        )}
-                      </Menu.Item>
+              <>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    type="button"
+                    onClick={() => setIsDropdownOpen((open) => !open)}
+                    className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-2xl flex items-center"
+                    aria-label="Settings"
+                  >
+                    <FiSettings />
+                  </button>
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                      <div className="py-2" role="menu" aria-orientation="vertical">
+                        <button
+                          onClick={() => { setIsDropdownOpen(false); router.push('/edit-page'); }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          role="menuitem"
+                        >
+                          Edit Profile
+                        </button>
+                        <Link
+                          href={`/public-profile/${JSON.parse(localStorage.getItem('user') || '{}').id}`}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          role="menuitem"
+                          onClick={() => setIsDropdownOpen(false)}
+                        >
+                          View Public Profile
+                        </Link>
+                        <button
+                          onClick={() => { setIsDropdownOpen(false); handleSignOut(); }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          role="menuitem"
+                        >
+                          Sign out
+                        </button>
+                      </div>
                     </div>
-                  </Menu.Items>
-                )}
-              </Menu>
+                  )}
+                </div>
+                <Link
+                  href="/company"
+                  className="ml-4 bg-blue-600 text-white px-5 py-2.5 rounded-md text-base font-medium hover:bg-blue-700"
+                >
+                  For Companies
+                </Link>
+              </>
             ) : (
               <>
                 <Link
-                  href="/login"
+                  href="/intern-sign-in"
                   className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-base font-medium"
                 >
                   Sign in
