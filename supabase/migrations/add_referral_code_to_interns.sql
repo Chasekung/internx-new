@@ -1,0 +1,1 @@
+ALTER TABLE interns ADD COLUMN IF NOT EXISTS referral_code VARCHAR(32) NULL; 
