@@ -455,6 +455,8 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   const [isDragging, setIsDragging] = useState(false);
   const [activeConfigQuestion, setActiveConfigQuestion] = useState<string | null>(null);
   const [isReloading, setIsReloading] = useState(false);
+  const [deletedSectionIds, setDeletedSectionIds] = useState<string[]>([]);
+  const [deletedQuestionIds, setDeletedQuestionIds] = useState<string[]>([]);
 
   const getIconSize = (type: string) => {
     switch (type) {
@@ -639,7 +641,6 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       // Gather and format all questions
       const allQuestions = sections.flatMap((section, sectionIdx) =>
         section.questions.map((q, qIdx) => {
-          // Map options to choice_1-15 or dropdown_1-50 as needed
           let choices: Record<string, string> = {};
           let dropdowns: Record<string, string> = {};
           if (q.type === 'multiple_choice' || q.type === 'checkboxes') {
@@ -664,7 +665,6 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
             placeholder: q.placeholder || '',
             ...choices,
             ...dropdowns,
-            // File/video upload fields
             file_types: q.fileTypes ? q.fileTypes.join(', ') : null,
             max_file_size: q.maxFileSize || null,
             max_duration: q.maxDuration || null,
@@ -672,44 +672,30 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
         })
       );
 
-      // Save questions to backend API
+      // Save questions to backend API (now with deleted IDs)
       const res = await fetch(`/api/companies/forms/${formId}/questions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ questions: allQuestions })
+        body: JSON.stringify({
+          questions: allQuestions,
+          deletedSectionIds,
+          deletedQuestionIds
+        })
       });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || 'Failed to save questions');
       }
 
+      // Clear deleted IDs after successful save
+      setDeletedSectionIds([]);
+      setDeletedQuestionIds([]);
+
       toast.success('Form saved successfully', {
         id: saveToast,
         duration: 2000,
         icon: '✅',
       });
-      
-      // Reload form data to ensure UI is in sync with database
-      // Add a small delay to show the success message
-      setTimeout(async () => {
-        try {
-          setIsReloading(true);
-          await loadForm();
-          // Show a subtle notification that the form was refreshed
-          toast.success('Form refreshed successfully', {
-            duration: 1500,
-            icon: '🔄',
-          });
-        } catch (reloadError) {
-          console.error('Error reloading form after save:', reloadError);
-          toast.error('Form saved but failed to refresh. Please reload the page.', {
-            duration: 3000,
-            icon: '⚠️',
-          });
-        } finally {
-          setIsReloading(false);
-        }
-      }, 500);
     } catch (error) {
       console.error('Error saving form:', error);
       toast.error('Failed to save form. Please try again.', {
@@ -800,6 +786,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   // Delete handlers
   const deleteSection = (sectionId: string) => {
     setSections(prev => prev.filter(s => s.id !== sectionId));
+    setDeletedSectionIds(prev => [...prev, sectionId]);
   };
 
   const deleteQuestion = (sectionId: string, questionId: string) => {
@@ -813,6 +800,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       return section;
     });
     setSections([...newSections]);
+    setDeletedQuestionIds(prev => [...prev, questionId]);
   };
 
   const getQuestionConfig = (type: Question['type']) => {
