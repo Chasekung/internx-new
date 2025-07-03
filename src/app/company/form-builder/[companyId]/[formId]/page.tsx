@@ -49,16 +49,16 @@ interface Theme {
   primaryColor: string;
   backgroundColor: string;
   fontFamily: string;
-  borderRadius: string;
-  spacing: string;
+  borderRadius: number;
+  spacing: number;
 }
 
 const ThemeContext = createContext<Theme>({
   primaryColor: '#3b82f6',
   backgroundColor: '#ffffff',
   fontFamily: 'Inter',
-  borderRadius: '0.5rem',
-  spacing: '1rem'
+  borderRadius: 8,
+  spacing: 16
 });
 
 // Add this new component for handling text inputs
@@ -449,11 +449,12 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     primaryColor: '#3b82f6',
     backgroundColor: '#ffffff',
     fontFamily: 'Inter',
-    borderRadius: '0.5rem',
-    spacing: '1rem'
+    borderRadius: 8,
+    spacing: 16
   });
   const [isDragging, setIsDragging] = useState(false);
   const [activeConfigQuestion, setActiveConfigQuestion] = useState<string | null>(null);
+  const [isReloading, setIsReloading] = useState(false);
 
   const getIconSize = (type: string) => {
     switch (type) {
@@ -490,58 +491,110 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   const loadForm = async () => {
     try {
       setIsLoading(true);
+      setError(null); // Clear any previous errors
       
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('Not authenticated');
-      }
+      if (!user) throw new Error('Not authenticated');
 
       const { data: company, error: companyError } = await supabase
         .from('companies')
         .select('id')
         .eq('id', companyId)
         .single();
-
-      if (companyError || !company) {
-        notFound();
-      }
+      if (companyError || !company) notFound();
 
       const { data: form, error: formError } = await supabase
         .from('forms')
-        .select('title, description')
+        .select('title, description, primary_color, background_color, font_family, border_radius, spacing')
         .eq('id', formId)
         .eq('company_id', companyId)
         .single();
-
-      if (formError || !form) {
-        notFound();
-      }
+      if (formError || !form) notFound();
 
       setFormTitle(form.title || '');
       setFormDescription(form.description || '');
+      setTheme({
+        primaryColor: form.primary_color !== null && form.primary_color !== undefined ? `#${form.primary_color.toString(16).padStart(6, '0')}` : '#3b82f6',
+        backgroundColor: form.background_color !== null && form.background_color !== undefined ? `#${form.background_color.toString(16).padStart(6, '0')}` : '#ffffff',
+        fontFamily: form.font_family || 'Inter',
+        borderRadius: form.border_radius ?? 8,
+        spacing: form.spacing ?? 16
+      });
 
-      const { data: sectionsData, error: sectionsError } = await supabase
-        .from('form_sections')
-        .select(`
-          *,
-          form_questions (*)
-        `)
-        .eq('form_id', formId)
-        .order('order_index');
-
-      if (sectionsError) throw sectionsError;
-
-      const formattedSections = sectionsData.map((section: any) => ({
+      // Fetch sections and questions from backend API
+      const res = await fetch(`/api/companies/forms/${formId}/questions`);
+      if (!res.ok) throw new Error('Failed to fetch form questions');
+      const { sections: apiSections } = await res.json();
+      
+      // Map API response to local Section/Question structure
+      const formattedSections = apiSections.map((section: any) => ({
         id: section.id,
         title: section.title,
         description: section.description,
         order_index: section.order_index,
-        questions: section.form_questions.sort((a: any, b: any) => a.order_index - b.order_index)
+        questions: (section.questions || []).map((q: any) => {
+          const options = (() => {
+            if (q.type === 'multiple_choice' || q.type === 'checkboxes') {
+              return Array.from({ length: 15 }, (_, i) => q[`choice_${i + 1}`]).filter(Boolean);
+            }
+            if (q.type === 'dropdown') {
+              return Array.from({ length: 50 }, (_, i) => q[`dropdown_${i + 1}`]).filter(Boolean);
+            }
+            return undefined;
+          })();
+          
+          // Determine if question is configured based on whether it has any configuration data
+          const hasDescription = q.description && q.description.trim() !== '';
+          const hasHint = q.hint && q.hint.trim() !== '';
+          const hasPlaceholder = q.placeholder && q.placeholder.trim() !== '';
+          const hasOptions = options && options.length > 0;
+          const hasFileConfig = q.file_types || q.max_file_size || q.max_duration;
+          
+          const isConfigured = hasDescription || hasHint || hasPlaceholder || hasOptions || hasFileConfig;
+          
+          return {
+            id: q.id,
+            type: q.type,
+            question_text: q.question_text,
+            description: q.description,
+            required: q.required,
+            order_index: q.order_index,
+            placeholder: q.placeholder,
+            hint: q.hint,
+            options,
+            // Add file/video upload fields
+            fileTypes: q.file_types ? q.file_types.split(',').map((t: string) => t.trim()) : undefined,
+            maxFileSize: q.max_file_size,
+            maxDuration: q.max_duration,
+            isConfigured,
+          };
+        })
       }));
-
+      
       setSections(formattedSections);
+      
+      // Preserve active section if it still exists, otherwise set to first section
       if (formattedSections.length > 0) {
-        setActiveSection(formattedSections[0].id);
+        const currentActiveSection = activeSection;
+        const sectionStillExists = formattedSections.some((s: Section) => s.id === currentActiveSection);
+        
+        if (sectionStillExists) {
+          setActiveSection(currentActiveSection);
+        } else {
+          setActiveSection(formattedSections[0].id);
+        }
+      } else {
+        setActiveSection(null);
+      }
+      
+      // Close config modal if the question being configured no longer exists
+      if (activeConfigQuestion) {
+        const questionStillExists = formattedSections.some((section: Section) => 
+          section.questions.some((q: Question) => q.id === activeConfigQuestion)
+        );
+        if (!questionStillExists) {
+          setActiveConfigQuestion(null);
+        }
       }
     } catch (error) {
       console.error('Error loading form:', error);
@@ -555,21 +608,108 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     const saveToast = toast.loading('Saving form...');
     setIsSaving(true);
     try {
-      const { error } = await supabase
+      // Save form theme and metadata
+      const { error: formError } = await supabase
         .from('forms')
         .update({
           title: formTitle,
-          description: formDescription
+          description: formDescription,
+          primary_color: parseInt(theme.primaryColor.replace('#', ''), 16),
+          background_color: parseInt(theme.backgroundColor.replace('#', ''), 16),
+          font_family: theme.fontFamily,
+          border_radius: theme.borderRadius,
+          spacing: theme.spacing
         })
         .eq('id', formId);
+      if (formError) throw formError;
 
-      if (error) throw error;
+      // Upsert all sections
+      const sectionsToSave = sections.map((section, idx) => ({
+        id: section.id,
+        form_id: formId,
+        title: section.title,
+        description: section.description || '',
+        order_index: idx
+      }));
+      const { error: sectionError } = await supabase
+        .from('form_sections')
+        .upsert(sectionsToSave, { onConflict: 'id' });
+      if (sectionError) throw sectionError;
+
+      // Gather and format all questions
+      const allQuestions = sections.flatMap((section, sectionIdx) =>
+        section.questions.map((q, qIdx) => {
+          // Map options to choice_1-15 or dropdown_1-50 as needed
+          let choices: Record<string, string> = {};
+          let dropdowns: Record<string, string> = {};
+          if (q.type === 'multiple_choice' || q.type === 'checkboxes') {
+            (q.options || []).slice(0, 15).forEach((opt, i) => {
+              choices[`choice_${i + 1}`] = opt;
+            });
+          }
+          if (q.type === 'dropdown') {
+            (q.options || []).slice(0, 50).forEach((opt, i) => {
+              dropdowns[`dropdown_${i + 1}`] = opt;
+            });
+          }
+          return {
+            id: q.id,
+            section_id: section.id,
+            type: q.type,
+            question_text: q.question_text,
+            required: q.required,
+            order_index: qIdx,
+            description: q.description || '',
+            hint: q.hint || '',
+            placeholder: q.placeholder || '',
+            ...choices,
+            ...dropdowns,
+            // File/video upload fields
+            file_types: q.fileTypes ? q.fileTypes.join(', ') : null,
+            max_file_size: q.maxFileSize || null,
+            max_duration: q.maxDuration || null,
+          };
+        })
+      );
+
+      // Save questions to backend API
+      const res = await fetch(`/api/companies/forms/${formId}/questions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ questions: allQuestions })
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to save questions');
+      }
 
       toast.success('Form saved successfully', {
         id: saveToast,
         duration: 2000,
         icon: '✅',
       });
+      
+      // Reload form data to ensure UI is in sync with database
+      // Add a small delay to show the success message
+      setTimeout(async () => {
+        try {
+          setIsReloading(true);
+          await loadForm();
+          // Show a subtle notification that the form was refreshed
+          toast.success('Form refreshed successfully', {
+            duration: 1500,
+            icon: '🔄',
+          });
+        } catch (reloadError) {
+          console.error('Error reloading form after save:', reloadError);
+          toast.error('Form saved but failed to refresh. Please reload the page.', {
+            duration: 3000,
+            icon: '⚠️',
+          });
+        } finally {
+          setIsReloading(false);
+        }
+      }, 500);
     } catch (error) {
       console.error('Error saving form:', error);
       toast.error('Failed to save form. Please try again.', {
@@ -990,23 +1130,34 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                   </button>
                 </div>
               </div>
-              <button
-                onClick={saveForm}
-                disabled={isSaving}
-                className={`px-6 py-3 text-white rounded-md transition-colors duration-200 text-lg font-medium flex items-center space-x-2 ${
-                  isSaving 
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-              >
-                {isSaving && (
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={saveForm}
+                  disabled={isSaving}
+                  className={`px-6 py-3 text-white rounded-md transition-colors duration-200 text-lg font-medium flex items-center space-x-2 ${
+                    isSaving 
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
+                >
+                  {isSaving && (
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  )}
+                  <span>{isSaving ? 'Saving...' : 'Save'}</span>
+                </button>
+                {isReloading && (
+                  <div className="flex items-center space-x-2 text-sm text-gray-500">
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Refreshing...</span>
+                  </div>
                 )}
-                <span>{isSaving ? 'Saving...' : 'Save'}</span>
-              </button>
+              </div>
             </div>
           </div>
         </div>
@@ -1239,37 +1390,26 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-black mb-1">
-                        Border Radius
-                      </label>
-                      <select
+                      <label className="block text-sm font-medium text-black mb-1">Border Radius (px)</label>
+                      <input
+                        type="number"
                         value={theme.borderRadius}
-                        onChange={(e) => setTheme({ ...theme, borderRadius: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-black"
-                        style={{ borderRadius: theme.borderRadius }}
-                      >
-                        <option value="0" className="text-black">None</option>
-                        <option value="0.25rem" className="text-black">Small</option>
-                        <option value="0.5rem" className="text-black">Medium</option>
-                        <option value="1rem" className="text-black">Large</option>
-                        <option value="2rem" className="text-black">Extra Large</option>
-                      </select>
+                        onChange={e => setTheme({ ...theme, borderRadius: parseInt(e.target.value) || 0 })}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
+                        min={0}
+                        max={100}
+                      />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-black mb-1">
-                        Spacing
-                      </label>
-                      <select
+                      <label className="block text-sm font-medium text-black mb-1">Spacing (px)</label>
+                      <input
+                        type="number"
                         value={theme.spacing}
-                        onChange={(e) => setTheme({ ...theme, spacing: e.target.value })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-black"
-                        style={{ borderRadius: theme.borderRadius }}
-                      >
-                        <option value="0.5rem" className="text-black">Compact</option>
-                        <option value="1rem" className="text-black">Normal</option>
-                        <option value="1.5rem" className="text-black">Relaxed</option>
-                        <option value="2rem" className="text-black">Spacious</option>
-                      </select>
+                        onChange={e => setTheme({ ...theme, spacing: parseInt(e.target.value) || 0 })}
+                        className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
+                        min={0}
+                        max={100}
+                      />
                     </div>
                   </div>
                 </div>
