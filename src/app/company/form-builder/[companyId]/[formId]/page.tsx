@@ -323,6 +323,7 @@ const QuestionPreview = ({ question }: { question: Question }) => {
   return (
     <div className="mt-4 p-4 bg-gray-50 rounded-lg" style={{ borderRadius: theme.borderRadius }}>
       <h4 className="text-sm font-medium text-gray-700 mb-2">Preview:</h4>
+      <div className="font-semibold text-gray-900 mb-2">{question.question_text}</div>
       {renderQuestionInput()}
     </div>
   );
@@ -333,13 +334,15 @@ const ThemedSection = ({
   children, 
   onTitleChange, 
   onDescriptionChange,
-  onDelete
+  onDelete,
+  isPublished = false
 }: { 
   section: Section, 
   children: React.ReactNode,
   onTitleChange: (value: string) => void,
   onDescriptionChange: (value: string) => void,
-  onDelete: () => void
+  onDelete: () => void,
+  isPublished?: boolean
 }) => {
   const theme = useContext(ThemeContext);
   
@@ -354,27 +357,42 @@ const ThemedSection = ({
     >
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <TextInput
-            value={section.title}
-            onChange={onTitleChange}
-            placeholder="Section Title"
-            className="text-xl font-semibold w-full border-0 focus:ring-0 p-0 mb-2 text-gray-900 bg-transparent"
-          />
-          <TextInput
-            type="textarea"
-            value={section.description || ''}
-            onChange={onDescriptionChange}
-            placeholder="Section Description (optional)"
-            className="w-full border-0 focus:ring-0 p-0 resize-none text-gray-600 bg-transparent"
-            rows={2}
-          />
+          {isPublished ? (
+            <>
+              <h2 className="text-xl font-semibold w-full p-0 mb-2 text-gray-900 bg-transparent">
+                {section.title || 'Section Title'}
+              </h2>
+              <p className="w-full p-0 text-gray-600 bg-transparent">
+                {section.description || ''}
+              </p>
+            </>
+          ) : (
+            <>
+              <TextInput
+                value={section.title}
+                onChange={onTitleChange}
+                placeholder="Section Title"
+                className="text-xl font-semibold w-full border-0 focus:ring-0 p-0 mb-2 text-gray-900 bg-transparent"
+              />
+              <TextInput
+                type="textarea"
+                value={section.description || ''}
+                onChange={onDescriptionChange}
+                placeholder="Section Description (optional)"
+                className="w-full border-0 focus:ring-0 p-0 resize-none text-gray-600 bg-transparent"
+                rows={2}
+              />
+            </>
+          )}
         </div>
-        <button
-          onClick={onDelete}
-          className="ml-4 p-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
-        >
-          <TrashIcon className="h-5 w-5" />
-        </button>
+        {!isPublished && (
+          <button
+            onClick={onDelete}
+            className="ml-4 p-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
+          >
+            <TrashIcon className="h-5 w-5" />
+          </button>
+        )}
       </div>
       <div className="space-y-4">
         {children}
@@ -387,12 +405,14 @@ const ThemedQuestion = ({
   question, 
   children, 
   onDelete,
-  onConfigure
+  onConfigure,
+  isPublished = false
 }: { 
   question: Question, 
   children: React.ReactNode,
   onDelete: () => void,
-  onConfigure: () => void
+  onConfigure: () => void,
+  isPublished?: boolean
 }) => {
   const theme = useContext(ThemeContext);
   
@@ -403,12 +423,14 @@ const ThemedQuestion = ({
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100">
-            <ArrowsUpDownIcon className="h-4 w-4 text-gray-500" />
-          </div>
+          {!isPublished && (
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100">
+              <ArrowsUpDownIcon className="h-4 w-4 text-gray-500" />
+            </div>
+          )}
           <div className="flex items-center space-x-2">
             <Image
-              src={`/${question.type.replace('_', '-')}.png`}
+              src={question.type === 'file_upload' ? '/upload.png' : `/${question.type.replace('_', '-')}.png`}
               alt={question.type}
               width={24}
               height={24}
@@ -418,20 +440,22 @@ const ThemedQuestion = ({
             </span>
           </div>
         </div>
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={onConfigure}
-            className="p-1 text-gray-400 hover:text-blue-500 transition-colors duration-200"
-          >
-            <Cog6ToothIcon className="h-4 w-4" />
-          </button>
-          <button
-            onClick={onDelete}
-            className="p-1 text-gray-400 hover:text-red-500 transition-colors duration-200"
-          >
-            <TrashIcon className="h-4 w-4" />
-          </button>
-        </div>
+        {!isPublished && (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={onConfigure}
+              className="p-1 text-gray-400 hover:text-blue-500 transition-colors duration-200"
+            >
+              <Cog6ToothIcon className="h-4 w-4" />
+            </button>
+            <button
+              onClick={onDelete}
+              className="p-1 text-gray-400 hover:text-red-500 transition-colors duration-200"
+            >
+              <TrashIcon className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
       {children}
     </div>
@@ -461,6 +485,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   const [isReloading, setIsReloading] = useState(false);
   const [deletedSectionIds, setDeletedSectionIds] = useState<string[]>([]);
   const [deletedQuestionIds, setDeletedQuestionIds] = useState<string[]>([]);
+  const [isPublished, setIsPublished] = useState(false);
   
   // Multi-step form state
   const [currentStep, setCurrentStep] = useState(0);
@@ -526,7 +551,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
 
       const { data: form, error: formError } = await supabase
         .from('forms')
-        .select('title, description, primary_color, background_color, font_family, border_radius, spacing')
+        .select('title, description, primary_color, background_color, font_family, border_radius, spacing, published')
         .eq('id', formId)
         .eq('company_id', companyId)
         .single();
@@ -534,6 +559,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
 
       setFormTitle(form.title || '');
       setFormDescription(form.description || '');
+      setIsPublished(form.published || false);
       setTheme({
         primaryColor: form.primary_color !== null && form.primary_color !== undefined ? `#${form.primary_color.toString(16).padStart(6, '0')}` : '#3b82f6',
         backgroundColor: form.background_color !== null && form.background_color !== undefined ? `#${form.background_color.toString(16).padStart(6, '0')}` : '#ffffff',
@@ -631,6 +657,11 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   };
 
   const saveForm = async () => {
+    if (isPublished) {
+      toast.error('Cannot edit a published form. Please unpublish it first.');
+      return;
+    }
+    
     const saveToast = toast.loading('Saving form...');
     setIsSaving(true);
     try {
@@ -928,8 +959,21 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-          <h3 className="text-lg font-semibold mb-4 text-black">Configure Question</h3>
-          
+          <h3 className="text-lg font-semibold mb-2 text-black">Configure Question</h3>
+
+          {/* Question Title */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Question Title
+            </label>
+            <TextInput
+              value={localQuestion.question_text || ''}
+              onChange={(value) => handleInputChange('question_text', value)}
+              className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              placeholder="Enter your question here"
+            />
+          </div>
+
           {/* Description */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1178,11 +1222,17 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                 </div>
               </div>
               <div className="flex items-center space-x-4">
+                {isPublished && (
+                  <div className="flex items-center space-x-2 px-3 py-2 bg-green-100 text-green-700 rounded-md">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm font-medium">Published</span>
+                  </div>
+                )}
                 <button
                   onClick={saveForm}
-                  disabled={isSaving}
+                  disabled={isSaving || isPublished}
                   className={`px-6 py-3 text-white rounded-md transition-colors duration-200 text-lg font-medium flex items-center space-x-2 ${
-                    isSaving 
+                    isSaving || isPublished
                       ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-blue-600 hover:bg-blue-700'
                   }`}
@@ -1193,7 +1243,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                   )}
-                  <span>{isSaving ? 'Saving...' : 'Save'}</span>
+                  <span>{isSaving ? 'Saving...' : isPublished ? 'Published (Read-only)' : 'Save'}</span>
                 </button>
                 {isReloading && (
                   <div className="flex items-center space-x-2 text-sm text-gray-500">
@@ -1275,37 +1325,51 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                 border: '1px solid',
               }}
             >
-              <TextInput
-                value={formTitle}
-                onChange={setFormTitle}
-                placeholder="Form Title"
-                className="text-2xl font-bold w-full border-0 focus:ring-0 p-0 mb-4 text-gray-900 bg-transparent"
-              />
-              <TextInput
-                type="textarea"
-                value={formDescription}
-                onChange={setFormDescription}
-                placeholder="Form Description"
-                className="w-full border-0 focus:ring-0 p-0 resize-none text-gray-900 bg-transparent"
-                rows={2}
-              />
+              {isPublished ? (
+                <>
+                  <h1 className="text-2xl font-bold w-full p-0 mb-4 text-gray-900 bg-transparent">
+                    {formTitle || 'Form Title'}
+                  </h1>
+                  <p className="w-full p-0 text-gray-900 bg-transparent">
+                    {formDescription || 'Form Description'}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <TextInput
+                    value={formTitle}
+                    onChange={setFormTitle}
+                    placeholder="Form Title"
+                    className="text-2xl font-bold w-full border-0 focus:ring-0 p-0 mb-4 text-gray-900 bg-transparent"
+                  />
+                  <TextInput
+                    type="textarea"
+                    value={formDescription}
+                    onChange={setFormDescription}
+                    placeholder="Form Description"
+                    className="w-full border-0 focus:ring-0 p-0 resize-none text-gray-900 bg-transparent"
+                    rows={2}
+                  />
+                </>
+              )}
             </div>
 
-            <DragDropContext onDragEnd={onDragEnd} onDragStart={onDragStart}>
+            <DragDropContext onDragEnd={isPublished ? () => {} : onDragEnd} onDragStart={isPublished ? () => {} : onDragStart}>
               <div className="flex gap-8">
                 {/* Left sidebar - Question types */}
-                <div 
-                  className="w-64 bg-white/80 backdrop-blur-md p-4 rounded-lg shadow-sm self-start sticky top-32"
-                  style={{ borderRadius: theme.borderRadius }}
-                >
-                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                    Question Types
-                  </h3>
-                  <Droppable droppableId="question-types" isDropDisabled={true}>
-                    {(provided) => (
-                      <div
-                        {...provided.droppableProps}
-                        ref={provided.innerRef}
+                {!isPublished && (
+                  <div 
+                    className="w-64 bg-white/80 backdrop-blur-md p-4 rounded-lg shadow-sm self-start sticky top-32"
+                    style={{ borderRadius: theme.borderRadius }}
+                  >
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                      Question Types
+                    </h3>
+                    <Droppable droppableId="question-types" isDropDisabled={true}>
+                      {(provided) => (
+                        <div
+                          {...provided.droppableProps}
+                          ref={provided.innerRef}
                         className="space-y-4"
                       >
                         {questionTypes.map((type, index) => (
@@ -1347,50 +1411,54 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                       </div>
                     )}
                   </Droppable>
-                </div>
+                  </div>
+                )}
 
                 {/* Main content area */}
-                <div className="flex-1">
+                <div className={`flex-1 ${isPublished ? 'max-w-4xl mx-auto' : ''}`}>
                   <div className="max-w-3xl mx-auto">
                     {sections.length === 0 ? (
                       <div className="text-center py-12">
                         <p className="text-gray-500 mb-4">No sections yet. Add your first section to get started!</p>
-                        <button
-                          onClick={addSection}
-                          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
-                          style={{ borderRadius: theme.borderRadius }}
-                        >
-                          <PlusIcon className="h-5 w-5 inline mr-2" />
-                          Add First Section
-                        </button>
+                        {!isPublished && (
+                          <button
+                            onClick={addSection}
+                            className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
+                            style={{ borderRadius: theme.borderRadius }}
+                          >
+                            <PlusIcon className="h-5 w-5 inline mr-2" />
+                            Add First Section
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <>
                         {/* Current Section */}
                         {sections[currentStep] && (
-                          <Droppable droppableId={sections[currentStep].id}>
+                          <Droppable droppableId={sections[currentStep].id} isDropDisabled={isPublished}>
                             {(provided, snapshot) => (
                               <div 
                                 ref={provided.innerRef} 
                                 {...provided.droppableProps}
-                                className={snapshot.isDraggingOver ? 'bg-blue-50/50 rounded-lg' : ''}
+                                className={snapshot.isDraggingOver && !isPublished ? 'bg-blue-50/50 rounded-lg' : ''}
                               >
                                 <ThemedSection 
                                   section={sections[currentStep]}
-                                  onTitleChange={(value) => {
+                                  onTitleChange={isPublished ? () => {} : (value) => {
                                     const newSections = [...sections];
                                     newSections[currentStep].title = value;
                                     setSections(newSections);
                                   }}
-                                  onDescriptionChange={(value) => {
+                                  onDescriptionChange={isPublished ? () => {} : (value) => {
                                     const newSections = [...sections];
                                     newSections[currentStep].description = value;
                                     setSections(newSections);
                                   }}
-                                  onDelete={() => deleteSection(sections[currentStep].id)}
+                                  onDelete={isPublished ? () => {} : () => deleteSection(sections[currentStep].id)}
+                                  isPublished={isPublished}
                                 >
                                   {sections[currentStep].questions.map((question, questionIndex) => (
-                                    <Draggable key={question.id} draggableId={question.id} index={questionIndex}>
+                                    <Draggable key={question.id} draggableId={question.id} index={questionIndex} isDragDisabled={isPublished}>
                                       {(provided) => (
                                         <div
                                           ref={provided.innerRef}
@@ -1399,19 +1467,26 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                                         >
                                           <ThemedQuestion 
                                             question={question}
-                                            onDelete={() => deleteQuestion(sections[currentStep].id, question.id)}
-                                            onConfigure={() => setActiveConfigQuestion(question.id)}
+                                            onDelete={isPublished ? () => {} : () => deleteQuestion(sections[currentStep].id, question.id)}
+                                            onConfigure={isPublished ? () => {} : () => setActiveConfigQuestion(question.id)}
+                                            isPublished={isPublished}
                                           >
-                                            <TextInput
-                                              value={question.question_text}
-                                              onChange={(value) => {
-                                                const newSections = [...sections];
-                                                newSections[currentStep].questions[questionIndex].question_text = value;
-                                                setSections(newSections);
-                                              }}
-                                              placeholder="Question text"
-                                              className="text-lg font-medium w-full border-0 focus:ring-0 p-0 mb-2"
-                                            />
+                                            {isPublished ? (
+                                              <div className="text-lg font-medium w-full p-0 mb-2">
+                                                {question.question_text || 'Question text'}
+                                              </div>
+                                            ) : (
+                                              <TextInput
+                                                value={question.question_text}
+                                                onChange={(value) => {
+                                                  const newSections = [...sections];
+                                                  newSections[currentStep].questions[questionIndex].question_text = value;
+                                                  setSections(newSections);
+                                                }}
+                                                placeholder="Question text"
+                                                className="text-lg font-medium w-full border-0 focus:ring-0 p-0 mb-2"
+                                              />
+                                            )}
                                             {question.isConfigured && <QuestionPreview question={question} />}
                                           </ThemedQuestion>
                                         </div>
@@ -1419,19 +1494,21 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                                     </Draggable>
                                   ))}
                                   {provided.placeholder}
-                                  <button
-                                    onClick={() => addQuestion(sections[currentStep].id)}
-                                    className={`w-full border-2 border-dashed rounded-lg p-4 text-gray-500 hover:text-gray-700 hover:border-gray-400 flex items-center justify-center transition-colors duration-200 ${
-                                      snapshot.isDraggingOver ? 'bg-blue-50 border-blue-200' : ''
-                                    }`}
-                                    style={{ 
-                                      borderRadius: theme.borderRadius,
-                                      borderColor: `${theme.primaryColor}40`,
-                                    }}
-                                  >
-                                    <PlusIcon className="h-5 w-5 mr-2" />
-                                    Add Question
-                                  </button>
+                                  {!isPublished && (
+                                    <button
+                                      onClick={() => addQuestion(sections[currentStep].id)}
+                                      className={`w-full border-2 border-dashed rounded-lg p-4 text-gray-500 hover:text-gray-700 hover:border-gray-400 flex items-center justify-center transition-colors duration-200 ${
+                                        snapshot.isDraggingOver ? 'bg-blue-50 border-blue-200' : ''
+                                      }`}
+                                      style={{ 
+                                        borderRadius: theme.borderRadius,
+                                        borderColor: `${theme.primaryColor}40`,
+                                      }}
+                                    >
+                                      <PlusIcon className="h-5 w-5 mr-2" />
+                                      Add Question
+                                    </button>
+                                  )}
                                 </ThemedSection>
                               </div>
                             )}
@@ -1479,19 +1556,21 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                         </div>
 
                         {/* Add Section Button */}
-                        <div className="flex justify-center items-center mt-4">
-                          <button
-                            onClick={addSection}
-                            className="flex items-center justify-center w-full max-w-3xl mx-auto py-6 px-4 border-2 border-dashed rounded-lg text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-all duration-200 bg-white/50 backdrop-blur-sm"
-                            style={{ 
-                              borderRadius: theme.borderRadius,
-                              borderColor: `${theme.primaryColor}40`,
-                            }}
-                          >
-                            <PlusIcon className="h-6 w-6" />
-                            <span className="ml-2 text-base font-medium">Add New Section</span>
-                          </button>
-                        </div>
+                        {!isPublished && (
+                          <div className="flex justify-center items-center mt-4">
+                            <button
+                              onClick={addSection}
+                              className="flex items-center justify-center w-full max-w-3xl mx-auto py-6 px-4 border-2 border-dashed rounded-lg text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                              style={{ 
+                                borderRadius: theme.borderRadius,
+                                borderColor: `${theme.primaryColor}40`,
+                              }}
+                            >
+                              <PlusIcon className="h-6 w-6" />
+                              <span className="ml-2 text-base font-medium">Add New Section</span>
+                            </button>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>
