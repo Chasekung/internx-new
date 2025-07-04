@@ -169,8 +169,7 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
   };
 
   const navigateToPreview = () => {
-    // TODO: Implement preview route
-    console.log('Navigate to preview');
+    router.push(`/company/form-builder-pnp/${companyId}/${formId}`);
   };
 
   if (isLoading) {
