@@ -32,6 +32,7 @@ interface FormData {
   published: boolean;
   published_at: string | null;
   share_url: string | null;
+  internship_id: string;
 }
 
 interface Section {
@@ -102,6 +103,10 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
 
       setFormData(form);
 
+      // Generate preview URL - point to internship posting instead of form
+      const baseUrl = window.location.origin;
+      setPreviewUrl(`${baseUrl}/postings/${form.internship_id || 'unknown'}`);
+
       // Load sections and questions
       const res = await fetch(`/api/companies/forms/${formId}/questions`);
       if (!res.ok) throw new Error('Failed to fetch form questions');
@@ -145,9 +150,15 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
         setCurrentStep(0);
       }
 
-      // Generate preview URL
-      const baseUrl = window.location.origin;
-      setPreviewUrl(`${baseUrl}/forms/${formId}`);
+      // After loading and setting sections, append a virtual thank you section for preview
+      const thankYouSection = {
+        id: 'thank-you',
+        title: '',
+        description: '',
+        order_index: formattedSections.length,
+        questions: []
+      };
+      const allSections = [...formattedSections, thankYouSection];
 
     } catch (error) {
       console.error('Error loading form data:', error);
@@ -159,7 +170,7 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
 
   // Multi-step form navigation functions
   const nextStep = () => {
-    if (currentStep < sections.length - 1) {
+    if (currentStep < allSections.length - 1) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -290,6 +301,16 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
     spacing: formData.spacing ?? 16
   };
 
+  // Create allSections with thank you section appended
+  const thankYouSection = {
+    id: 'thank-you',
+    title: '',
+    description: '',
+    order_index: sections.length,
+    questions: []
+  };
+  const allSections = [...sections, thankYouSection];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Toaster position="bottom-right" />
@@ -358,22 +379,22 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
               </div>
               
               {/* Progress Bar - Under Form Preview Header */}
-              {sections.length > 0 && (
+              {allSections.length > 0 && (
                 <div className="mb-6">
                   <div className="mb-4">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-medium text-gray-700">
-                        Preview Progress: {currentStep + 1} of {sections.length}
+                        Preview Progress: {currentStep + 1} of {allSections.length}
                       </span>
                       <span className="text-sm text-gray-500">
-                        {Math.round(((currentStep + 1) / sections.length) * 100)}% Complete
+                        {Math.round(((currentStep + 1) / allSections.length) * 100)}% Complete
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
                         className="h-2 rounded-full transition-all duration-300 ease-in-out"
                         style={{ 
-                          width: `${((currentStep + 1) / sections.length) * 100}%`,
+                          width: `${((currentStep + 1) / allSections.length) * 100}%`,
                           backgroundColor: theme.primaryColor
                         }}
                       ></div>
@@ -382,7 +403,7 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
                   
                   {/* Section Tabs */}
                   <div className="flex flex-wrap gap-2">
-                    {sections.map((section, index) => {
+                    {allSections.map((section, index) => {
                       const isCompleted = index < currentStep;
                       const isCurrent = index === currentStep;
                       const isAccessible = userRole === 'COMPANY' || index <= currentStep + 1;
@@ -403,7 +424,7 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
                           }`}
                           style={{ borderRadius: theme.borderRadius }}
                         >
-                          {index + 1}. {section.title || `Section ${index + 1}`}
+                          {index + 1}. {section.id === 'thank-you' ? 'Thank You' : section.title || `Section ${index + 1}`}
                         </button>
                       );
                     })}
@@ -428,21 +449,27 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
                 )}
                 
                 {/* Preview Current Section Only */}
-                {sections.length === 0 ? (
+                {allSections.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500">No sections to preview. Add sections in the Build tab.</p>
                   </div>
-                ) : sections[currentStep] ? (
+                ) : currentStep === allSections.length - 1 ? (
+                  <div className="flex flex-col items-center justify-center py-16">
+                    <CheckCircleIcon className="h-16 w-16 text-green-500 mb-4" />
+                    <h2 className="text-2xl font-bold mb-2">Thank you for submitting!</h2>
+                    <p className="text-gray-700 text-lg">Check your dashboard for updates.</p>
+                  </div>
+                ) : allSections[currentStep] ? (
                   <div className="space-y-4">
-                    <div key={sections[currentStep].id} className="space-y-4">
-                      {sections[currentStep].title && (
-                        <h3 className="text-lg font-semibold text-gray-900">{sections[currentStep].title}</h3>
+                    <div key={allSections[currentStep].id} className="space-y-4">
+                      {allSections[currentStep].title && (
+                        <h3 className="text-lg font-semibold text-gray-900">{allSections[currentStep].title}</h3>
                       )}
-                      {sections[currentStep].description && (
-                        <p className="text-gray-600 text-sm">{sections[currentStep].description}</p>
+                      {allSections[currentStep].description && (
+                        <p className="text-gray-600 text-sm">{allSections[currentStep].description}</p>
                       )}
                       
-                      {sections[currentStep].questions.map((question, questionIndex) => (
+                      {allSections[currentStep].questions.map((question, questionIndex) => (
                         <div 
                           key={question.id} 
                           className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-gray-200 mb-4"
@@ -467,7 +494,7 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
                                 <input
                                   type="text"
                                   placeholder={question.placeholder || 'Enter your answer'}
-                                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black bg-white"
                                   style={{ 
                                     borderRadius: theme.borderRadius,
                                     borderColor: theme.primaryColor,
@@ -479,7 +506,7 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
                                 <textarea
                                   placeholder={question.placeholder || 'Enter your answer'}
                                   rows={3}
-                                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-black bg-white"
                                   style={{ 
                                     borderRadius: theme.borderRadius,
                                     borderColor: theme.primaryColor,
@@ -565,7 +592,7 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
               </div>
 
               {/* Navigation Buttons */}
-              {sections.length > 0 && (
+              {allSections.length > 0 && (
                 <div className="flex justify-between items-center mt-6">
                   <button
                     onClick={prevStep}
@@ -583,21 +610,21 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
 
                   <div className="flex items-center space-x-4">
                     <span className="text-sm text-gray-500">
-                      Section {currentStep + 1} of {sections.length}
+                      Section {currentStep + 1} of {allSections.length}
                     </span>
                   </div>
 
                   <button
                     onClick={nextStep}
-                    disabled={currentStep === sections.length - 1}
+                    disabled={currentStep === allSections.length - 1}
                     className={`flex items-center px-6 py-3 rounded-md font-medium transition-colors duration-200 ${
-                      currentStep === sections.length - 1
+                      currentStep === allSections.length - 1
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
                     style={{ 
                       borderRadius: theme.borderRadius,
-                      backgroundColor: currentStep === sections.length - 1 ? undefined : theme.primaryColor
+                      backgroundColor: currentStep === allSections.length - 1 ? undefined : theme.primaryColor
                     }}
                   >
                     Next
@@ -702,7 +729,7 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
                         type="text"
                         value={previewUrl}
                         readOnly
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-black"
                       />
                       <button
                         onClick={copyShareUrl}
