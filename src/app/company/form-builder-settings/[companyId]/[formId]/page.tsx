@@ -26,6 +26,11 @@ interface FormSettings {
   allow_editing: boolean;
   auto_save: boolean;
   form_privacy: 'public' | 'private' | 'organization';
+  primary_color: number | null;
+  background_color: number | null;
+  font_family: string;
+  border_radius: number | null;
+  spacing: number | null;
 }
 
 export default function FormBuilderSettings({ params: { companyId, formId } }: { params: { companyId: string, formId: string } }) {
@@ -40,17 +45,15 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
     notification_email: '',
     allow_editing: false,
     auto_save: true,
-    form_privacy: 'private'
+    form_privacy: 'private',
+    primary_color: null,
+    background_color: null,
+    font_family: '',
+    border_radius: null,
+    spacing: null,
   });
   const [localSettings, setLocalSettings] = useState<FormSettings>({
-    accepting_responses: true,
-    max_responses: null,
-    submission_deadline: null,
-    notify_on_submission: true,
-    notification_email: '',
-    allow_editing: false,
-    auto_save: true,
-    form_privacy: 'private'
+    ...settings
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
@@ -75,24 +78,21 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
           notification_email,
           allow_editing,
           auto_save,
-          form_privacy
+          form_privacy,
+          primary_color,
+          background_color,
+          font_family,
+          border_radius,
+          spacing
         `)
         .eq('id', formId)
         .single();
 
-      if (error) {
-        console.error('Error loading form data:', error);
-        throw error;
-      }
-      
+      if (error) throw error;
       if (formData) {
-        console.log('Loaded form data:', formData); // Debug log
-        
-        // Convert the submission_deadline to local datetime-local format if it exists
         const deadline = formData.submission_deadline 
           ? new Date(formData.submission_deadline).toISOString().slice(0, 16) 
           : null;
-
         const settingsData = {
           accepting_responses: formData.accepting_responses,
           max_responses: formData.max_responses,
@@ -101,11 +101,15 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
           notification_email: formData.notification_email || '',
           allow_editing: formData.allow_editing,
           auto_save: formData.auto_save,
-          form_privacy: formData.form_privacy as 'public' | 'private' | 'organization'
+          form_privacy: formData.form_privacy,
+          primary_color: formData.primary_color,
+          background_color: formData.background_color,
+          font_family: formData.font_family || '',
+          border_radius: formData.border_radius,
+          spacing: formData.spacing,
         };
-        
-        console.log('Setting form settings to:', settingsData); // Debug log
         setSettings(settingsData);
+        setLocalSettings(settingsData);
       }
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -125,11 +129,9 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
   const saveSettings = async () => {
     const saveToast = toast.loading('Saving changes...');
     try {
-      // Convert the local datetime-local format back to ISO format for the database
       const submission_deadline = localSettings.submission_deadline 
         ? new Date(localSettings.submission_deadline).toISOString()
         : null;
-
       const updateData = {
         accepting_responses: localSettings.accepting_responses,
         max_responses: localSettings.max_responses,
@@ -138,39 +140,26 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
         notification_email: localSettings.notification_email,
         allow_editing: localSettings.allow_editing,
         auto_save: localSettings.auto_save,
-        form_privacy: localSettings.form_privacy
+        form_privacy: localSettings.form_privacy,
+        primary_color: localSettings.primary_color,
+        background_color: localSettings.background_color,
+        font_family: localSettings.font_family,
+        border_radius: localSettings.border_radius,
+        spacing: localSettings.spacing,
       };
-
-      console.log('Saving settings with data:', updateData); // Debug log
-
       const { data, error } = await supabase
         .from('forms')
         .update(updateData)
         .eq('id', formId)
-        .select(); // Add select() to get the updated data
-
-      if (error) {
-        console.error('Error from Supabase:', error); // Debug log
-        throw error;
-      }
-
-      console.log('Supabase update response:', data); // Debug log
-      
-      // Update the main settings state to match local settings
+        .select();
+      if (error) throw error;
       setSettings(localSettings);
       setHasUnsavedChanges(false);
-      
-      toast.success('Settings saved successfully', {
-        id: saveToast,
-      });
-
-      // Reload settings to verify the update
+      toast.success('Settings saved successfully', { id: saveToast });
       await loadSettings();
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast.error('Failed to save settings. Please try again.', {
-        id: saveToast,
-      });
+      toast.error('Failed to save settings. Please try again.', { id: saveToast });
     }
   };
 
@@ -404,6 +393,77 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
                     />
                     <label className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
                   </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Theme Settings */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <div className="flex items-center space-x-3 mb-6">
+                <Cog6ToothIcon className="h-6 w-6 text-blue-600" />
+                <h2 className="text-xl font-semibold text-black">Theme Settings</h2>
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1">Primary Color</label>
+                  <input
+                    type="color"
+                    value={localSettings.primary_color !== null ? `#${localSettings.primary_color.toString(16).padStart(6, '0')}` : '#000000'}
+                    onChange={e => {
+                      const hex = e.target.value.replace('#', '');
+                      handleSettingChange('primary_color', parseInt(hex, 16));
+                    }}
+                    className="w-16 h-10 p-0 border-none bg-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1">Background Color</label>
+                  <input
+                    type="color"
+                    value={localSettings.background_color !== null ? `#${localSettings.background_color.toString(16).padStart(6, '0')}` : '#ffffff'}
+                    onChange={e => {
+                      const hex = e.target.value.replace('#', '');
+                      handleSettingChange('background_color', parseInt(hex, 16));
+                    }}
+                    className="w-16 h-10 p-0 border-none bg-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1">Font Family</label>
+                  <select
+                    value={localSettings.font_family}
+                    onChange={e => handleSettingChange('font_family', e.target.value)}
+                    className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md text-black"
+                  >
+                    <option value="">Default</option>
+                    <option value="Inter">Inter</option>
+                    <option value="Roboto">Roboto</option>
+                    <option value="Arial">Arial</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1">Border Radius (px)</label>
+                  <input
+                    type="number"
+                    value={localSettings.border_radius ?? ''}
+                    onChange={e => handleSettingChange('border_radius', e.target.value ? parseInt(e.target.value) : null)}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
+                    min={0}
+                    max={100}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-black mb-1">Spacing (px)</label>
+                  <input
+                    type="number"
+                    value={localSettings.spacing ?? ''}
+                    onChange={e => handleSettingChange('spacing', e.target.value ? parseInt(e.target.value) : null)}
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-black"
+                    min={0}
+                    max={100}
+                  />
                 </div>
               </div>
             </div>

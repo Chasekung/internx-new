@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import supabase from '@/lib/supabaseClient';
+import { getRequestLocation, formatLocation } from '@/lib/locationUtils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,6 +37,8 @@ export async function POST(request: NextRequest) {
       portfolioUrl,
       bio,
       state,
+      // Referral fields
+      referralCode,
     } = body;
 
     // Validate required fields
@@ -131,6 +134,25 @@ export async function POST(request: NextRequest) {
       }
     } else if (role === 'INTERN') {
       console.log('Creating intern profile...');
+
+      // Generate a unique referral_code
+      let newReferralCode: string;
+      let attempts = 0;
+      const maxAttempts = 10;
+      do {
+        newReferralCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+        attempts++;
+        const { data: existing } = await supabase
+          .from('interns')
+          .select('id')
+          .eq('referral_code', newReferralCode)
+          .single();
+        if (!existing) break;
+      } while (attempts < maxAttempts);
+      if (attempts >= maxAttempts) {
+        return NextResponse.json({ error: 'Unable to generate unique referral code' }, { status: 500 });
+      }
+
       const { error: profileError } = await supabase
         .from('interns')
         .insert({
@@ -140,6 +162,11 @@ export async function POST(request: NextRequest) {
           email: email,
           phone: phone || null,
           location: location || null,
+          signup_location: location || null,
+          signup_ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
+          signup_user_agent: request.headers.get('user-agent') || null,
+          referral_code: newReferralCode,
+          referred_by: referralCode || null,
           high_school: highSchool || null,
           grade_level: gradeLevel || null,
           age: age || null,
