@@ -22,22 +22,19 @@ interface ReferralData {
     conversionRate: number;
     recentReferrals: number;
   };
-        referrals: Array<{
-        id: string;
-        status: string;
-        created_at: string;
-        signup_location: string;
-        referred_interns: {
-          full_name: string;
-          email: string;
-          signup_location: string;
-        };
-      }>;
-      clicks: Array<{
-        id: string;
-        visitor_location: string;
-        clicked_at: string;
-      }>;
+  referrals: Array<{
+    id: string;
+    username: string;
+    full_name: string;
+    email: string;
+    location: string;
+    created_at: string;
+  }>;
+  clicks: Array<{
+    id: string;
+    visitor_location: string;
+    clicked_at: string;
+  }>;
 }
 
 export default function ReferralStats({ userId, className = '' }: ReferralStatsProps) {
@@ -160,24 +157,20 @@ export default function ReferralStats({ userId, className = '' }: ReferralStatsP
               <div key={referral.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div>
                   <p className="font-medium text-gray-900">
-                    {referral.referred_interns?.full_name || 'Anonymous'}
+                    {referral.full_name || 'Anonymous'}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {referral.referred_interns?.email}
+                    {referral.email}
                   </p>
-                  {referral.signup_location && (
+                  {referral.location && (
                     <p className="text-xs text-gray-500">
-                      📍 {referral.signup_location}
+                      📍 {referral.location}
                     </p>
                   )}
                 </div>
                 <div className="text-right">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    referral.status === 'completed' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {referral.status}
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    Completed
                   </span>
                   <p className="text-xs text-gray-500 mt-1">
                     {new Date(referral.created_at).toLocaleDateString()}
@@ -205,7 +198,7 @@ export default function ReferralStats({ userId, className = '' }: ReferralStatsP
                 }, {} as Record<string, number>);
                 
                 const topLocations = Object.entries(locationCounts)
-                  .sort(([,a], [,b]) => b - a)
+                  .sort(([,a], [,b]) => (b as number) - (a as number))
                   .slice(0, 5);
                 
                 return (
@@ -225,8 +218,8 @@ export default function ReferralStats({ userId, className = '' }: ReferralStatsP
               <h5 className="font-medium text-gray-700 mb-2">Top Referral Locations</h5>
               {(() => {
                 const referralLocations = referrals
-                  .filter(r => r.signup_location)
-                  .map(r => r.signup_location);
+                  .filter(r => r.location)
+                  .map(r => r.location);
                 
                 const locationCounts = referralLocations.reduce((acc, location) => {
                   acc[location] = (acc[location] || 0) + 1;
@@ -234,7 +227,7 @@ export default function ReferralStats({ userId, className = '' }: ReferralStatsP
                 }, {} as Record<string, number>);
                 
                 const topReferralLocations = Object.entries(locationCounts)
-                  .sort(([,a], [,b]) => b - a)
+                  .sort(([,a], [,b]) => (b as number) - (a as number))
                   .slice(0, 5);
                 
                 return (
