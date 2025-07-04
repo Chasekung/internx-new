@@ -288,7 +288,7 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
                     fontFamily: theme.fontFamily
                   }}
                 >
-                  <h1 className="text-2xl font-bold mb-4" style={{ color: theme.primaryColor }}>
+                  <h1 className="text-2xl font-bold mb-4 text-gray-900">
                     {formData.title || 'Untitled Form'}
                   </h1>
                   {formData.description && (
@@ -318,24 +318,32 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
                             
                             {/* Question Preview */}
                             <div className="mt-2">
-                              {question.type === 'short_text' && (
-                                <input
-                                  type="text"
-                                  placeholder={question.placeholder || 'Enter your answer'}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  style={{ borderRadius: theme.borderRadius }}
-                                  disabled
-                                />
-                              )}
-                              {question.type === 'long_text' && (
-                                <textarea
-                                  placeholder={question.placeholder || 'Enter your answer'}
-                                  rows={3}
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  style={{ borderRadius: theme.borderRadius }}
-                                  disabled
-                                />
-                              )}
+                                                             {question.type === 'short_text' && (
+                                 <input
+                                   type="text"
+                                   placeholder={question.placeholder || 'Enter your answer'}
+                                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                                   style={{ 
+                                     borderRadius: theme.borderRadius,
+                                     borderColor: theme.primaryColor,
+                                     borderWidth: '2px'
+                                   }}
+                                   disabled
+                                 />
+                               )}
+                                                             {question.type === 'long_text' && (
+                                 <textarea
+                                   placeholder={question.placeholder || 'Enter your answer'}
+                                   rows={3}
+                                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                                   style={{ 
+                                     borderRadius: theme.borderRadius,
+                                     borderColor: theme.primaryColor,
+                                     borderWidth: '2px'
+                                   }}
+                                   disabled
+                                 />
+                               )}
                               {question.type === 'multiple_choice' && question.options && (
                                 <div className="space-y-2">
                                   {question.options.map((option, index) => (
@@ -365,28 +373,44 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
                                   ))}
                                 </div>
                               )}
-                              {question.type === 'dropdown' && question.options && (
-                                <select
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                  style={{ borderRadius: theme.borderRadius }}
-                                  disabled
-                                >
+                                                             {question.type === 'dropdown' && question.options && (
+                                 <select
+                                   className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
+                                   style={{ 
+                                     borderRadius: theme.borderRadius,
+                                     borderColor: theme.primaryColor,
+                                     borderWidth: '2px'
+                                   }}
+                                   disabled
+                                 >
                                   <option value="">Select an option</option>
                                   {question.options.map((option, index) => (
                                     <option key={index} value={option}>{option}</option>
                                   ))}
                                 </select>
                               )}
-                              {question.type === 'file_upload' && (
-                                <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
-                                  <p className="text-sm text-gray-500">File upload area</p>
-                                </div>
-                              )}
-                              {question.type === 'video_upload' && (
-                                <div className="border-2 border-dashed border-gray-300 rounded-md p-4 text-center">
-                                  <p className="text-sm text-gray-500">Video upload area</p>
-                                </div>
-                              )}
+                                                             {question.type === 'file_upload' && (
+                                 <div 
+                                   className="border-2 border-dashed rounded-md p-4 text-center"
+                                   style={{ 
+                                     borderRadius: theme.borderRadius,
+                                     borderColor: theme.primaryColor
+                                   }}
+                                 >
+                                   <p className="text-sm text-gray-500">File upload area</p>
+                                 </div>
+                               )}
+                                                             {question.type === 'video_upload' && (
+                                 <div 
+                                   className="border-2 border-dashed rounded-md p-4 text-center"
+                                   style={{ 
+                                     borderRadius: theme.borderRadius,
+                                     borderColor: theme.primaryColor
+                                   }}
+                                 >
+                                   <p className="text-sm text-gray-500">Video upload area</p>
+                                 </div>
+                               )}
                             </div>
                           </div>
                         ))}

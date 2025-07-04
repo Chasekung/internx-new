@@ -141,7 +141,8 @@ const QuestionPreview = ({ question }: { question: Question }) => {
                   className={getThemedInputClass()}
                   style={{ 
                     borderRadius: theme.borderRadius,
-                    borderColor: `${theme.primaryColor}40`,
+                    borderColor: theme.primaryColor,
+                    borderWidth: '2px'
                   }}
                 />
               ) : (
@@ -152,7 +153,8 @@ const QuestionPreview = ({ question }: { question: Question }) => {
                   className={getThemedInputClass()}
                   style={{ 
                     borderRadius: theme.borderRadius,
-                    borderColor: `${theme.primaryColor}40`,
+                    borderColor: theme.primaryColor,
+                    borderWidth: '2px'
                   }}
                 />
               )}
@@ -230,7 +232,8 @@ const QuestionPreview = ({ question }: { question: Question }) => {
               className={getThemedInputClass()}
               style={{ 
                 borderRadius: theme.borderRadius,
-                borderColor: `${theme.primaryColor}40`,
+                borderColor: theme.primaryColor,
+                borderWidth: '2px'
               }}
             >
               <option value="">{question.placeholder || 'Select an option'}</option>
@@ -255,7 +258,7 @@ const QuestionPreview = ({ question }: { question: Question }) => {
                 className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed cursor-not-allowed bg-gray-50"
                 style={{ 
                   borderRadius: theme.borderRadius,
-                  borderColor: `${theme.primaryColor}40`,
+                  borderColor: theme.primaryColor,
                 }}
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
@@ -291,7 +294,7 @@ const QuestionPreview = ({ question }: { question: Question }) => {
                 className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed cursor-not-allowed bg-gray-50"
                 style={{ 
                   borderRadius: theme.borderRadius,
-                  borderColor: `${theme.primaryColor}40`,
+                  borderColor: theme.primaryColor,
                 }}
               >
                 <div className="flex flex-col items-center justify-center pt-5 pb-6">
