@@ -13,7 +13,10 @@ export default function InternGetStarted() {
     email: '',
     password: '',
     confirmPassword: '',
+    location: '',
   });
+  const [referralCode, setReferralCode] = useState<string>('');
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -91,6 +94,8 @@ export default function InternGetStarted() {
           name: formData.fullName,
           username: formData.username,
           role: 'INTERN',
+          location: formData.location,
+          referralCode: referralCode,
         }),
       });
 
@@ -244,6 +249,36 @@ export default function InternGetStarted() {
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-600">{errors.email}</p>
                 )}
+              </div>
+
+              <div>
+                <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+                  Location
+                </label>
+                <input
+                  id="location"
+                  name="location"
+                  type="text"
+                  value={formData.location}
+                  onChange={handleChange}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white"
+                  placeholder="City, State/Country"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="referralCode" className="block text-sm font-medium text-gray-700">
+                  Referral Code (optional)
+                </label>
+                <input
+                  id="referralCode"
+                  name="referralCode"
+                  type="text"
+                  value={referralCode}
+                  onChange={e => setReferralCode(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white"
+                  placeholder="Enter a referral code if you have one"
+                />
               </div>
             </div>
 

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import ApplicationTracker from '@/components/ApplicationTracker';
+import ReferralLink from '@/components/ReferralLink';
+import ReferralStats from '@/components/ReferralStats';
 
 interface InternData {
   id: string;
@@ -13,6 +15,7 @@ interface InternData {
   email: string;
   phone?: string;
   location?: string;
+  referral_code?: string;
   high_school?: string;
   grade_level?: string;
   age?: number;
@@ -40,6 +43,7 @@ export default function InternDash() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
   useEffect(() => {
     // Check if user is signed in
@@ -83,6 +87,41 @@ export default function InternDash() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('token');
       router.replace('/intern-sign-in');
+    }
+  };
+
+  const handleGenerateNewReferralCode = async () => {
+    if (!internData) return;
+    
+    setIsGeneratingCode(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/referrals/generate', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userId: internData.id })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate new code');
+      }
+
+      const result = await response.json();
+      
+      // Update the local state with the new referral code
+      setInternData(prev => prev ? {
+        ...prev,
+        referral_code: result.referralCode
+      } : null);
+      
+    } catch (error) {
+      console.error('Error generating referral code:', error);
+      throw error;
+    } finally {
+      setIsGeneratingCode(false);
     }
   };
 
@@ -157,6 +196,17 @@ export default function InternDash() {
 
         {/* Application Tracker */}
         <ApplicationTracker />
+
+        {/* Referral System */}
+        {internData && (
+          <div className="grid md:grid-cols-2 gap-8 mb-8">
+            <ReferralLink 
+              referralCode={internData.referral_code || 'GENERATING'} 
+              onGenerateNew={handleGenerateNewReferralCode}
+            />
+            <ReferralStats userId={internData.id} />
+          </div>
+        )}
       </div>
 
       {/* Add custom styles for animations */}

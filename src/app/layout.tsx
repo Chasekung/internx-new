@@ -9,26 +9,51 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'Step Up - Connect with Tech Talent',
+  title: 'Step Up',
   description: 'Connect with the best tech talent for your company',
   icons: {
     icon: [
       {
+        url: '/android-chrome-192x192.png',
+        type: 'image/png',
+        sizes: '192x192',
+      },
+      {
+        url: '/android-chrome-512x512.png',
+        type: 'image/png',
+        sizes: '512x512',
+      },
+      {
+        url: '/apple-touch-icon.png',
+        type: 'image/png',
+        sizes: '180x180',
+      },
+      {
+        url: '/favicon-16x16.png',
+        type: 'image/png',
+        sizes: '16x16',
+      },
+      {
+        url: '/favicon-32x32.png',
+        type: 'image/png',
+        sizes: '32x32',
+      },
+      {
         url: '/favicon.ico',
-        sizes: 'any',
         type: 'image/x-icon',
+        sizes: 'any',
       },
       {
         url: '/stepup-logo.png',
         type: 'image/png',
         sizes: '593x620',
-      }
+      },
     ],
     shortcut: '/favicon.ico',
     apple: {
-      url: '/stepup-logo.png',
+      url: '/apple-touch-icon.png',
       type: 'image/png',
-      sizes: '593x620',
+      sizes: '180x180',
     },
   },
 }
