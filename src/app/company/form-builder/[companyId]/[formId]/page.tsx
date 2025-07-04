@@ -15,7 +15,9 @@ import {
   PaintBrushIcon,
   DocumentTextIcon,
   ArrowPathIcon,
-  XMarkIcon
+  XMarkIcon,
+  ChevronRightIcon,
+  ChevronLeftIcon
 } from '@heroicons/react/24/outline';
 import { Toaster } from 'react-hot-toast';
 import { toast } from 'react-hot-toast';
@@ -205,10 +207,9 @@ const QuestionPreview = ({ question }: { question: Question }) => {
                   <input
                     type="checkbox"
                     disabled
-                    className="h-4 w-4 rounded border-gray-300 disabled:cursor-not-allowed"
+                    className="h-4 w-4 border-gray-300 disabled:cursor-not-allowed"
                     style={{ 
                       accentColor: theme.primaryColor,
-                      borderRadius: theme.borderRadius,
                     }}
                   />
                   <label className="ml-2 text-sm text-gray-700">{option}</label>
@@ -236,7 +237,7 @@ const QuestionPreview = ({ question }: { question: Question }) => {
                 borderWidth: '2px'
               }}
             >
-              <option value="">{question.placeholder || 'Select an option'}</option>
+              <option value="">Select an option</option>
               {(question.options || ['Option 1', 'Option 2']).map((option, index) => (
                 <option key={index} value={option}>{option}</option>
               ))}
@@ -253,29 +254,29 @@ const QuestionPreview = ({ question }: { question: Question }) => {
             {question.description && (
               <p className="text-sm text-gray-600 mb-2">{question.description}</p>
             )}
-            <div className="flex items-center justify-center w-full">
-              <label 
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed cursor-not-allowed bg-gray-50"
-                style={{ 
-                  borderRadius: theme.borderRadius,
-                  borderColor: theme.primaryColor,
-                }}
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <svg className="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
-                  </svg>
-                  <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Click to upload</span> or drag and drop
+            <div
+              className="border-2 border-dashed rounded-lg p-6 text-center cursor-not-allowed opacity-50"
+              style={{ 
+                borderRadius: theme.borderRadius,
+                borderColor: theme.primaryColor,
+              }}
+            >
+              <div className="flex flex-col items-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                <p className="mt-1 text-sm text-gray-600">Click to upload or drag and drop</p>
+                {question.fileTypes && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    {question.fileTypes.join(', ').toUpperCase()}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {question.fileTypes?.length 
-                      ? `Allowed types: ${question.fileTypes.join(', ')}`
-                      : 'All file types accepted'}
-                    {question.maxFileSize && ` (Max: ${question.maxFileSize}MB)`}
+                )}
+                {question.maxFileSize && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Max size: {question.maxFileSize}MB
                   </p>
-                </div>
-              </label>
+                )}
+              </div>
             </div>
             {question.hint && (
               <p className="mt-1 text-sm text-gray-500">{question.hint}</p>
@@ -289,26 +290,24 @@ const QuestionPreview = ({ question }: { question: Question }) => {
             {question.description && (
               <p className="text-sm text-gray-600 mb-2">{question.description}</p>
             )}
-            <div className="flex items-center justify-center w-full">
-              <label 
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed cursor-not-allowed bg-gray-50"
-                style={{ 
-                  borderRadius: theme.borderRadius,
-                  borderColor: theme.primaryColor,
-                }}
-              >
-                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                  <svg className="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                    <path stroke="currentColor" strokeLinecap="round" d="M10 5.757v8.486M5.757 10h8.486M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
-                  </svg>
-                  <p className="mb-2 text-sm text-gray-500">
-                    <span className="font-semibold">Click to record</span> or upload video
+            <div
+              className="border-2 border-dashed rounded-lg p-6 text-center cursor-not-allowed opacity-50"
+              style={{ 
+                borderRadius: theme.borderRadius,
+                borderColor: theme.primaryColor,
+              }}
+            >
+              <div className="flex flex-col items-center">
+                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <p className="mt-1 text-sm text-gray-600">Click to upload video or drag and drop</p>
+                {question.maxDuration && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Max duration: {question.maxDuration} seconds
                   </p>
-                  <p className="text-xs text-gray-500">
-                    {question.maxDuration && `Max duration: ${question.maxDuration} seconds`}
-                  </p>
-                </div>
-              </label>
+                )}
+              </div>
             </div>
             {question.hint && (
               <p className="mt-1 text-sm text-gray-500">{question.hint}</p>
@@ -322,11 +321,8 @@ const QuestionPreview = ({ question }: { question: Question }) => {
   };
 
   return (
-    <div 
-      className="mt-4 border-t pt-4"
-      style={{ borderColor: `${theme.primaryColor}20` }}
-    >
-      <div className="text-sm text-gray-500">Preview:</div>
+    <div className="mt-4 p-4 bg-gray-50 rounded-lg" style={{ borderRadius: theme.borderRadius }}>
+      <h4 className="text-sm font-medium text-gray-700 mb-2">Preview:</h4>
       {renderQuestionInput()}
     </div>
   );
@@ -349,41 +345,38 @@ const ThemedSection = ({
   
   return (
     <div 
-      className="bg-white shadow-sm rounded-lg overflow-hidden mb-4 group"
-      style={{
-        backgroundColor: theme.backgroundColor,
+      className="bg-white/80 backdrop-blur-md shadow-sm rounded-lg p-6 mb-6"
+      style={{ 
         borderRadius: theme.borderRadius,
-        fontFamily: theme.fontFamily,
-        marginBottom: theme.spacing,
+        borderColor: `${theme.primaryColor}20`,
+        border: '1px solid',
       }}
     >
-      <div 
-        className="border-b p-4 flex justify-between items-start"
-        style={{ borderColor: theme.primaryColor }}
-      >
+      <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <TextInput
             value={section.title}
             onChange={onTitleChange}
             placeholder="Section Title"
-            className={`text-xl font-semibold mb-2 w-full bg-transparent border-none focus:ring-0 hover:bg-gray-50/50`}
+            className="text-xl font-semibold w-full border-0 focus:ring-0 p-0 mb-2 text-gray-900 bg-transparent"
           />
           <TextInput
+            type="textarea"
             value={section.description || ''}
             onChange={onDescriptionChange}
-            placeholder="Section Description"
-            className="text-gray-600 w-full bg-transparent border-none focus:ring-0 hover:bg-gray-50/50"
+            placeholder="Section Description (optional)"
+            className="w-full border-0 focus:ring-0 p-0 resize-none text-gray-600 bg-transparent"
+            rows={2}
           />
         </div>
         <button
           onClick={onDelete}
-          className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors duration-200 opacity-0 group-hover:opacity-100"
-          title="Delete Section"
+          className="ml-4 p-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
         >
           <TrashIcon className="h-5 w-5" />
         </button>
       </div>
-      <div className="p-4" style={{ gap: theme.spacing }}>
+      <div className="space-y-4">
         {children}
       </div>
     </div>
@@ -405,34 +398,42 @@ const ThemedQuestion = ({
   
   return (
     <div 
-      className="bg-white shadow-sm rounded-lg p-4 mb-4 group"
-      style={{
-        borderRadius: theme.borderRadius,
-        marginBottom: theme.spacing,
-        border: `1px solid ${theme.primaryColor}20`,
-      }}
+      className="bg-white/60 backdrop-blur-sm rounded-lg p-4 border border-gray-200"
+      style={{ borderRadius: theme.borderRadius }}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          {children}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center space-x-3">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100">
+            <ArrowsUpDownIcon className="h-4 w-4 text-gray-500" />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Image
+              src={`/${question.type.replace('_', '-')}.png`}
+              alt={question.type}
+              width={24}
+              height={24}
+            />
+            <span className="text-sm font-medium text-gray-600 capitalize">
+              {question.type.replace('_', ' ')}
+            </span>
+          </div>
         </div>
         <div className="flex items-center space-x-2">
           <button
             onClick={onConfigure}
-            className="text-gray-500 hover:text-gray-700 p-1 rounded-full hover:bg-gray-50 transition-colors duration-200"
-            title="Configure Question"
+            className="p-1 text-gray-400 hover:text-blue-500 transition-colors duration-200"
           >
-            <Cog6ToothIcon className="h-5 w-5" />
+            <Cog6ToothIcon className="h-4 w-4" />
           </button>
           <button
             onClick={onDelete}
-            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors duration-200 opacity-0 group-hover:opacity-100"
-            title="Delete Question"
+            className="p-1 text-gray-400 hover:text-red-500 transition-colors duration-200"
           >
-            <TrashIcon className="h-5 w-5" />
+            <TrashIcon className="h-4 w-4" />
           </button>
         </div>
       </div>
+      {children}
     </div>
   );
 };
@@ -460,6 +461,10 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   const [isReloading, setIsReloading] = useState(false);
   const [deletedSectionIds, setDeletedSectionIds] = useState<string[]>([]);
   const [deletedQuestionIds, setDeletedQuestionIds] = useState<string[]>([]);
+  
+  // Multi-step form state
+  const [currentStep, setCurrentStep] = useState(0);
+  const [userRole, setUserRole] = useState<'COMPANY' | 'INTERN' | null>(null);
 
   const getIconSize = (type: string) => {
     switch (type) {
@@ -489,6 +494,17 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   ];
 
   useEffect(() => {
+    // Detect user role
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setUserRole(user.role);
+      } catch (e) {
+        console.error('Error parsing user data:', e);
+      }
+    }
+    
     loadForm();
     setMounted(true);
   }, []);
@@ -577,6 +593,11 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       }));
       
       setSections(formattedSections);
+      
+      // Set current step to 0 if we have sections, otherwise keep at 0
+      if (formattedSections.length > 0) {
+        setCurrentStep(0);
+      }
       
       // Preserve active section if it still exists, otherwise set to first section
       if (formattedSections.length > 0) {
@@ -719,7 +740,10 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       order_index: sections.length,
       questions: []
     };
-    setSections(prev => [...prev, newSection]);
+    const newSections = [...sections, newSection];
+    setSections(newSections);
+    // Automatically go to the new section
+    setCurrentStep(newSections.length - 1);
   };
 
   const addQuestion = (sectionId: string, type: Question['type'] = 'short_text'): string => {
@@ -788,8 +812,16 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
 
   // Delete handlers
   const deleteSection = (sectionId: string) => {
-    setSections(prev => prev.filter(s => s.id !== sectionId));
+    const newSections = sections.filter(s => s.id !== sectionId);
+    setSections(newSections);
     setDeletedSectionIds(prev => [...prev, sectionId]);
+    
+    // If we deleted the current section, adjust the current step
+    if (newSections.length === 0) {
+      setCurrentStep(0);
+    } else if (currentStep >= newSections.length) {
+      setCurrentStep(newSections.length - 1);
+    }
   };
 
   const deleteQuestion = (sectionId: string, questionId: string) => {
@@ -1046,6 +1078,31 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     );
   };
 
+  // Multi-step form navigation functions
+  const nextStep = () => {
+    if (currentStep < sections.length - 1) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStep > 0) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const goToStep = (step: number) => {
+    // Only allow employers to jump to any step
+    if (userRole === 'COMPANY') {
+      setCurrentStep(step);
+    } else {
+      // High schoolers can only go to steps they've completed or the next step
+      if (step <= currentStep + 1) {
+        setCurrentStep(step);
+      }
+    }
+  };
+
   // Add navigation functions
   const navigateToSettings = () => {
     router.push(`/company/form-builder-settings/${companyId}/${formId}`);
@@ -1155,6 +1212,60 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
         {/* Main Container - adjust top padding to account for larger navbar */}
         <div className="pt-48 relative" style={{ zIndex: 30 }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Progress Bar */}
+            {sections.length > 0 && (
+              <div className="bg-white/80 backdrop-blur-md shadow-sm rounded-lg p-6 mb-6" style={{ borderRadius: theme.borderRadius }}>
+                <div className="mb-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-gray-700">
+                      Progress: {currentStep + 1} of {sections.length}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      {Math.round(((currentStep + 1) / sections.length) * 100)}% Complete
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="h-2 rounded-full transition-all duration-300 ease-in-out"
+                      style={{ 
+                        width: `${((currentStep + 1) / sections.length) * 100}%`,
+                        backgroundColor: theme.primaryColor
+                      }}
+                    ></div>
+                  </div>
+                </div>
+                
+                {/* Section Tabs */}
+                <div className="flex flex-wrap gap-2">
+                  {sections.map((section, index) => {
+                    const isCompleted = index < currentStep;
+                    const isCurrent = index === currentStep;
+                    const isAccessible = userRole === 'COMPANY' || index <= currentStep + 1;
+                    
+                    return (
+                      <button
+                        key={section.id}
+                        onClick={() => goToStep(index)}
+                        disabled={!isAccessible}
+                        className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                          isCurrent
+                            ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                            : isCompleted
+                            ? 'bg-green-100 text-green-700 border-2 border-green-300'
+                            : isAccessible
+                            ? 'bg-gray-100 text-gray-700 border-2 border-gray-300 hover:bg-gray-200'
+                            : 'bg-gray-50 text-gray-400 border-2 border-gray-200 cursor-not-allowed'
+                        }`}
+                        style={{ borderRadius: theme.borderRadius }}
+                      >
+                        {index + 1}. {section.title || `Section ${index + 1}`}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Form Header */}
             <div 
               className="bg-white/80 backdrop-blur-md shadow-sm rounded-lg p-6 mb-8"
@@ -1241,91 +1352,148 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                 {/* Main content area */}
                 <div className="flex-1">
                   <div className="max-w-3xl mx-auto">
-                    {sections.map((section, sectionIndex) => (
-                      <Droppable key={section.id} droppableId={section.id}>
-                        {(provided, snapshot) => (
-                          <div 
-                            ref={provided.innerRef} 
-                            {...provided.droppableProps}
-                            className={snapshot.isDraggingOver ? 'bg-blue-50/50 rounded-lg' : ''}
-                          >
-                            <ThemedSection 
-                              section={section}
-                              onTitleChange={(value) => {
-                                const newSections = [...sections];
-                                newSections[sectionIndex].title = value;
-                                setSections(newSections);
-                              }}
-                              onDescriptionChange={(value) => {
-                                const newSections = [...sections];
-                                newSections[sectionIndex].description = value;
-                                setSections(newSections);
-                              }}
-                              onDelete={() => deleteSection(section.id)}
-                            >
-                              {section.questions.map((question, questionIndex) => (
-                                <Draggable key={question.id} draggableId={question.id} index={questionIndex}>
-                                  {(provided) => (
-                                    <div
-                                      ref={provided.innerRef}
-                                      {...provided.draggableProps}
-                                      {...provided.dragHandleProps}
-                                    >
-                                      <ThemedQuestion 
-                                        question={question}
-                                        onDelete={() => deleteQuestion(section.id, question.id)}
-                                        onConfigure={() => setActiveConfigQuestion(question.id)}
-                                      >
-                                        <TextInput
-                                          value={question.question_text}
-                                          onChange={(value) => {
-                                            const newSections = [...sections];
-                                            newSections[sectionIndex].questions[questionIndex].question_text = value;
-                                            setSections(newSections);
-                                          }}
-                                          placeholder="Question text"
-                                          className="text-lg font-medium w-full border-0 focus:ring-0 p-0 mb-2"
-                                        />
-                                        {question.isConfigured && <QuestionPreview question={question} />}
-                                      </ThemedQuestion>
-                                    </div>
-                                  )}
-                                </Draggable>
-                              ))}
-                              {provided.placeholder}
-                              <button
-                                onClick={() => addQuestion(section.id)}
-                                className={`w-full border-2 border-dashed rounded-lg p-4 text-gray-500 hover:text-gray-700 hover:border-gray-400 flex items-center justify-center transition-colors duration-200 ${
-                                  snapshot.isDraggingOver ? 'bg-blue-50 border-blue-200' : ''
-                                }`}
-                                style={{ 
-                                  borderRadius: theme.borderRadius,
-                                  borderColor: `${theme.primaryColor}40`,
-                                }}
+                    {sections.length === 0 ? (
+                      <div className="text-center py-12">
+                        <p className="text-gray-500 mb-4">No sections yet. Add your first section to get started!</p>
+                        <button
+                          onClick={addSection}
+                          className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-200"
+                          style={{ borderRadius: theme.borderRadius }}
+                        >
+                          <PlusIcon className="h-5 w-5 inline mr-2" />
+                          Add First Section
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Current Section */}
+                        {sections[currentStep] && (
+                          <Droppable droppableId={sections[currentStep].id}>
+                            {(provided, snapshot) => (
+                              <div 
+                                ref={provided.innerRef} 
+                                {...provided.droppableProps}
+                                className={snapshot.isDraggingOver ? 'bg-blue-50/50 rounded-lg' : ''}
                               >
-                                <PlusIcon className="h-5 w-5 mr-2" />
-                                Add Question
-                              </button>
-                            </ThemedSection>
-                          </div>
+                                <ThemedSection 
+                                  section={sections[currentStep]}
+                                  onTitleChange={(value) => {
+                                    const newSections = [...sections];
+                                    newSections[currentStep].title = value;
+                                    setSections(newSections);
+                                  }}
+                                  onDescriptionChange={(value) => {
+                                    const newSections = [...sections];
+                                    newSections[currentStep].description = value;
+                                    setSections(newSections);
+                                  }}
+                                  onDelete={() => deleteSection(sections[currentStep].id)}
+                                >
+                                  {sections[currentStep].questions.map((question, questionIndex) => (
+                                    <Draggable key={question.id} draggableId={question.id} index={questionIndex}>
+                                      {(provided) => (
+                                        <div
+                                          ref={provided.innerRef}
+                                          {...provided.draggableProps}
+                                          {...provided.dragHandleProps}
+                                        >
+                                          <ThemedQuestion 
+                                            question={question}
+                                            onDelete={() => deleteQuestion(sections[currentStep].id, question.id)}
+                                            onConfigure={() => setActiveConfigQuestion(question.id)}
+                                          >
+                                            <TextInput
+                                              value={question.question_text}
+                                              onChange={(value) => {
+                                                const newSections = [...sections];
+                                                newSections[currentStep].questions[questionIndex].question_text = value;
+                                                setSections(newSections);
+                                              }}
+                                              placeholder="Question text"
+                                              className="text-lg font-medium w-full border-0 focus:ring-0 p-0 mb-2"
+                                            />
+                                            {question.isConfigured && <QuestionPreview question={question} />}
+                                          </ThemedQuestion>
+                                        </div>
+                                      )}
+                                    </Draggable>
+                                  ))}
+                                  {provided.placeholder}
+                                  <button
+                                    onClick={() => addQuestion(sections[currentStep].id)}
+                                    className={`w-full border-2 border-dashed rounded-lg p-4 text-gray-500 hover:text-gray-700 hover:border-gray-400 flex items-center justify-center transition-colors duration-200 ${
+                                      snapshot.isDraggingOver ? 'bg-blue-50 border-blue-200' : ''
+                                    }`}
+                                    style={{ 
+                                      borderRadius: theme.borderRadius,
+                                      borderColor: `${theme.primaryColor}40`,
+                                    }}
+                                  >
+                                    <PlusIcon className="h-5 w-5 mr-2" />
+                                    Add Question
+                                  </button>
+                                </ThemedSection>
+                              </div>
+                            )}
+                          </Droppable>
                         )}
-                      </Droppable>
-                    ))}
-                  </div>
 
-                  {/* Add Section Button */}
-                  <div className="flex justify-center items-center mt-4">
-                    <button
-                      onClick={addSection}
-                      className="flex items-center justify-center w-full max-w-3xl mx-auto py-6 px-4 border-2 border-dashed rounded-lg text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-all duration-200 bg-white/50 backdrop-blur-sm"
-                      style={{ 
-                        borderRadius: theme.borderRadius,
-                        borderColor: `${theme.primaryColor}40`,
-                      }}
-                    >
-                      <PlusIcon className="h-6 w-6" />
-                      <span className="ml-2 text-base font-medium">Add New Section</span>
-                    </button>
+                        {/* Navigation Buttons */}
+                        <div className="flex justify-between items-center mt-8 mb-4">
+                          <button
+                            onClick={prevStep}
+                            disabled={currentStep === 0}
+                            className={`flex items-center px-6 py-3 rounded-md font-medium transition-colors duration-200 ${
+                              currentStep === 0
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            }`}
+                            style={{ borderRadius: theme.borderRadius }}
+                          >
+                            <ChevronLeftIcon className="h-5 w-5 mr-2" />
+                            Previous
+                          </button>
+
+                          <div className="flex items-center space-x-4">
+                            <span className="text-sm text-gray-500">
+                              Section {currentStep + 1} of {sections.length}
+                            </span>
+                          </div>
+
+                          <button
+                            onClick={nextStep}
+                            disabled={currentStep === sections.length - 1}
+                            className={`flex items-center px-6 py-3 rounded-md font-medium transition-colors duration-200 ${
+                              currentStep === sections.length - 1
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                            style={{ 
+                              borderRadius: theme.borderRadius,
+                              backgroundColor: currentStep === sections.length - 1 ? undefined : theme.primaryColor
+                            }}
+                          >
+                            Next
+                            <ChevronRightIcon className="h-5 w-5 ml-2" />
+                          </button>
+                        </div>
+
+                        {/* Add Section Button */}
+                        <div className="flex justify-center items-center mt-4">
+                          <button
+                            onClick={addSection}
+                            className="flex items-center justify-center w-full max-w-3xl mx-auto py-6 px-4 border-2 border-dashed rounded-lg text-gray-500 hover:text-gray-700 hover:border-gray-400 transition-all duration-200 bg-white/50 backdrop-blur-sm"
+                            style={{ 
+                              borderRadius: theme.borderRadius,
+                              borderColor: `${theme.primaryColor}40`,
+                            }}
+                          >
+                            <PlusIcon className="h-6 w-6" />
+                            <span className="ml-2 text-base font-medium">Add New Section</span>
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
