@@ -27,7 +27,8 @@ export async function GET(request: NextRequest) {
 
     if (profileError) {
         console.error('Profile fetch error:', profileError);
-        return NextResponse.json({ error: 'Error fetching profile' }, { status: 500 });
+        console.error('User ID:', user.id);
+        return NextResponse.json({ error: 'Error fetching profile', details: profileError.message }, { status: 500 });
     }
 
     if (!profile) {
@@ -63,6 +64,8 @@ export async function GET(request: NextRequest) {
       interests: profile.interests || '',
       languages: profile.languages || '',
       certifications: profile.certifications || [],
+      referral_code: profile.referral_code,
+      referred_by: profile.referred_by,
       created_at: profile.created_at,
       updated_at: profile.updated_at
     };
@@ -70,7 +73,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(transformedProfile);
   } catch (error) {
     console.error('Profile GET error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('Error details:', error instanceof Error ? error.message : 'Unknown error');
+    return NextResponse.json({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -162,6 +166,8 @@ export async function PUT(request: NextRequest) {
       interests: updatedProfile.interests || '',
       languages: updatedProfile.languages || '',
       certifications: updatedProfile.certifications || [],
+      referral_code: updatedProfile.referral_code,
+      referred_by: updatedProfile.referred_by,
       created_at: updatedProfile.created_at,
       updated_at: updatedProfile.updated_at
     };
