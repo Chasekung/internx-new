@@ -159,8 +159,46 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
   };
   const allSections = [...sections, thankYouSection];
 
+  // Function to check if current section is completed
+  const isSectionCompleted = (sectionIndex: number) => {
+    if (sectionIndex >= allSections.length - 1) return true; // Thank you section is always "completed"
+    
+    const section = allSections[sectionIndex];
+    if (!section || !section.questions) return true;
+    
+    // Check if all required questions in this section are answered
+    return section.questions.every(question => {
+      if (!question.required) return true; // Optional questions don't block progress
+      
+      const response = responses[question.id];
+      
+      // Check based on question type
+      switch (question.type) {
+        case 'short_text':
+        case 'long_text':
+        case 'dropdown':
+          return response && response.trim() !== '';
+        case 'multiple_choice':
+          return response && response !== '';
+        case 'checkboxes':
+          return Array.isArray(response) && response.length > 0;
+        case 'file_upload':
+        case 'video_upload':
+          return response !== undefined && response !== null;
+        default:
+          return true;
+      }
+    });
+  };
+
   // Multi-step form navigation functions
   const nextStep = () => {
+    // Check if current section is completed before allowing next step
+    if (!isSectionCompleted(currentStep)) {
+      toast.error('Please complete all required fields before proceeding to the next section.');
+      return;
+    }
+    
     if (currentStep < allSections.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -174,6 +212,14 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
 
   const goToStep = (step: number) => {
     // High schoolers can only go to steps they've completed or the next step
+    // Check if all previous sections are completed
+    for (let i = 0; i < step; i++) {
+      if (!isSectionCompleted(i)) {
+        toast.error('Please complete all previous sections before jumping ahead.');
+        return;
+      }
+    }
+    
     if (step <= currentStep + 1) {
       setCurrentStep(step);
     }
@@ -251,9 +297,10 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
                 {/* Section Tabs */}
                 <div className="flex flex-wrap gap-2">
                   {allSections.map((section, index) => {
-                    const isCompleted = index < currentStep;
+                    const isCompleted = index < currentStep || (index === currentStep && isSectionCompleted(index));
                     const isCurrent = index === currentStep;
-                    const isAccessible = index <= currentStep + 1;
+                    // Allow access to current step, previous completed steps, and next step if current is completed
+                    const isAccessible = index <= currentStep || (index === currentStep + 1 && isSectionCompleted(currentStep));
                     
                     return (
                       <button
@@ -508,15 +555,15 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
                 ) : (
                   <button
                     onClick={nextStep}
-                    disabled={currentStep === allSections.length - 1}
+                    disabled={currentStep === allSections.length - 1 || !isSectionCompleted(currentStep)}
                     className={`flex items-center px-6 py-3 rounded-md font-medium transition-colors duration-200 ${
-                      currentStep === allSections.length - 1
+                      currentStep === allSections.length - 1 || !isSectionCompleted(currentStep)
                         ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                         : 'bg-blue-600 text-white hover:bg-blue-700'
                     }`}
                     style={{ 
                       borderRadius: theme.borderRadius,
-                      backgroundColor: currentStep === allSections.length - 1 ? undefined : theme.primaryColor
+                      backgroundColor: (currentStep === allSections.length - 1 || !isSectionCompleted(currentStep)) ? undefined : theme.primaryColor
                     }}
                   >
                     Next
