@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { MapPinIcon, GlobeAltIcon, PhoneIcon, BuildingOfficeIcon, BriefcaseIcon, EnvelopeIcon, ClockIcon, CurrencyDollarIcon, BuildingOffice2Icon, StarIcon } from '@heroicons/react/24/outline';
 import { type Posting, type CompanyLocation, getCompanyLocations } from '@/lib/postingUtils';
-import AnimatedBackground from '@/app/postings/[id]/AnimatedBackground';
+import AnimatedBackground from '../../app/postings/[id]/AnimatedBackground';
 
 interface PostingContentProps {
   posting: Posting;
