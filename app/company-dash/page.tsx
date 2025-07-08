@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon, DocumentPlusIcon } from '@heroicons/react/24/outline';
+import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon, DocumentPlusIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 import supabase from '@/lib/supabaseClient';
+import ApplicationResponseView from '@/components/ApplicationResponseView';
 
 export default function CompanyDash() {
   const [companyName, setCompanyName] = useState("");
@@ -20,6 +21,9 @@ export default function CompanyDash() {
   const [expandedApplications, setExpandedApplications] = useState<string[]>([]);
   const [applicationCounts, setApplicationCounts] = useState<Record<string, number>>({});
   const [existingApplicationForms, setExistingApplicationForms] = useState<Record<string, boolean>>({});
+  const [applications, setApplications] = useState<any[]>([]);
+  const [expandedApplicationResponses, setExpandedApplicationResponses] = useState<string[]>([]);
+  const [isLoadingApplications, setIsLoadingApplications] = useState(false);
   const router = useRouter();
 
   const handleApplicationFormClick = async (postingId: string) => {
@@ -96,6 +100,29 @@ export default function CompanyDash() {
     } catch (error) {
       console.error('Error handling form navigation:', error);
       // Show error to user (you can add a toast notification here)
+    }
+  };
+
+  const loadApplications = async (companyId: string, internshipId?: string) => {
+    try {
+      setIsLoadingApplications(true);
+      const params = new URLSearchParams({ companyId });
+      if (internshipId) {
+        params.append('internshipId', internshipId);
+      }
+      
+      const response = await fetch(`/api/companies/applications?${params}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setApplications(data.applications || []);
+      } else {
+        console.error('Error loading applications:', data.error);
+      }
+    } catch (error) {
+      console.error('Error loading applications:', error);
+    } finally {
+      setIsLoadingApplications(false);
     }
   };
 
@@ -499,11 +526,49 @@ export default function CompanyDash() {
                                                   className="overflow-hidden"
                                                 >
                                                   <div className="px-6 py-4 bg-white bg-opacity-90">
-                                                    <p className="text-gray-600">
-                                                      {applicationCounts[posting.id] 
-                                                        ? `You have ${applicationCounts[posting.id]} application${applicationCounts[posting.id] === 1 ? '' : 's'} for this position.`
-                                                        : 'No applications yet for this position.'}
-                                                    </p>
+                                                    {applicationCounts[posting.id] > 0 ? (
+                                                      <div className="space-y-4">
+                                                        <div className="flex items-center justify-between">
+                                                          <p className="text-gray-600">
+                                                            {applicationCounts[posting.id]} application{applicationCounts[posting.id] === 1 ? '' : 's'} for this position
+                                                          </p>
+                                                          <Link
+                                                            href={`/company/view-responses?internshipId=${posting.id}`}
+                                                            className={`px-4 py-2 rounded-lg ${categoryStyle.bgLight} border ${categoryStyle.border} hover:shadow-md transition-all duration-200 flex items-center space-x-2`}
+                                                          >
+                                                            <UserGroupIcon className={`h-4 w-4 ${categoryStyle.color}`} />
+                                                            <span className={`text-sm font-medium ${categoryStyle.color}`}>
+                                                              View Individual Responses
+                                                            </span>
+                                                          </Link>
+                                                        </div>
+                                                        
+                                                        {applications.length > 0 && (
+                                                          <div className="space-y-3">
+                                                            {applications
+                                                              .filter(app => app.internship.id === posting.id)
+                                                              .map((application) => (
+                                                                <ApplicationResponseView
+                                                                  key={application.id}
+                                                                  application={application}
+                                                                  isExpanded={expandedApplicationResponses.includes(application.id)}
+                                                                  onToggle={() => {
+                                                                    setExpandedApplicationResponses(prev =>
+                                                                      prev.includes(application.id)
+                                                                        ? prev.filter(id => id !== application.id)
+                                                                        : [...prev, application.id]
+                                                                    );
+                                                                  }}
+                                                                />
+                                                              ))}
+                                                          </div>
+                                                        )}
+                                                      </div>
+                                                    ) : (
+                                                      <p className="text-gray-600">
+                                                        No applications yet for this position.
+                                                      </p>
+                                                    )}
                                                   </div>
                                                 </motion.div>
                                               )}

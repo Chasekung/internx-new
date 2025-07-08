@@ -323,7 +323,10 @@ const QuestionPreview = ({ question }: { question: Question }) => {
   return (
     <div className="mt-4 p-4 bg-gray-50 rounded-lg" style={{ borderRadius: theme.borderRadius }}>
       <h4 className="text-sm font-medium text-gray-700 mb-2">Preview:</h4>
-      <div className="font-semibold text-gray-900 mb-2">{question.question_text}</div>
+      <div className="font-semibold text-gray-900 mb-2">
+        {question.question_text}
+        {question.required && <span className="text-red-500 ml-1">*</span>}
+      </div>
       {renderQuestionInput()}
     </div>
   );
@@ -1103,6 +1106,25 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
             </>
           )}
 
+          {/* Required checkbox */}
+          <div className="mb-6">
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="required-checkbox"
+                checked={localQuestion.required}
+                onChange={(e) => handleInputChange('required', e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="required-checkbox" className="ml-2 block text-sm font-medium text-gray-700">
+                Required question
+              </label>
+            </div>
+            <p className="mt-1 text-sm text-gray-500">
+              Users must answer this question before they can continue
+            </p>
+          </div>
+
           <div className="flex justify-end space-x-2">
             <button
               onClick={onClose}
@@ -1474,18 +1496,22 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                                             {isPublished ? (
                                               <div className="text-lg font-medium w-full p-0 mb-2">
                                                 {question.question_text || 'Question text'}
+                                                {question.required && <span className="text-red-500 ml-1">*</span>}
                                               </div>
                                             ) : (
-                                              <TextInput
-                                                value={question.question_text}
-                                                onChange={(value) => {
-                                                  const newSections = [...sections];
-                                                  newSections[currentStep].questions[questionIndex].question_text = value;
-                                                  setSections(newSections);
-                                                }}
-                                                placeholder="Question text"
-                                                className="text-lg font-medium w-full border-0 focus:ring-0 p-0 mb-2"
-                                              />
+                                              <div className="mb-2">
+                                                <TextInput
+                                                  value={question.question_text}
+                                                  onChange={(value) => {
+                                                    const newSections = [...sections];
+                                                    newSections[currentStep].questions[questionIndex].question_text = value;
+                                                    setSections(newSections);
+                                                  }}
+                                                  placeholder="Question text"
+                                                  className="text-lg font-medium w-full border-0 focus:ring-0 p-0"
+                                                />
+                                                {question.required && <span className="text-red-500 ml-1">*</span>}
+                                              </div>
                                             )}
                                             {question.isConfigured && <QuestionPreview question={question} />}
                                           </ThemedQuestion>
