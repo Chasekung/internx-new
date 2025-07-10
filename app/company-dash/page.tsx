@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon, DocumentPlusIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon, DocumentPlusIcon, UserGroupIcon, UserCircleIcon, EnvelopeIcon, CalendarIcon, EyeIcon } from '@heroicons/react/24/outline';
 import supabase from '@/lib/supabaseClient';
 import ApplicationResponseView from '@/components/ApplicationResponseView';
 
@@ -24,6 +24,8 @@ export default function CompanyDash() {
   const [applications, setApplications] = useState<any[]>([]);
   const [expandedApplicationResponses, setExpandedApplicationResponses] = useState<string[]>([]);
   const [isLoadingApplications, setIsLoadingApplications] = useState(false);
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [isLoadingTeam, setIsLoadingTeam] = useState(false);
   const router = useRouter();
 
   const handleApplicationFormClick = async (postingId: string) => {
@@ -126,6 +128,28 @@ export default function CompanyDash() {
     }
   };
 
+  const loadTeamMembers = async (companyId: string) => {
+    try {
+      setIsLoadingTeam(true);
+      const { data, error } = await supabase
+        .from('interns')
+        .select('id, full_name, email, high_school, graduation_year, profile_photo_url, team')
+        .not('team', 'is', null)
+        .order('team', { ascending: true })
+        .order('full_name', { ascending: true });
+
+      if (error) {
+        console.error('Error loading team members:', error);
+      } else {
+        setTeamMembers(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading team members:', error);
+    } finally {
+      setIsLoadingTeam(false);
+    }
+  };
+
   useEffect(() => {
     const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
     if (!userStr) {
@@ -210,14 +234,17 @@ export default function CompanyDash() {
               }
             }
             
-            setApplicationCounts(counts);
+                        setApplicationCounts(counts);
             setExistingApplicationForms(existingForms);
           } catch (error) {
             console.error('Error fetching postings:', error);
           }
         };
-        
+
         fetchPostings();
+        
+        // Load team members
+        loadTeamMembers(userId);
       }
     };
     
@@ -696,7 +723,88 @@ export default function CompanyDash() {
               </div>
             )}
             {activeTab === 'team' && (
-              <div className="py-8 text-gray-600 text-lg text-center">(Manage your company team here)</div>
+              <div>
+                <div className="mb-6">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Your Team</h3>
+                  <p className="text-gray-600">Manage interns who have been added to your team</p>
+                </div>
+                
+                {isLoadingTeam ? (
+                  <div className="py-8 text-gray-600 text-lg text-center">Loading team members...</div>
+                ) : teamMembers.length === 0 ? (
+                  <div className="py-8 text-gray-600 text-lg text-center">
+                    <div className="mb-4">
+                      <UserGroupIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                    </div>
+                    <p>No team members yet</p>
+                    <p className="text-sm text-gray-500 mt-2">
+                      Use the "Connect to your team" button on applications to add interns to your team
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Group by team */}
+                    {Object.entries(
+                      teamMembers.reduce((acc: Record<string, any[]>, member: any) => {
+                        const team = member.team || 'Unassigned';
+                        if (!acc[team]) acc[team] = [];
+                        acc[team].push(member);
+                        return acc;
+                      }, {})
+                    ).map(([teamName, members]) => (
+                      <div key={teamName} className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden">
+                        <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-gray-200">
+                          <h4 className="text-lg font-semibold text-gray-900">{teamName}</h4>
+                          <p className="text-sm text-gray-600">{members.length} member{members.length === 1 ? '' : 's'}</p>
+                        </div>
+                        <div className="divide-y divide-gray-200">
+                          {members.map((member) => (
+                            <div key={member.id} className="px-6 py-4 flex items-center space-x-4">
+                              <div className="flex-shrink-0">
+                                {member.profile_photo_url ? (
+                                  <img
+                                    src={member.profile_photo_url}
+                                    alt={member.full_name}
+                                    className="h-10 w-10 rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <UserCircleIcon className="h-10 w-10 text-gray-400" />
+                                )}
+                              </div>
+                                                              <div className="flex-1">
+                                  <h5 className="text-sm font-medium text-gray-900">{member.full_name}</h5>
+                                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                    <div className="flex items-center">
+                                      <EnvelopeIcon className="h-4 w-4 mr-1" />
+                                      {member.email}
+                                    </div>
+                                    <div className="flex items-center">
+                                      <AcademicCapIcon className="h-4 w-4 mr-1" />
+                                      {member.high_school}
+                                    </div>
+                                    <div className="flex items-center">
+                                      <CalendarIcon className="h-4 w-4 mr-1" />
+                                      Class of {member.graduation_year}
+                                    </div>
+                                  </div>
+                                </div>
+                              <div className="flex-shrink-0">
+                                <Link
+                                  href={`/company/public-profile/${member.id}`}
+                                  className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-1"
+                                >
+                                  <EyeIcon className="h-4 w-4" />
+                                  <span>View Profile</span>
+                                </Link>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </motion.div>
