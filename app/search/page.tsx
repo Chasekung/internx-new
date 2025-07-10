@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Search, MapPin, GraduationCap, User, Building } from 'lucide-react';
+import { getProfileLink } from '@/lib/linkUtils';
 
 interface SearchResult {
   id: string;
@@ -96,7 +97,7 @@ export default function SearchPage() {
   };
 
   const handleProfileClick = (userId: string) => {
-    router.push(`/public-profile/${userId}`);
+    router.push(getProfileLink(userId));
   };
 
   const truncateText = (text: string, maxLength: number) => {

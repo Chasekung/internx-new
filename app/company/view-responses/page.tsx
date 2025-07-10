@@ -8,7 +8,8 @@ import {
   DocumentTextIcon,
   VideoCameraIcon,
   PhotoIcon,
-  UserIcon
+  UserIcon,
+  UserPlusIcon
 } from '@heroicons/react/24/outline';
 import supabase from '@/lib/supabaseClient';
 import Link from 'next/link';
@@ -87,6 +88,9 @@ export default function ViewResponsesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [internshipDetails, setInternshipDetails] = useState<any>(null);
+  const [isAddingToTeam, setIsAddingToTeam] = useState(false);
+  const [teamName, setTeamName] = useState('');
+  const [showTeamModal, setShowTeamModal] = useState(false);
 
   // Load applications data
   useEffect(() => {
@@ -338,6 +342,46 @@ export default function ViewResponsesPage() {
       setError('Failed to load applications');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleAddToTeam = async () => {
+    if (!teamName.trim()) return;
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('You must be logged in to perform this action');
+      return;
+    }
+    
+    setIsAddingToTeam(true);
+    try {
+      const response = await fetch('/api/companies/add-to-team', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          internId: currentApplication.intern.id,
+          teamName: teamName.trim()
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setShowTeamModal(false);
+        setTeamName('');
+        alert('Intern added to team successfully!');
+      } else {
+        alert(data.error || 'Failed to add to team');
+      }
+    } catch (error) {
+      console.error('Error adding to team:', error);
+      alert('Failed to add to team');
+    } finally {
+      setIsAddingToTeam(false);
     }
   };
 
@@ -631,16 +675,27 @@ export default function ViewResponsesPage() {
               </div>
             </div>
             
-            {/* View Profile Button */}
-            <Link
-              href={`/public-profile/${currentApplication.intern.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <UserIcon className="w-4 h-4 mr-2" />
-              View Profile
-            </Link>
+            <div className="flex items-center space-x-3">
+              {/* Connect to Team Button */}
+              <button
+                onClick={() => setShowTeamModal(true)}
+                className="inline-flex items-center px-4 py-2 border border-green-300 rounded-md shadow-sm text-sm font-medium text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                <UserPlusIcon className="w-4 h-4 mr-2" />
+                Connect to your team
+              </button>
+              
+              {/* View Profile Button */}
+              <Link
+                href={`/company/public-profile/${currentApplication.intern.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <UserIcon className="w-4 h-4 mr-2" />
+                View Profile
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -690,6 +745,53 @@ export default function ViewResponsesPage() {
           </p>
         </div>
       </div>
+
+      {/* Team Modal */}
+      {showTeamModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Add {currentApplication.intern.name} to your team
+            </h3>
+            <div className="mb-4">
+              <label htmlFor="teamName" className="block text-sm font-medium text-gray-700 mb-2">
+                Team Name
+              </label>
+              <input
+                type="text"
+                id="teamName"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                placeholder="e.g., Engineering, Marketing, Sales"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAddToTeam();
+                  }
+                }}
+              />
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={handleAddToTeam}
+                disabled={isAddingToTeam || !teamName.trim()}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isAddingToTeam ? 'Adding...' : 'Add to Team'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowTeamModal(false);
+                  setTeamName('');
+                }}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
