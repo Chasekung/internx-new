@@ -40,12 +40,12 @@ export default function ClientLayout({
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">About</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="/about" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/about/step-up" className="text-base text-gray-500 hover:text-gray-900">
                       About Us
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contact" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/about/contact" className="text-base text-gray-500 hover:text-gray-900">
                       Contact
                     </Link>
                   </li>
@@ -60,7 +60,7 @@ export default function ClientLayout({
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">For Students</h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="/signup" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/intern-get-started" className="text-base text-gray-500 hover:text-gray-900">
                       Create Profile
                     </Link>
                   </li>
@@ -90,7 +90,7 @@ export default function ClientLayout({
                     </Link>
                   </li>
                   <li>
-                    <Link href="/post-internship" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/company" className="text-base text-gray-500 hover:text-gray-900">
                       Post an Internship
                     </Link>
                   </li>

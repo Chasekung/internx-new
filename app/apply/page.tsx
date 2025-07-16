@@ -217,16 +217,16 @@ export default function ApplyLandingPage() {
       } else {
         // Create new application record
         const { data: newApp, error: applicationError } = await supabase
-          .from('applications')
-          .insert({
-            internship_id: internshipId,
-            intern_id: session.user.id,
-            status: 'in_progress',
-          })
-          .select()
-          .single();
+        .from('applications')
+        .insert({
+          internship_id: internshipId,
+          intern_id: session.user.id,
+          status: 'in_progress',
+        })
+        .select()
+        .single();
 
-        if (applicationError) throw applicationError;
+      if (applicationError) throw applicationError;
         application = newApp;
       }
 
@@ -336,13 +336,13 @@ export default function ApplyLandingPage() {
                 <p className="text-gray-600 mb-6">
                   You have already started an application for this internship. Click below to continue where you left off.
                 </p>
-                <button
-                  onClick={openApplication}
-                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  Continue Application
-                </button>
-              </div>
+              <button
+                onClick={openApplication}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Continue Application
+              </button>
+            </div>
             )
           ) : (
             <div className="text-center">

@@ -12,7 +12,8 @@ import {
   CheckCircleIcon,
   ClockIcon,
   EyeIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  UserPlusIcon
 } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
@@ -74,6 +75,9 @@ export default function ApplicationResponseView({
   onToggle 
 }: ApplicationResponseViewProps) {
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [isAddingToTeam, setIsAddingToTeam] = useState(false);
+  const [teamName, setTeamName] = useState('');
+  const [showTeamModal, setShowTeamModal] = useState(false);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -108,6 +112,40 @@ export default function ApplicationResponseView({
         return <EyeIcon className="h-4 w-4" />;
       default:
         return <DocumentTextIcon className="h-4 w-4" />;
+    }
+  };
+
+  const handleAddToTeam = async () => {
+    if (!teamName.trim()) return;
+    
+    setIsAddingToTeam(true);
+    try {
+      const response = await fetch('/api/companies/add-to-team', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          internId: application.applicant.id,
+          teamName: teamName.trim()
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setShowTeamModal(false);
+        setTeamName('');
+        // You could add a success notification here
+        alert('Intern added to team successfully!');
+      } else {
+        alert(data.error || 'Failed to add to team');
+      }
+    } catch (error) {
+      console.error('Error adding to team:', error);
+      alert('Failed to add to team');
+    } finally {
+      setIsAddingToTeam(false);
     }
   };
 
@@ -267,6 +305,16 @@ export default function ApplicationResponseView({
           <div className="text-sm text-gray-500">
             {formatDate(application.form_response.submitted_at || application.applied_at)}
           </div>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowTeamModal(true);
+            }}
+            className="px-3 py-1 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center space-x-1"
+          >
+            <UserPlusIcon className="h-4 w-4" />
+            <span>Connect to your team</span>
+          </button>
           <Link
             href={`/company/view-responses/${application.id}`}
             className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-1"
@@ -357,6 +405,53 @@ export default function ApplicationResponseView({
                     ))}
                   </div>
                 ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Team Modal */}
+      {showTeamModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Add {application.applicant.name} to your team
+            </h3>
+            <div className="mb-4">
+              <label htmlFor="teamName" className="block text-sm font-medium text-gray-700 mb-2">
+                Team Name
+              </label>
+              <input
+                type="text"
+                id="teamName"
+                value={teamName}
+                onChange={(e) => setTeamName(e.target.value)}
+                placeholder="e.g., Engineering, Marketing, Sales"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleAddToTeam();
+                  }
+                }}
+              />
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={handleAddToTeam}
+                disabled={isAddingToTeam || !teamName.trim()}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isAddingToTeam ? 'Adding...' : 'Add to Team'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowTeamModal(false);
+                  setTeamName('');
+                }}
+                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

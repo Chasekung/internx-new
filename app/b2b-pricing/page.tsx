@@ -47,6 +47,14 @@ export default function B2BPricingPage() {
         <div className="mt-8 text-center text-gray-500 text-sm">
           <p>Discounts available for nonprofits and schools. Post-trial upgrades include a 10–15% first-year discount.</p>
         </div>
+        {/* Custom Pricing Section for Businesses */}
+        <div className="mt-12 flex flex-col items-center justify-center">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-8 max-w-xl w-full flex flex-col items-center">
+            <h3 className="text-2xl font-bold text-blue-700 mb-2">Need Something Different?</h3>
+            <p className="text-gray-700 mb-4 text-center">None of the options fit your needs? Contact us for custom pricing and solutions tailored to your organization.</p>
+            <a href="/about/contact" className="inline-block px-6 py-3 rounded-md bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all duration-200">Contact Us</a>
+          </div>
+        </div>
         <div className="mt-16 max-w-3xl mx-auto">
           <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-8 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">For Non-Profits</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -75,6 +83,14 @@ export default function B2BPricingPage() {
                 <li>Save volunteer profiles to "talent pool"</li>
               </ul>
             </section>
+          </div>
+          {/* Custom Pricing Section for Nonprofits */}
+          <div className="mt-12 flex flex-col items-center justify-center">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg p-8 max-w-xl w-full flex flex-col items-center">
+              <h3 className="text-2xl font-bold text-blue-700 mb-2">Need Something Different?</h3>
+              <p className="text-gray-700 mb-4 text-center">None of the options fit your needs? Contact us for custom nonprofit pricing and solutions.</p>
+              <a href="/about/contact" className="inline-block px-6 py-3 rounded-md bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all duration-200">Contact Us</a>
+            </div>
           </div>
         </div>
       </div>
