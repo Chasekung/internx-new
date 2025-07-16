@@ -331,7 +331,7 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
       if (file.size > maxSize) {
         throw new Error(`File size (${Math.round(file.size / 1024 / 1024)}MB) exceeds the ${maxSizeMB}MB limit.`);
       }
-      
+
       console.log('✅ File size validation passed');
 
       // Additional validation checks
@@ -403,11 +403,11 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
           
           // Fallback: Try with smaller cache control and shorter timeout
           const retryPromise = supabase.storage
-            .from(bucketName)
-            .upload(fileName, file, {
-              cacheControl: '3600',
-              upsert: true
-            });
+        .from(bucketName)
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
             
           const retryResult = await uploadWithTimeout(retryPromise, 120000); // 2 minute timeout
           uploadError = retryResult.error;
@@ -671,9 +671,9 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
           
           try {
             const { data: insertResult, error: answerError } = await supabase
-              .from('response_answers')
+          .from('response_answers')
               .insert(answerRecord)
-              .select();
+          .select();
 
             if (answerError) {
               console.error(`❌ Error inserting answer ${i + 1}:`, answerError);
