@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface Question {
   id: string;
@@ -31,6 +31,7 @@ export default function ApplicationForm({
   params: { internshipId: string; applicationId: string } 
 }) {
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [formData, setFormData] = useState<FormData | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -430,7 +431,6 @@ export default function ApplicationForm({
     </div>
   );
 } 
- 
  
  
  

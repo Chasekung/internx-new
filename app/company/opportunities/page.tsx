@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, Fragment } from "react";
 import { useRouter } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 const CATEGORIES = [
   "Software Engineering",
@@ -125,6 +125,7 @@ export default function CompanyOpportunitiesPage() {
   useEffect(() => {
     // TODO: Replace with actual company filter if needed
     const fetchInternships = async () => {
+      const supabase = createClientComponentClient();
       const { data, error } = await supabase.from('internships').select('*');
       if (!error && data) setInternships(data);
     };
@@ -219,4 +220,3 @@ export default function CompanyOpportunitiesPage() {
       </div>
     </div>
   );
-}

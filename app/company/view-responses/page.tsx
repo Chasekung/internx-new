@@ -11,7 +11,7 @@ import {
   UserIcon,
   UserPlusIcon
 } from '@heroicons/react/24/outline';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
 
 interface Application {
@@ -37,8 +37,6 @@ interface Application {
     response_answers: Answer[];
   };
 }
-
-
 
 interface Section {
   id: string;
@@ -91,6 +89,8 @@ export default function ViewResponsesPage() {
   const [isAddingToTeam, setIsAddingToTeam] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [showTeamModal, setShowTeamModal] = useState(false);
+
+  const supabase = createClientComponentClient();
 
   // Load applications data
   useEffect(() => {

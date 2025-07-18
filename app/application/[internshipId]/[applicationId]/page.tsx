@@ -3,7 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface ApplicationData {
   id?: string;
@@ -25,6 +25,7 @@ interface ApplicationData {
 
 export default function Application({ params }: { params: { internshipId: string; applicationId: string } }) {
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [formData, setFormData] = useState<{ [key: string]: any }>({});
   const [currentSection, setCurrentSection] = useState(0);
   const [applicationData, setApplicationData] = useState<ApplicationData | null>(null);
@@ -139,7 +140,7 @@ export default function Application({ params }: { params: { internshipId: string
             });
 
             // Set existing answers
-            const answersMap = formResponse.response_answers.reduce((acc: Record<string, any>, answer) => {
+            const answersMap = formResponse.response_answers.reduce((acc: Record<string, any>, answer: any) => {
               acc[answer.question_id] = answer.answer_data || answer.answer_text;
               return acc;
             }, {});
@@ -155,7 +156,7 @@ export default function Application({ params }: { params: { internshipId: string
     };
 
     fetchApplicationData();
-  }, [params.internshipId, params.applicationId]);
+  }, [params.internshipId, params.applicationId, supabase]);
 
   const handleInputChange = (questionId: string, value: string | string[] | File) => {
     setFormData(prev => ({
@@ -305,4 +306,3 @@ export default function Application({ params }: { params: { internshipId: string
       {/* Add your form rendering logic here */}
     </div>
   );
-} 

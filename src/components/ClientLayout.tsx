@@ -2,17 +2,22 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import UserNavbar from './UserNavbar';
+import UserNav from './UserNav';
+import CompanyNav from './CompanyNav';
 import CompanyNavbar from './CompanyNavbar';
-import { AnimatePresence, motion } from 'framer-motion';
+import UserNavbar from './UserNavbar';
 
-export default function ClientLayout({
+function ClientLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
   const pathname = usePathname();
-  const isCompanyRoute = pathname?.startsWith('/company') || pathname === '/company-dash';
+  
+  // Define company pages
+  const companyPages = ['/company', '/company-get-started', '/company-sign-in', '/company-forgot-password', '/company-reset-password', '/company-dash', '/company/opportunities', '/company/search', '/company/messaging', '/company/postings', '/company/view-responses', '/company/form-builder', '/company/public-profile'];
+  
+  const isCompanyPage = companyPages.some(page => pathname?.startsWith(page));
 
   return (
     <>
@@ -27,7 +32,7 @@ export default function ClientLayout({
       
       {/* Main content */}
       <div className="relative z-10">
-        {isCompanyRoute ? <CompanyNavbar /> : <UserNavbar />}
+        {isCompanyPage ? <CompanyNavbar /> : <UserNavbar />}
         
         <main>
           {children}
@@ -127,4 +132,6 @@ export default function ClientLayout({
       </div>
     </>
   );
-} 
+}
+
+export default ClientLayout;

@@ -26,16 +26,6 @@ export default function CompanyNav() {
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
-                href="/company"
-                className={`${
-                  pathname === '/company'
-                    ? 'border-purple-500 text-gray-900'
-                    : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
-              >
-                Home
-              </Link>
-              <Link
                 href="/company-reviews"
                 className={`${
                   pathname === '/company-reviews'
@@ -46,9 +36,9 @@ export default function CompanyNav() {
                 Reviews
               </Link>
               <Link
-                href="/company/b2b-pricing"
+                href="/b2b-pricing"
                 className={`${
-                  pathname === '/company/b2b-pricing'
+                  pathname === '/b2b-pricing'
                     ? 'border-purple-500 text-gray-900'
                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
@@ -59,10 +49,10 @@ export default function CompanyNav() {
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             <Link
-              href="/company/signup"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+              href="/intern-get-started"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
-              Get Started
+              For Students
             </Link>
           </div>
         </div>

@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function CompanySignIn() {
   console.log('Loaded company sign-in page!');
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -205,4 +206,4 @@ export default function CompanySignIn() {
       `}</style>
     </div>
   );
-} 
+}

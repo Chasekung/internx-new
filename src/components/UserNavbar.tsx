@@ -8,7 +8,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import supabase from '@/lib/supabaseClient';
 import { Menu } from '@headlessui/react';
-import { classNames } from '../lib/classNames';
+import { classNames } from '@/lib/classNames';
 
 interface User {
   id: string;

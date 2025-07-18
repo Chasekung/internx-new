@@ -1,4 +1,4 @@
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export interface CompanyLocation {
   address: string;
@@ -100,6 +100,7 @@ export function getCompanyLocations(company: Company): CompanyLocation[] {
 }
 
 export async function getPostingAndCompanyDetails(id: string) {
+  const supabase = createClientComponentClient();
   // Extract the UUID from the ID parameter (it might include company name prefix)
   const uuidMatch = id.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
   const cleanId = uuidMatch ? uuidMatch[0] : id;
@@ -147,4 +148,3 @@ export async function getPostingAndCompanyDetails(id: string) {
     ...posting,
     companies: company
   };
-} 

@@ -26,43 +26,43 @@ export default function UserNav() {
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link
-                href="/"
+                href="/opportunities"
                 className={`${
-                  pathname === '/'
+                  pathname === '/opportunities'
                     ? 'border-purple-500 text-gray-900'
                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
-                Home
+                Opportunities
               </Link>
               <Link
-                href="/user-reviews"
+                href="/resources"
                 className={`${
-                  pathname === '/user-reviews'
+                  pathname === '/resources'
                     ? 'border-purple-500 text-gray-900'
                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
-                Reviews
+                Resources
               </Link>
               <Link
-                href="/b2b-pricing"
+                href="/about/step-up"
                 className={`${
-                  pathname === '/b2b-pricing'
+                  pathname === '/about/step-up'
                     ? 'border-purple-500 text-gray-900'
                     : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                 } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
               >
-                Pricing
+                About Us
               </Link>
             </div>
           </div>
           <div className="hidden sm:ml-6 sm:flex sm:items-center">
             <Link
-              href="/user/signup"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700"
+              href="/company"
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
             >
-              Get Started
+              For Companies
             </Link>
           </div>
         </div>

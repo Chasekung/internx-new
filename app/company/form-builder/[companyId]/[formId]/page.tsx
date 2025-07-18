@@ -3,7 +3,7 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { 
@@ -467,6 +467,7 @@ const ThemedQuestion = ({
 
 export default function FormBuilder({ params: { companyId, formId } }: { params: { companyId: string, formId: string } }) {
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'build' | 'settings' | 'publish'>('build');
   const [sections, setSections] = useState<Section[]>([]);
@@ -1716,4 +1717,3 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       />
     </ThemeContext.Provider>
   );
-} 

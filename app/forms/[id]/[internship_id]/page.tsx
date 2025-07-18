@@ -9,7 +9,7 @@ import {
   ChevronRightIcon,
   ChevronLeftIcon
 } from '@heroicons/react/24/outline';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import toast, { Toaster } from 'react-hot-toast';
 
 interface FormData {
@@ -50,6 +50,7 @@ interface Question {
 
 export default function PublicForm({ params: { id, internship_id } }: { params: { id: string, internship_id: string } }) {
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<FormData | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
