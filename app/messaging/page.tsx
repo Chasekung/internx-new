@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
 import MessagingPortal from '@/components/MessagingPortal';
 import NewConversationModal from '@/components/NewConversationModal';
 
@@ -10,6 +11,7 @@ export default function MessagingPage() {
   const [userType, setUserType] = useState<'company' | 'intern' | null>(null);
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const supabase = createClientComponentClient();
 
@@ -19,24 +21,46 @@ export default function MessagingPage() {
       if (user) {
         setUser(user);
         
-        // Determine user type
-        const { data: company } = await supabase
-          .from('companies')
-          .select('id')
-          .eq('id', user.id)
-          .single();
-        
-        if (company) {
-          setUserType('company');
-        } else {
+        // Determine user type by checking both tables
+        try {
+          const { data: company, error: companyError } = await supabase
+            .from('companies')
+            .select('id')
+            .eq('id', user.id)
+            .maybeSingle();
+          
+          if (company && !companyError) {
+            setUserType('company');
+          } else {
+            // If not a company, check if they're an intern
+            const { data: intern, error: internError } = await supabase
+              .from('interns')
+              .select('id')
+              .eq('id', user.id)
+              .maybeSingle();
+            
+            if (intern && !internError) {
+              setUserType('intern');
+            } else {
+              // Default to intern if we can't determine
+              setUserType('intern');
+            }
+          }
+        } catch (error) {
+          console.error('Error determining user type:', error);
+          // Default to intern if there's an error
           setUserType('intern');
         }
+      } else {
+        // Redirect to intern sign-in if not authenticated
+        router.push('/intern-sign-in');
+        return;
       }
       setLoading(false);
     };
 
     getUser();
-  }, []);
+  }, [router]);
 
   const handleConversationCreated = (conversationId: string) => {
     // You can add logic here to refresh the messaging portal
@@ -51,15 +75,9 @@ export default function MessagingPage() {
     );
   }
 
+  // Don't render anything if redirecting
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h1>
-          <p className="text-gray-600">You need to be signed in to access messaging.</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

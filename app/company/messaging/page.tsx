@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useRouter } from 'next/navigation';
 import MessagingPortal from '@/components/MessagingPortal';
 import NewConversationModal from '@/components/NewConversationModal';
 import CreateAnnouncementModal from '@/components/CreateAnnouncementModal';
@@ -11,6 +12,7 @@ export default function CompanyMessagingPage() {
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   const supabase = createClientComponentClient();
 
@@ -19,12 +21,16 @@ export default function CompanyMessagingPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
+      } else {
+        // Redirect to company sign-in if not authenticated
+        router.push('/company-sign-in');
+        return;
       }
       setLoading(false);
     };
 
     getUser();
-  }, []);
+  }, [router]);
 
   const handleConversationCreated = (conversationId: string) => {
     // You can add logic here to refresh the messaging portal
@@ -44,15 +50,9 @@ export default function CompanyMessagingPage() {
     );
   }
 
+  // Don't render anything if redirecting
   if (!user) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Please sign in</h1>
-          <p className="text-gray-600">You need to be signed in to access messaging.</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
