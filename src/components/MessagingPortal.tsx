@@ -56,7 +56,7 @@ interface Announcement {
   };
 }
 
-export default function MessagingPortal() {
+export default function MessagingPortal({ selectedConversationId }: { selectedConversationId?: string }) {
   const [user, setUser] = useState<any>(null);
   const [userType, setUserType] = useState<'company' | 'intern' | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -113,6 +113,16 @@ export default function MessagingPortal() {
 
     getUser();
   }, []);
+
+  // Set selected conversation when selectedConversationId is provided
+  useEffect(() => {
+    if (selectedConversationId && conversations.length > 0) {
+      const conversation = conversations.find(c => c.id === selectedConversationId);
+      if (conversation) {
+        setSelectedConversation(conversation);
+      }
+    }
+  }, [selectedConversationId, conversations]);
 
   const fetchConversations = async () => {
     try {

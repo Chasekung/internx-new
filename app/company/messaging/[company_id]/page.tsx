@@ -1,47 +1,93 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { useRouter } from 'next/navigation';
 import MessagingPortal from '@/components/MessagingPortal';
 import NewConversationModal from '@/components/NewConversationModal';
 import CreateAnnouncementModal from '@/components/CreateAnnouncementModal';
 
+interface Conversation {
+  id: string;
+  company_id: string;
+  intern_id: string;
+  created_at: string;
+  updated_at: string;
+  company?: {
+    company_name: string;
+    logo_url?: string;
+  };
+  intern?: {
+    full_name: string;
+    profile_photo_url?: string;
+  };
+}
+
 export default function CompanyMessagingPage() {
   const [user, setUser] = useState<any>(null);
+  const [userType, setUserType] = useState<'company' | 'intern' | null>(null);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-
+  const params = useParams();
+  const companyId = params.company_id as string;
   const supabase = createClientComponentClient();
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
+    const checkAuth = async () => {
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) {
+          router.push('/company-sign-in');
+          return;
+        }
+
+        // Check if user is a company
+        const { data: companyProfile } = await supabase
+          .from('companies')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (!companyProfile) {
+          router.push('/company-sign-in');
+          return;
+        }
+
         setUser(user);
-        // Redirect to company-specific messaging route
-        router.replace(`/company/messaging/${user.id}`);
-      } else {
-        // Redirect to company sign-in if not authenticated
+        setUserType('company');
+        setLoading(false);
+      } catch (error) {
+        console.error('Auth error:', error);
         router.push('/company-sign-in');
-        return;
       }
-      setLoading(false);
     };
 
-    getUser();
-  }, [router]);
+    checkAuth();
+  }, [supabase, router]);
 
-  const handleConversationCreated = (conversationId: string) => {
-    // You can add logic here to refresh the messaging portal
-    // For now, the portal will refresh automatically when the modal closes
+  useEffect(() => {
+    if (user && userType === 'company') {
+      fetchConversations();
+    }
+  }, [user, userType]);
+
+  const fetchConversations = async () => {
+    try {
+      const response = await fetch('/api/conversations');
+      if (response.ok) {
+        const data = await response.json();
+        setConversations(data.conversations || []);
+      }
+    } catch (error) {
+      console.error('Error fetching conversations:', error);
+    }
   };
 
-  const handleAnnouncementCreated = () => {
-    // Refresh the messaging portal to show new announcements
-    // The portal will refresh automatically when the modal closes
+  const handleConversationCreated = (conversationId: string) => {
+    router.push(`/company/messaging/${companyId}/${conversationId}`);
   };
 
   if (loading) {
@@ -52,8 +98,7 @@ export default function CompanyMessagingPage() {
     );
   }
 
-  // Don't render anything if redirecting
-  if (!user) {
+  if (!user || userType !== 'company') {
     return null;
   }
 
@@ -64,10 +109,8 @@ export default function CompanyMessagingPage() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Company Messages</h1>
-              <p className="mt-2 text-gray-600">
-                Connect with interns through messaging and announcements
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
+              <p className="mt-2 text-gray-600">Manage your conversations with interns</p>
             </div>
             <div className="flex space-x-3">
               <button
@@ -101,7 +144,10 @@ export default function CompanyMessagingPage() {
         <CreateAnnouncementModal
           isOpen={showAnnouncementModal}
           onClose={() => setShowAnnouncementModal(false)}
-          onAnnouncementCreated={handleAnnouncementCreated}
+          onAnnouncementCreated={() => {
+            // Refresh the messaging portal to show new announcements
+            // The portal will refresh automatically when the modal closes
+          }}
         />
       </div>
     </div>
