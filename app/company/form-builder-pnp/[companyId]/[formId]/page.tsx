@@ -15,7 +15,7 @@ import {
   ChevronRightIcon,
   ChevronLeftIcon
 } from '@heroicons/react/24/outline';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import toast, { Toaster } from 'react-hot-toast';
 
 interface FormData {
@@ -57,6 +57,7 @@ interface Question {
 
 export default function FormBuilderPreview({ params: { companyId, formId } }: { params: { companyId: string, formId: string } }) {
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [activeTab, setActiveTab] = useState<'build' | 'settings' | 'publish'>('publish');
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<FormData | null>(null);
@@ -751,4 +752,3 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
       </div>
     </div>
   );
-} 

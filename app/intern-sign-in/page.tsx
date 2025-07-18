@@ -4,10 +4,11 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function InternSignIn() {
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [formData, setFormData] = useState({
     identifier: '',
     password: '',
@@ -238,4 +239,4 @@ export default function InternSignIn() {
       `}</style>
     </div>
   );
-} 
+}

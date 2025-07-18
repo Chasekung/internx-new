@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function ApplicationConfirmation({ 
   params: { internshipId, applicationId } 
@@ -11,6 +11,7 @@ export default function ApplicationConfirmation({
   params: { internshipId: string; applicationId: string } 
 }) {
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [internshipDetails, setInternshipDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -113,4 +114,3 @@ export default function ApplicationConfirmation({
       </div>
     </div>
   );
-} 

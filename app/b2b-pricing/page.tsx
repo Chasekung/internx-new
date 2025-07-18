@@ -118,4 +118,3 @@ export default function B2BPricingPage() {
       `}</style>
     </div>
   );
-} 

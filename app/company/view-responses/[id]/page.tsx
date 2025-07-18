@@ -218,64 +218,15 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
           )
         `)
         .eq('internship_id', targetApp.internship_id)
-        .eq('status', 'submitted')
-        .eq('form_responses.status', 'submitted')
-        .not('form_response_id', 'is', null)
-        .not('form_responses.submitted_at', 'is', null)
-        .order('applied_at', { ascending: true }); // Order by application date
+        .order('applied_at', { ascending: false });
 
       if (error) throw error;
-
-      // Filter out applications without form responses and sort by submission time
-      const validApplications = applications
-        .filter(app => app.form_responses && app.form_responses.length > 0)
-        .map(app => {
-          const internData = Array.isArray(app.interns) ? app.interns[0] : app.interns;
-          const formResponseData = Array.isArray(app.form_responses) ? app.form_responses[0] : app.form_responses;
-          const formsData = Array.isArray(formResponseData.forms) ? formResponseData.forms[0] : formResponseData.forms;
-          
-          return {
-            id: app.id,
-            status: app.status,
-            applied_at: app.applied_at,
-                         intern: {
-               id: internData.id,
-               name: internData.full_name,
-               email: internData.email,
-               school: internData.high_school,
-               graduation_year: internData.graduation_year,
-               profile_picture: internData.profile_photo_url
-             },
-            form_responses: {
-              id: formResponseData.id,
-              status: formResponseData.status,
-              submitted_at: formResponseData.submitted_at,
-              forms: {
-                title: formsData.title,
-                form_sections: formsData.form_sections
-              },
-              response_answers: formResponseData.response_answers
-            }
-          };
-        })
-        .sort((a, b) => {
-          // Sort by form submission time (earliest first)
-          const aTime = new Date(a.form_responses.submitted_at).getTime();
-          const bTime = new Date(b.form_responses.submitted_at).getTime();
-          return aTime - bTime;
-        });
-
-      setApplications(validApplications);
       
       // Find the current application index
-      const currentAppIndex = validApplications.findIndex(app => app.id === applicationId);
-      if (currentAppIndex !== -1) {
-        setCurrentIndex(currentAppIndex);
-      }
+      const currentAppIndex = applications.findIndex(app => app.id === applicationId);
+      setCurrentIndex(currentAppIndex >= 0 ? currentAppIndex : 0);
       
-      if (validApplications.length === 0) {
-        setError('No submitted applications found for this internship.');
-      }
+      setApplications(applications);
     } catch (error) {
       console.error('Error loading application data:', error);
       setError('Failed to load application data');
@@ -286,104 +237,104 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
 
   const renderAnswer = (question: Question, answers: Answer[]) => {
     const answer = answers.find(a => a.question_id === question.id);
-    if (!answer) {
-      return <p className="text-gray-400 italic">No answer provided</p>;
-    }
-
-    const answerValue = answer.answer_text || answer.answer_data;
+    if (!answer) return <span className="text-gray-500">No answer provided</span>;
 
     switch (question.type) {
       case 'short_text':
       case 'long_text':
         return (
-          <div className="bg-gray-50 p-3 rounded-lg border">
-            <p className="text-gray-900 whitespace-pre-wrap">{answerValue}</p>
+          <div className="bg-gray-50 p-3 rounded-md">
+            <p className="text-gray-900 whitespace-pre-wrap">{answer.answer_text}</p>
           </div>
         );
 
       case 'multiple_choice':
-        return (
-          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-            <p className="text-blue-900 font-medium">{answerValue}</p>
-          </div>
-        );
-
-      case 'checkboxes':
-        const checkboxAnswers = Array.isArray(answerValue) ? answerValue : [answerValue];
+        const choices = [
+          question.choice_1, question.choice_2, question.choice_3, question.choice_4, question.choice_5,
+          question.choice_6, question.choice_7, question.choice_8, question.choice_9, question.choice_10,
+          question.choice_11, question.choice_12, question.choice_13, question.choice_14, question.choice_15
+        ].filter(Boolean);
+        
+        const selectedChoices = answer.answer_data?.selected_choices || [];
         return (
           <div className="space-y-2">
-            {checkboxAnswers.map((item, index) => (
-              <div key={index} className="bg-green-50 p-2 rounded border border-green-200">
-                <p className="text-green-900">{item}</p>
+            {choices.map((choice, index) => (
+              <div key={index} className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={selectedChoices.includes(index)}
+                  readOnly
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <span className="ml-2 text-gray-900">{choice}</span>
               </div>
             ))}
           </div>
         );
 
       case 'dropdown':
+        const dropdownOptions = [
+          question.dropdown_1, question.dropdown_2, question.dropdown_3, question.dropdown_4, question.dropdown_5,
+          question.dropdown_6, question.dropdown_7, question.dropdown_8, question.dropdown_9, question.dropdown_10,
+          question.dropdown_11, question.dropdown_12, question.dropdown_13, question.dropdown_14, question.dropdown_15,
+          question.dropdown_16, question.dropdown_17, question.dropdown_18, question.dropdown_19, question.dropdown_20,
+          question.dropdown_21, question.dropdown_22, question.dropdown_23, question.dropdown_24, question.dropdown_25,
+          question.dropdown_26, question.dropdown_27, question.dropdown_28, question.dropdown_29, question.dropdown_30,
+          question.dropdown_31, question.dropdown_32, question.dropdown_33, question.dropdown_34, question.dropdown_35,
+          question.dropdown_36, question.dropdown_37, question.dropdown_38, question.dropdown_39, question.dropdown_40,
+          question.dropdown_41, question.dropdown_42, question.dropdown_43, question.dropdown_44, question.dropdown_45,
+          question.dropdown_46, question.dropdown_47, question.dropdown_48, question.dropdown_49, question.dropdown_50
+        ].filter(Boolean);
+        
+        const selectedIndex = answer.answer_data?.selected_index;
         return (
-          <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
-            <p className="text-purple-900 font-medium">{answerValue}</p>
+          <div className="bg-gray-50 p-3 rounded-md">
+            <span className="text-gray-900 font-medium">
+              {selectedIndex !== undefined && dropdownOptions[selectedIndex] ? dropdownOptions[selectedIndex] : 'No selection'}
+            </span>
           </div>
         );
 
       case 'file_upload':
-        if (typeof answerValue === 'string' && answerValue.startsWith('http')) {
           return (
-            <div className="bg-gray-50 p-3 rounded-lg border">
-              <div className="flex items-center space-x-2">
-                <DocumentTextIcon className="h-5 w-5 text-gray-600" />
+          <div className="bg-gray-50 p-3 rounded-md">
+            {answer.answer_data?.file_url ? (
                 <a 
-                  href={answerValue} 
+                href={answer.answer_data.file_url}
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline"
+                className="text-blue-600 hover:text-blue-800 underline flex items-center"
                 >
+                <DocumentTextIcon className="h-5 w-5 mr-2" />
                   View uploaded file
                 </a>
-              </div>
-            </div>
-          );
-        }
-        return (
-          <div className="bg-gray-50 p-3 rounded-lg border">
-            <p className="text-gray-600">File uploaded</p>
+            ) : (
+              <span className="text-gray-500">No file uploaded</span>
+            )}
           </div>
         );
 
       case 'video_upload':
-        if (typeof answerValue === 'string' && answerValue.startsWith('http')) {
           return (
-            <div className="bg-gray-50 p-3 rounded-lg border">
-              <div className="flex items-center space-x-2 mb-2">
-                <VideoCameraIcon className="h-5 w-5 text-gray-600" />
-                <span className="text-gray-700">Video response:</span>
-              </div>
-              <video 
-                controls 
-                className="w-full max-w-md rounded border"
-                src={answerValue}
+          <div className="bg-gray-50 p-3 rounded-md">
+            {answer.answer_data?.video_url ? (
+              <a
+                href={answer.answer_data.video_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:text-blue-800 underline flex items-center"
               >
-                Your browser does not support the video tag.
-              </video>
-            </div>
-          );
-        }
-        return (
-          <div className="bg-gray-50 p-3 rounded-lg border">
-            <div className="flex items-center space-x-2">
-              <VideoCameraIcon className="h-5 w-5 text-gray-600" />
-              <p className="text-gray-600">Video uploaded</p>
-            </div>
+                <VideoCameraIcon className="h-5 w-5 mr-2" />
+                View uploaded video
+              </a>
+            ) : (
+              <span className="text-gray-500">No video uploaded</span>
+            )}
           </div>
         );
 
       default:
-        return (
-          <div className="bg-gray-50 p-3 rounded-lg border">
-            <p className="text-gray-900">{JSON.stringify(answerValue)}</p>
-          </div>
-        );
+        return <span className="text-gray-500">Unsupported question type</span>;
     }
   };
 
@@ -395,33 +346,23 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
   };
 
   const handleAddToTeam = async () => {
-    if (!teamName.trim()) return;
+    if (!teamName.trim() || !applications[currentIndex]) return;
     
     setIsAddingToTeam(true);
     try {
-      const response = await fetch('/api/companies/add-to-team', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          internId: currentApplication.intern.id,
-          teamName: teamName.trim()
-        }),
-      });
-
-      const data = await response.json();
+      const { error } = await supabase
+        .from('interns')
+        .update({ team: teamName })
+        .eq('id', applications[currentIndex].interns.id);
       
-      if (response.ok) {
+      if (error) throw error;
+
         setShowTeamModal(false);
         setTeamName('');
-        alert('Intern added to team successfully!');
-      } else {
-        alert(data.error || 'Failed to add to team');
-      }
+      // You could add a success notification here
     } catch (error) {
       console.error('Error adding to team:', error);
-      alert('Failed to add to team');
+      // You could add an error notification here
     } finally {
       setIsAddingToTeam(false);
     }
@@ -439,225 +380,196 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
-          <Link
-            href="/company-dash"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </Link>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
+          <p className="text-gray-600">{error}</p>
         </div>
       </div>
     );
   }
 
-  if (applications.length === 0 || !applications[currentIndex]) {
+  if (applications.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">No Applications</h2>
-          <p className="text-gray-600 mb-4">No application data found.</p>
-          <Link
-            href="/company-dash"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </Link>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">No applications found</h1>
+          <p className="text-gray-600">There are no applications for this internship.</p>
         </div>
       </div>
     );
   }
 
   const currentApplication = applications[currentIndex];
-  const formData = currentApplication.form_responses.forms;
-  const answers = currentApplication.form_responses.response_answers;
+  if (!currentApplication) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Application not found</h1>
+          <p className="text-gray-600">The requested application could not be found.</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Sort sections and questions by order_index
-  const sortedSections = formData.form_sections
-    .sort((a, b) => a.order_index - b.order_index)
-    .map(section => ({
-      ...section,
-      form_questions: section.form_questions.sort((a, b) => a.order_index - b.order_index)
-    }));
-
-  return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    return (
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link
-                href="/company-dash"
-                className="text-gray-600 hover:text-gray-900"
+                href="/company/view-responses"
+                className="text-gray-500 hover:text-gray-700"
               >
-                ← Back to Dashboard
+                <ChevronLeftIcon className="h-6 w-6" />
               </Link>
-              <div className="h-6 border-l border-gray-300"></div>
-              <h1 className="text-lg font-semibold text-gray-900">
-                {internshipDetails?.title || 'Application Response'}
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {internshipDetails?.title || 'Application Review'}
               </h1>
+                <p className="text-gray-600">
+                  Application {currentIndex + 1} of {applications.length}
+                </p>
+              </div>
             </div>
 
-            {/* Navigation Controls */}
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {currentIndex + 1} of {applications.length} responses
-              </span>
-              <div className="flex items-center space-x-2">
                 <button
-                  onClick={() => navigateToApplication(currentIndex - 1)}
-                  disabled={currentIndex === 0}
-                  className={`p-2 rounded-md ${
-                    currentIndex === 0
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
+                onClick={() => setShowTeamModal(true)}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
-                  <ChevronLeftIcon className="h-5 w-5" />
+                <UserPlusIcon className="h-5 w-5 mr-2" />
+                Add to Team
                 </button>
-                <button
-                  onClick={() => navigateToApplication(currentIndex + 1)}
-                  disabled={currentIndex === applications.length - 1}
-                  className={`p-2 rounded-md ${
-                    currentIndex === applications.length - 1
-                      ? 'text-gray-400 cursor-not-allowed'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
-                >
-                  <ChevronRightIcon className="h-5 w-5" />
-                </button>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Application Tabs */}
+      {/* Navigation */}
       <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-1 overflow-x-auto py-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+          <div className="flex items-center justify-between">
+                <button
+                  onClick={() => navigateToApplication(currentIndex - 1)}
+                  disabled={currentIndex === 0}
+              className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+              <ChevronLeftIcon className="h-5 w-5 mr-1" />
+              Previous
+                </button>
+            
+            <div className="flex space-x-2">
             {applications.map((app, index) => (
               <button
                 key={app.id}
                 onClick={() => navigateToApplication(index)}
-                className={`flex-shrink-0 px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`px-3 py-1 rounded-md text-sm ${
                   index === currentIndex
-                    ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
-                <div className="flex items-center space-x-2">
-                  {app.intern.profile_picture ? (
-                    <img
-                      src={app.intern.profile_picture}
-                      alt={app.intern.name}
-                      className="w-5 h-5 rounded-full"
-                    />
-                  ) : (
-                    <UserIcon className="w-5 h-5" />
-                  )}
-                  <span>{app.intern.name}</span>
-                </div>
+                  {index + 1}
               </button>
             ))}
+      </div>
+
+                <button
+                  onClick={() => navigateToApplication(currentIndex + 1)}
+                  disabled={currentIndex === applications.length - 1}
+              className="flex items-center px-3 py-2 text-gray-600 hover:text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+              Next
+              <ChevronRightIcon className="h-5 w-5 ml-1" />
+                </button>
           </div>
         </div>
       </div>
 
-      {/* Response Content */}
+      {/* Application Content */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Applicant Info */}
-        <div className="bg-white rounded-lg shadow-sm border p-6 mb-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
             <div className="flex items-center space-x-4">
-              {currentApplication.intern.profile_picture ? (
+            <div className="flex-shrink-0">
+              {currentApplication.interns.profile_photo_url ? (
                 <img
-                  src={currentApplication.intern.profile_picture}
-                  alt={currentApplication.intern.name}
-                  className="w-16 h-16 rounded-full object-cover"
+                  src={currentApplication.interns.profile_photo_url}
+                  alt="Profile"
+                  className="h-16 w-16 rounded-full object-cover"
                 />
               ) : (
-                <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-                  <UserIcon className="w-8 h-8 text-gray-400" />
+                <div className="h-16 w-16 rounded-full bg-gray-300 flex items-center justify-center">
+                  <UserIcon className="h-8 w-8 text-gray-600" />
                 </div>
               )}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900">{currentApplication.intern.name}</h2>
-                <p className="text-gray-600">{currentApplication.intern.email}</p>
-                {currentApplication.intern.school && (
-                  <p className="text-sm text-gray-500">
-                    {currentApplication.intern.school}
-                    {currentApplication.intern.graduation_year && ` • Class of ${currentApplication.intern.graduation_year}`}
-                  </p>
-                )}
-                <p className="text-xs text-gray-400 mt-1">
-                  Submitted: {new Date(currentApplication.form_responses.submitted_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}
+            </div>
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {currentApplication.interns.full_name}
+              </h2>
+              <p className="text-gray-600">{currentApplication.interns.email}</p>
+              <p className="text-gray-500">
+                {currentApplication.interns.high_school}
+                {currentApplication.interns.graduation_year && ` • Class of ${currentApplication.interns.graduation_year}`}
                 </p>
               </div>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              {/* Connect to Team Button */}
-              <button
-                onClick={() => setShowTeamModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-green-300 rounded-md shadow-sm text-sm font-medium text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-              >
-                <UserPlusIcon className="w-4 h-4 mr-2" />
-                Connect to your team
-              </button>
-              
-              {/* View Profile Button */}
-              <Link
-                href={`/company/public-profile/${currentApplication.intern.id}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                <UserIcon className="w-4 h-4 mr-2" />
-                View Profile
-              </Link>
+            <div className="text-right">
+              <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${
+                currentApplication.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                currentApplication.status === 'rejected' ? 'bg-red-100 text-red-800' :
+                'bg-yellow-100 text-yellow-800'
+              }`}>
+                {currentApplication.status.charAt(0).toUpperCase() + currentApplication.status.slice(1)}
+              </span>
+              <p className="text-sm text-gray-500 mt-1">
+                Applied {new Date(currentApplication.applied_at).toLocaleDateString()}
+              </p>
             </div>
           </div>
         </div>
 
         {/* Form Responses */}
+        {currentApplication.form_responses && (
         <div className="bg-white rounded-lg shadow-sm border">
           <div className="px-6 py-4 border-b">
-            <h3 className="text-lg font-semibold text-gray-900">{formData.title}</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                {currentApplication.form_responses.forms.title}
+              </h3>
+              <p className="text-sm text-gray-600">
+                Submitted {new Date(currentApplication.form_responses.submitted_at).toLocaleDateString()}
+              </p>
           </div>
 
-          <div className="p-6 space-y-8">
-            {sortedSections.map((section) => (
-              <div key={section.id}>
-                {section.title && (
-                  <div className="mb-6">
-                    <h4 className="text-lg font-medium text-gray-900 mb-2">{section.title}</h4>
+            <div className="p-6">
+              {currentApplication.form_responses.forms.form_sections
+                .sort((a, b) => a.order_index - b.order_index)
+                .map((section) => (
+                  <div key={section.id} className="mb-8 last:mb-0">
+                    <h4 className="text-lg font-medium text-gray-900 mb-4">
+                      {section.title}
+                    </h4>
                     {section.description && (
-                      <p className="text-gray-600 text-sm">{section.description}</p>
-                    )}
-                  </div>
+                      <p className="text-gray-600 mb-4">{section.description}</p>
                 )}
 
                 <div className="space-y-6">
-                  {section.form_questions.map((question) => (
-                    <div key={question.id} className="border-l-4 border-gray-200 pl-4">
+                      {section.form_questions
+                        .sort((a, b) => a.order_index - b.order_index)
+                        .map((question) => (
+                          <div key={question.id} className="border-b border-gray-200 pb-6 last:border-b-0">
                       <div className="mb-3">
-                        <h5 className="font-medium text-gray-900 mb-1">
+                              <h5 className="text-base font-medium text-gray-900">
                           {question.question_text}
-                          {question.required && <span className="text-red-500 ml-1">*</span>}
                         </h5>
-                        <p className="text-xs text-gray-500 capitalize">{question.type.replace('_', ' ')}</p>
+                              {question.required && (
+                                <span className="text-red-500 text-sm ml-1">*</span>
+                              )}
                       </div>
+                            
                       <div className="ml-4">
-                        {renderAnswer(question, answers)}
+                              {renderAnswer(question, currentApplication.form_responses.response_answers)}
                       </div>
                     </div>
                   ))}
@@ -666,56 +578,41 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
             ))}
           </div>
         </div>
-
-        {/* Keyboard shortcuts hint */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
-            Use ← → arrow keys to navigate between responses
-          </p>
-        </div>
+        )}
       </div>
 
-      {/* Team Modal */}
+      {/* Add to Team Modal */}
       {showTeamModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Add {currentApplication.intern.name} to your team
+              Add to Team
             </h3>
             <div className="mb-4">
-              <label htmlFor="teamName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Team Name
               </label>
               <input
                 type="text"
-                id="teamName"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
-                placeholder="e.g., Engineering, Marketing, Sales"
+                placeholder="Enter team name..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAddToTeam();
-                  }
-                }}
               />
             </div>
             <div className="flex space-x-3">
               <button
-                onClick={handleAddToTeam}
-                disabled={isAddingToTeam || !teamName.trim()}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isAddingToTeam ? 'Adding...' : 'Add to Team'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowTeamModal(false);
-                  setTeamName('');
-                }}
-                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                onClick={() => setShowTeamModal(false)}
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 Cancel
+              </button>
+              <button
+                onClick={handleAddToTeam}
+                disabled={!teamName.trim() || isAddingToTeam}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAddingToTeam ? 'Adding...' : 'Add to Team'}
               </button>
             </div>
           </div>

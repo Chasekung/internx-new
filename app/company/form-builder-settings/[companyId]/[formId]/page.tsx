@@ -14,7 +14,7 @@ import {
   DocumentDuplicateIcon,
   ArrowPathIcon
 } from '@heroicons/react/24/outline';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import toast, { Toaster } from 'react-hot-toast';
 
 interface FormSettings {
@@ -35,6 +35,7 @@ interface FormSettings {
 
 export default function FormBuilderSettings({ params: { companyId, formId } }: { params: { companyId: string, formId: string } }) {
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [activeTab, setActiveTab] = useState<'build' | 'settings' | 'publish'>('settings');
   const [isLoading, setIsLoading] = useState(true);
   const [settings, setSettings] = useState<FormSettings>({
@@ -489,4 +490,3 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
       `}</style>
     </div>
   );
-} 

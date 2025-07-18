@@ -199,37 +199,18 @@ export default function CompanyPublicProfile({ params }: { params: { id: string 
                     <p>{profileData.highSchool}</p>
                     <span>&bull;</span>
                     <p>{profileData.gradeLevel}</p>
+                    <span>&bull;</span>
+                    <p>{profileData.age} years old</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Bio Section */}
-            <div className="mb-8 rounded-lg p-6 bg-gradient-to-r from-blue-100 via-indigo-50 to-purple-100 shadow-sm">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">About</h2>
-              <div>
-                <p className="text-gray-700 whitespace-pre-line">
-                  {profileData.bio ? profileData.bio : <span className='italic text-gray-500'>No information provided.</span>}
-                </p>
-              </div>
-            </div>
-
-            {/* Interests Section */}
-            {profileData.interests && (
+            {profileData.bio && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Interests</h2>
-                <div className="flex flex-wrap gap-2">
-                  {splitField(profileData.interests).map((interest, index) => (
-                    <span
-                      key={index}
-                      className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        interestColors[index % interestColors.length]
-                      }`}
-                    >
-                      {interest}
-                    </span>
-                  ))}
-                </div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">About</h2>
+                <p className="text-gray-700 leading-relaxed">{profileData.bio}</p>
               </div>
             )}
 
@@ -241,7 +222,7 @@ export default function CompanyPublicProfile({ params }: { params: { id: string 
                   {splitField(profileData.skills).map((skill, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium"
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${interestColors[index % interestColors.length]}`}
                     >
                       {skill}
                     </span>
@@ -254,15 +235,15 @@ export default function CompanyPublicProfile({ params }: { params: { id: string 
             {profileData.experience && (
               <div className="mb-8">
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">Experience</h2>
-                <p className="text-gray-700 whitespace-pre-line">{profileData.experience}</p>
+                <p className="text-gray-700 leading-relaxed">{profileData.experience}</p>
               </div>
             )}
 
             {/* Extracurriculars Section */}
             {profileData.extracurriculars && (
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-900 mb-3">Extracurriculars</h2>
-                <p className="text-gray-700 whitespace-pre-line">{profileData.extracurriculars}</p>
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">Extracurricular Activities</h2>
+                <p className="text-gray-700 leading-relaxed">{profileData.extracurriculars}</p>
               </div>
             )}
 
@@ -270,7 +251,7 @@ export default function CompanyPublicProfile({ params }: { params: { id: string 
             {profileData.achievements && (
               <div className="mb-8">
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">Achievements</h2>
-                <p className="text-gray-700 whitespace-pre-line">{profileData.achievements}</p>
+                <p className="text-gray-700 leading-relaxed">{profileData.achievements}</p>
               </div>
             )}
 
@@ -278,7 +259,33 @@ export default function CompanyPublicProfile({ params }: { params: { id: string 
             {profileData.careerInterests && (
               <div className="mb-8">
                 <h2 className="text-xl font-semibold text-gray-900 mb-3">Career Interests</h2>
-                <p className="text-gray-700 whitespace-pre-line">{profileData.careerInterests}</p>
+                <div className="flex flex-wrap gap-2">
+                  {splitField(profileData.careerInterests).map((interest, index) => (
+                    <span
+                      key={index}
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${interestColors[index % interestColors.length]}`}
+                    >
+                      {interest}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Interests Section */}
+            {profileData.interests && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">Interests</h2>
+                <div className="flex flex-wrap gap-2">
+                  {splitField(profileData.interests).map((interest, index) => (
+                    <span
+                      key={index}
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${interestColors[index % interestColors.length]}`}
+                    >
+                      {interest}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -290,7 +297,7 @@ export default function CompanyPublicProfile({ params }: { params: { id: string 
                   {splitField(profileData.languages).map((language, index) => (
                     <span
                       key={index}
-                      className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium"
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${interestColors[index % interestColors.length]}`}
                     >
                       {language}
                     </span>
@@ -299,28 +306,57 @@ export default function CompanyPublicProfile({ params }: { params: { id: string 
               </div>
             )}
 
+            {/* Certifications Section */}
+            {profileData.certifications && profileData.certifications.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-xl font-semibold text-gray-900 mb-3">Certifications</h2>
+                <div className="flex flex-wrap gap-2">
+                  {profileData.certifications.map((certification, index) => (
+                    <span
+                      key={index}
+                      className={`px-3 py-1 rounded-full text-sm font-medium ${interestColors[index % interestColors.length]}`}
+                    >
+                      {certification}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Contact Information */}
             <div className="border-t border-gray-200 pt-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-3">Contact Information</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Email</p>
+                  <p className="text-sm text-gray-500">Email</p>
                   <p className="text-gray-900">{profileData.email}</p>
                 </div>
                 {profileData.phoneNumber && (
                   <div>
-                    <p className="text-sm font-medium text-gray-500">Phone</p>
+                    <p className="text-sm text-gray-500">Phone</p>
                     <p className="text-gray-900">{profileData.phoneNumber}</p>
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Location</p>
+                  <p className="text-sm text-gray-500">Location</p>
                   <p className="text-gray-900">{profileData.location}, {profileData.state}</p>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-gray-500">School</p>
-                  <p className="text-gray-900">{profileData.highSchool}</p>
-                </div>
+                {profileData.githubUrl && (
+                  <div>
+                    <p className="text-sm text-gray-500">GitHub</p>
+                    <a href={profileData.githubUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                      View Profile
+                    </a>
+                  </div>
+                )}
+                {profileData.portfolioUrl && (
+                  <div>
+                    <p className="text-sm text-gray-500">Portfolio</p>
+                    <a href={profileData.portfolioUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                      View Portfolio
+                    </a>
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -335,23 +371,14 @@ export default function CompanyPublicProfile({ params }: { params: { id: string 
           66% { transform: translate(-20px, 20px) scale(0.9); }
           100% { transform: translate(0px, 0px) scale(1); }
         }
-
         .animate-blob {
           animation: blob 7s infinite;
         }
-
         .animation-delay-2000 {
           animation-delay: 2s;
         }
-
         .animation-delay-4000 {
           animation-delay: 4s;
-        }
-
-        .bg-grid-pattern {
-          background-image: linear-gradient(to right, #a78bfa 1px, transparent 1px),
-            linear-gradient(to bottom, #a78bfa 1px, transparent 1px);
-          background-size: 24px 24px;
         }
       `}</style>
     </div>

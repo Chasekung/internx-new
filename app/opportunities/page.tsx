@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BsGrid, BsList } from 'react-icons/bs';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import OpportunityCardView from '@/components/OpportunityCardView';
 import OpportunityListView from '@/components/OpportunityListView';
 
@@ -95,6 +95,7 @@ const OpportunitiesPage: React.FC = () => {
   const [internships, setInternships] = useState<Internship[]>([]);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
     const load = async () => {
@@ -199,4 +200,4 @@ const OpportunitiesPage: React.FC = () => {
   );
 };
 
-export default OpportunitiesPage; 
+export default OpportunitiesPage;

@@ -1,6 +1,5 @@
 'use client';
 
-import CompanyNavbar from '@/components/CompanyNavbar';
 import { usePathname } from 'next/navigation';
 
 export default function CompanyLayout({
@@ -13,7 +12,6 @@ export default function CompanyLayout({
 
   return (
     <div className="relative">
-      {!isFormBuilder && <CompanyNavbar />}
       {/* Main content */}
       <main>
         {children}

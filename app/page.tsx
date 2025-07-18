@@ -163,7 +163,7 @@ const volunteerTestimonials = [
   },
 ];
 
-export default function Home() {
+function Home() {
   const [currentIndex, setCurrentIndex] = useState(2);
   const [activeTab, setActiveTab] = useState('internships');
 
@@ -750,3 +750,5 @@ export default function Home() {
     </div>
   )
 }
+
+export default Home;
