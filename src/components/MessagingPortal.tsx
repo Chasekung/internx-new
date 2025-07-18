@@ -10,12 +10,11 @@ interface Conversation {
   created_at: string;
   updated_at: string;
   company?: {
-    name: string;
+    company_name: string;
     logo_url?: string;
   };
   intern?: {
-    first_name: string;
-    last_name: string;
+    full_name: string;
     profile_photo_url?: string;
   };
 }
@@ -28,12 +27,11 @@ interface Message {
   sender_type: 'company' | 'intern';
   created_at: string;
   sender?: {
-    first_name: string;
-    last_name: string;
+    full_name: string;
     profile_photo_url?: string;
   };
   company?: {
-    name: string;
+    company_name: string;
     logo_url?: string;
   };
 }
@@ -49,24 +47,24 @@ interface Announcement {
   created_at: string;
   read: boolean;
   company?: {
-    name: string;
+    company_name: string;
     logo_url?: string;
   };
   intern?: {
-    first_name: string;
-    last_name: string;
+    full_name: string;
     profile_photo_url?: string;
   };
 }
 
 export default function MessagingPortal() {
   const [user, setUser] = useState<any>(null);
+  const [userType, setUserType] = useState<'company' | 'intern' | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [activeTab, setActiveTab] = useState<'messages' | 'announcements'>('messages');
 
   const supabase = createClientComponentClient();
@@ -76,6 +74,38 @@ export default function MessagingPortal() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
+        
+        // Determine user type by checking both tables
+        try {
+          const { data: company, error: companyError } = await supabase
+            .from('companies')
+            .select('id')
+            .eq('id', user.id)
+            .maybeSingle();
+          
+          if (company && !companyError) {
+            setUserType('company');
+          } else {
+            // If not a company, check if they're an intern
+            const { data: intern, error: internError } = await supabase
+              .from('interns')
+              .select('id')
+              .eq('id', user.id)
+              .maybeSingle();
+            
+            if (intern && !internError) {
+              setUserType('intern');
+            } else {
+              // Default to intern if we can't determine
+              setUserType('intern');
+            }
+          }
+        } catch (error) {
+          console.error('Error determining user type:', error);
+          // Default to intern if there's an error
+          setUserType('intern');
+        }
+        
         await fetchConversations();
         await fetchAnnouncements();
       }
@@ -90,8 +120,8 @@ export default function MessagingPortal() {
         .from('conversations')
         .select(`
           *,
-          company:companies(name, logo_url),
-          intern:interns(first_name, last_name, profile_photo_url)
+          company:companies(company_name, logo_url),
+          intern:interns(full_name, profile_photo_url)
         `)
         .or(`company_id.eq.${user?.id},intern_id.eq.${user?.id}`);
 
@@ -108,8 +138,8 @@ export default function MessagingPortal() {
         .from('messages')
         .select(`
           *,
-          sender:interns(first_name, last_name, profile_photo_url),
-          company:companies(name, logo_url)
+          sender:interns(full_name, profile_photo_url),
+          company:companies(company_name, logo_url)
         `)
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
@@ -127,8 +157,8 @@ export default function MessagingPortal() {
         .from('announcements')
         .select(`
           *,
-          company:companies(name, logo_url),
-          intern:interns(first_name, last_name, profile_photo_url)
+          company:companies(company_name, logo_url),
+          intern:interns(full_name, profile_photo_url)
         `)
         .eq('recipient_id', user?.id)
         .order('created_at', { ascending: false });
@@ -151,7 +181,7 @@ export default function MessagingPortal() {
           conversation_id: selectedConversation.id,
           content: newMessage.trim(),
           sender_id: user?.id,
-          sender_type: user?.role === 'COMPANY' ? 'company' : 'intern'
+          sender_type: userType === 'company' ? 'company' : 'intern'
         })
         .select()
         .single();
@@ -168,15 +198,15 @@ export default function MessagingPortal() {
   };
 
   const getConversationName = (conversation: Conversation) => {
-    if (user?.role === 'COMPANY') {
-      return `${conversation.intern?.first_name || ''} ${conversation.intern?.last_name || ''}`.trim() || 'Unknown User';
+    if (userType === 'company') {
+      return conversation.intern?.full_name || 'Unknown User';
     } else {
-      return conversation.company?.name || 'Unknown Company';
+      return conversation.company?.company_name || 'Unknown Company';
     }
   };
 
   const getConversationAvatar = (conversation: Conversation) => {
-    if (user?.role === 'COMPANY') {
+    if (userType === 'company') {
       return conversation.intern?.profile_photo_url;
     } else {
       return conversation.company?.logo_url;
