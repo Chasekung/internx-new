@@ -148,3 +148,4 @@ export async function getPostingAndCompanyDetails(id: string) {
     ...posting,
     companies: company
   };
+}
