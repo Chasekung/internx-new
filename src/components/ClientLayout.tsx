@@ -15,7 +15,7 @@ function ClientLayout({
   const pathname = usePathname();
   
   // Define company pages
-  const companyPages = ['/company', '/company-get-started', '/company-sign-in', '/company-forgot-password', '/company-reset-password', '/company-dash', '/company/opportunities', '/company/search', '/company/messaging', '/company/postings', '/company/view-responses', '/company/form-builder', '/company/public-profile'];
+  const companyPages = ['/company', '/company-get-started', '/company-sign-in', '/company-forgot-password', '/company-reset-password', '/company-dash', '/company/opportunities', '/company/search', '/company/messaging', '/company/postings', '/company/view-responses', '/company/form-builder', '/company/public-profile', '/company/edit-page'];
   
   const isCompanyPage = companyPages.some(page => pathname?.startsWith(page));
 

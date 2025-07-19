@@ -1717,3 +1717,4 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       />
     </ThemeContext.Provider>
   );
+}
