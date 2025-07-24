@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
-import ApplicationTracker from '@/components/ApplicationTracker';
 import ReferralLink from '@/components/ReferralLink';
 import ReferralStats from '@/components/ReferralStats';
 
@@ -37,51 +36,103 @@ interface InternData {
   updated_at: string;
 }
 
+interface Application {
+  id: string;
+  status: string;
+  applied_at: string;
+  internship_id: string;
+  internships: {
+    title: string;
+    position: string;
+    companies: {
+      company_name: string;
+      logo_url?: string;
+    };
+    location?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    description?: string;
+    duration?: string;
+    start_date?: string;
+    end_date?: string;
+    salary_min?: number;
+    salary_max?: number;
+    pay?: number;
+  };
+}
+
+// Helper function to create Google Maps link
+const createGoogleMapsLink = (address?: string, city?: string, state?: string) => {
+  if (!city && !state && !address) return null;
+  
+  const fullAddress = [address, city, state].filter(Boolean).join(', ');
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
+};
+
+// Helper function to display location
+const formatDisplayLocation = (city?: string, state?: string) => {
+  if (!city && !state) return 'N/A';
+  return [city, state].filter(Boolean).join(', ');
+};
+
 export default function InternDash() {
   const router = useRouter();
   const [internData, setInternData] = useState<InternData | null>(null);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
 
   useEffect(() => {
-    // Check if user is signed in
     const token = localStorage.getItem('token');
     if (!token) {
-      console.log('No token found, redirecting to sign in');
       router.replace('/intern-sign-in');
       return;
     }
-
+    
     const fetchInternData = async () => {
       try {
-        console.log('Fetching intern data...');
         const response = await fetch('/api/interns/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+          headers: { 'Authorization': `Bearer ${token}` },
         });
-        console.log('Response status:', response.status);
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch intern data');
-        }
-
+        if (!response.ok) throw new Error('Failed to fetch intern data');
         const data = await response.json();
-        console.log('Intern data received:', data);
-        setInternData(data.data); // Note: the API returns { success: true, data: {...} }
+        setInternData(data.data);
       } catch (err) {
-        console.error('Error fetching intern data:', err);
         setError('Failed to load dashboard data');
+      }
+    };
+    
+    const fetchApplications = async () => {
+      try {
+        const response = await fetch('/api/interns/applications', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch applications');
+        const data = await response.json();
+        setApplications(data.applications || []);
+      } catch (err) {
+        setError('Failed to load applications');
+        console.error('Applications fetch error:', err);
       } finally {
         setIsLoading(false);
       }
     };
-
+    
     fetchInternData();
+    fetchApplications();
   }, [router]);
+
+  // Calculate stats
+  const totalApplications = applications.length;
+  const applicationsThisMonth = applications.filter(app => {
+    const applied = new Date(app.applied_at);
+    const now = new Date();
+    return applied.getMonth() === now.getMonth() && applied.getFullYear() === now.getFullYear();
+  }).length;
 
   const handleSignOut = () => {
     if (typeof window !== 'undefined') {
@@ -132,7 +183,6 @@ export default function InternDash() {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
@@ -193,10 +243,103 @@ export default function InternDash() {
             This is your personal dashboard where you can manage your internship applications and profile.
           </p>
         </motion.div>
-
-        {/* Application Tracker */}
-        <ApplicationTracker />
-
+        {/* Stats Row */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+            <div className="text-2xl font-bold text-blue-600">{totalApplications}</div>
+            <div className="text-sm text-gray-600 mt-2">Total Applications</div>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+            <div className="text-2xl font-bold text-purple-500">{applicationsThisMonth}</div>
+            <div className="text-sm text-gray-600 mt-2">Applications This Month</div>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+            <div className="text-2xl font-bold text-green-500">0</div>
+            <div className="text-sm text-gray-600 mt-2">Interviews Scheduled</div>
+          </div>
+          <div className="bg-white rounded-xl shadow p-6 flex flex-col items-center">
+            <div className="text-2xl font-bold text-yellow-500">0</div>
+            <div className="text-sm text-gray-600 mt-2">Under Review</div>
+          </div>
+        </div>
+        {/* Application Cards */}
+        <div className="space-y-6 mb-8">
+          {applications.length === 0 ? (
+            <div className="text-center text-gray-500">No submitted applications yet.</div>
+          ) : (
+            applications.map((app) => (
+              <motion.div
+                key={app.id}
+                className="bg-white rounded-lg shadow-md p-4 mb-4 border border-gray-200"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="flex items-center justify-between cursor-pointer" onClick={() => setExpanded(expanded === app.id ? null : app.id)}>
+                  <div className="flex items-center gap-3">
+                    {app.internships?.companies?.logo_url && (
+                      <img src={app.internships.companies.logo_url} alt="Company Logo" className="w-10 h-10 rounded-full object-cover border" />
+                    )}
+                    <div>
+                      <div className="font-semibold text-lg text-black">{app.internships?.title || 'Untitled Position'}</div>
+                      <div className="text-sm text-black">{app.internships?.companies?.company_name || 'Unknown Company'}</div>
+                    </div>
+                  </div>
+                  <div className="text-xs text-gray-400">Applied: {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : 'N/A'}</div>
+                </div>
+                {expanded === app.id && (
+                  <div className="mt-4 border-t pt-4 text-sm text-black flex flex-wrap gap-3">
+                    <div className="bg-blue-50 px-4 py-2 rounded-full shadow-sm flex items-center min-w-[120px]">
+                      <span className="font-semibold mr-1">Position:</span> {app.internships?.position || 'N/A'}
+                    </div>
+                    <div className="bg-green-50 px-4 py-2 rounded-full shadow-sm flex items-center min-w-[120px]">
+                      <span className="font-semibold mr-1">Location:</span> {
+                        (() => {
+                          const mapsLink = createGoogleMapsLink(
+                            app.internships?.address,
+                            app.internships?.city,
+                            app.internships?.state
+                          );
+                          const displayLocation = formatDisplayLocation(
+                            app.internships?.city,
+                            app.internships?.state
+                          );
+                          
+                          return mapsLink ? (
+                            <a 
+                              href={mapsLink} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                            >
+                              {displayLocation}
+                            </a>
+                          ) : displayLocation;
+                        })()
+                      }
+                    </div>
+                    <div className="bg-yellow-50 px-4 py-2 rounded-full shadow-sm flex items-center min-w-[120px]">
+                      <span className="font-semibold mr-1">Pay:</span> {
+                        typeof app.internships?.pay === 'number'
+                          ? `$${app.internships.pay}/hr`
+                          : app.internships?.salary_min && app.internships?.salary_max
+                          ? `$${app.internships.salary_min} - $${app.internships.salary_max}`
+                          : app.internships?.salary_min
+                          ? `$${app.internships.salary_min}`
+                          : app.internships?.salary_max
+                          ? `$${app.internships.salary_max}`
+                          : 'N/A'
+                      }
+                    </div>
+                    <div className="bg-purple-50 px-4 py-2 rounded-full shadow-sm flex items-center min-w-[120px]">
+                      <span className="font-semibold mr-1">Description:</span> {app.internships?.description ? app.internships.description : 'No description provided.'}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            ))
+          )}
+        </div>
         {/* Referral System */}
         {internData && (
           <div className="grid md:grid-cols-2 gap-8 mb-8">
