@@ -126,7 +126,9 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
 
   const fetchConversations = async () => {
     try {
-      const response = await fetch('/api/conversations');
+      const response = await fetch('/api/conversations', {
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch conversations');
       }
@@ -139,18 +141,15 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
 
   const fetchMessages = async (conversationId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select(`
-          *,
-          sender:interns(full_name, profile_photo_url),
-          company:companies(company_name, logo_url)
-        `)
-        .eq('conversation_id', conversationId)
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      setMessages(data || []);
+      const response = await fetch(`/api/conversations/${conversationId}/messages`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages || []);
+      } else {
+        console.error('Failed to fetch messages');
+      }
     } catch (error) {
       console.error('Error fetching messages:', error);
     }
@@ -158,7 +157,9 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
 
   const fetchAnnouncements = async () => {
     try {
-      const response = await fetch('/api/announcements');
+      const response = await fetch('/api/announcements', {
+        credentials: 'include'
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch announcements');
       }
@@ -174,21 +175,24 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
 
     setSending(true);
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: selectedConversation.id,
+      const response = await fetch(`/api/conversations/${selectedConversation.id}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
           content: newMessage.trim(),
-          sender_id: user?.id,
-          sender_type: userType === 'company' ? 'company' : 'intern'
-        })
-        .select()
-        .single();
+        }),
+      });
 
-      if (error) throw error;
-
+      if (response.ok) {
         setNewMessage('');
-      await fetchMessages(selectedConversation.id);
+        await fetchMessages(selectedConversation.id);
+      } else {
+        const errorData = await response.json();
+        console.error('Error sending message:', errorData);
+      }
     } catch (error) {
       console.error('Error sending message:', error);
     } finally {
@@ -404,10 +408,10 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                         className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                           isOwnMessage
                             ? 'bg-blue-600 text-white'
-                            : 'bg-gray-200 text-gray-900'
+                            : 'bg-white text-gray-900 border border-gray-200'
                         }`}
                       >
-                        <p className="text-sm">{message.content}</p>
+                        <p className={`text-sm ${isOwnMessage ? 'text-white' : 'text-gray-900'}`}>{message.content}</p>
                         <p className={`text-xs mt-1 ${
                           isOwnMessage ? 'text-blue-100' : 'text-gray-500'
                         }`}>
@@ -428,7 +432,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                     placeholder="Type a message..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                     disabled={sending}
                   />
                   <button
