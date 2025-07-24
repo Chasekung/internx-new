@@ -167,35 +167,28 @@ export default function CompanyNavbar() {
                       onMouseLeave={() => setIsAboutUsOpen(false)}
                     />
                     <div 
-                      className="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                      className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
                       onMouseEnter={() => setIsAboutUsOpen(true)}
                       onMouseLeave={() => setIsAboutUsOpen(false)}
                     >
                       <div className="py-2" role="menu" aria-orientation="vertical">
                         <Link
-                          href="/about/team"
-                          className="block px-4 py-2.5 text-base text-gray-700 hover:bg-gray-100"
+                          href="/about/step-up"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           role="menuitem"
                         >
-                          Our Team
-                        </Link>
-                        <Link
-                          href="/about/mission"
-                          className="block px-4 py-2.5 text-base text-gray-700 hover:bg-gray-100"
-                          role="menuitem"
-                        >
-                          Our Mission
+                          About Step Up
                         </Link>
                         <Link
                           href="/about/careers"
-                          className="block px-4 py-2.5 text-base text-gray-700 hover:bg-gray-100"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           role="menuitem"
                         >
                           Careers
                         </Link>
                         <Link
                           href="/about/contact"
-                          className="block px-4 py-2.5 text-base text-gray-700 hover:bg-gray-100"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                           role="menuitem"
                         >
                           Contact Us
