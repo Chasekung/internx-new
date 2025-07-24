@@ -166,6 +166,15 @@ const volunteerTestimonials = [
 function Home() {
   const [currentIndex, setCurrentIndex] = useState(2);
   const [activeTab, setActiveTab] = useState('internships');
+  const animatedWords = ["Internship", "Volunteering", "Research", "Summer Camp"];
+  const [wordIndex, setWordIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWordIndex((prev) => (prev + 1) % animatedWords.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Animation variants
   const containerVariants = {
@@ -276,7 +285,39 @@ function Home() {
               className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl"
             >
               <span className="block">Find</span>
-              <span className="block gradient-text">Your Perfect Opportunity</span>
+              <span className="block">
+                <span className="gradient-text">Your Perfect </span>
+                <span style={{ display: 'inline-block', position: 'relative' }}>
+                  <motion.span
+                    key={animatedWords[wordIndex]}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                    className="animated-purple-text"
+                    style={{ display: 'inline-block' }}
+                  >
+                    {animatedWords[wordIndex]}
+                    <motion.span
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      exit={{ scaleX: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="animated-purple-underline"
+                      style={{
+                        display: 'block',
+                        height: '4px',
+                        borderRadius: '2px',
+                        background: 'linear-gradient(90deg, #a855f7, #6366f1, #c026d3)',
+                        marginTop: '4px',
+                        width: '100%',
+                        transformOrigin: 'left',
+                      }}
+                    />
+                  </motion.span>
+                </span>
+                <span className="gradient-text"> Opportunity</span>
+              </span>
             </motion.h1>
             <motion.p
               variants={itemVariants}
@@ -460,7 +501,7 @@ function Home() {
 
               {/* Testimonials Section */}
               <div className="py-8 bg-white">
-                <div className="mx-auto max-w-[1275px] px-4 sm:px-6 lg:px-8">
+                <div className="mx-auto max-[1275px] px-4 sm:px-6 lg:px-8">
                   <div className="text-center">
                     <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
                       Based on <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">skill and mindset</span>, not experience
@@ -745,6 +786,16 @@ function Home() {
 
         .animate-fade-in-up {
           animation: fade-in-up 0.5s ease-out forwards;
+        }
+
+        .animated-purple-text {
+          background: linear-gradient(to right, #6366f1, #8b5cf6);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-fill-color: transparent;
+          font-weight: bold;
+          display: inline-block;
         }
       `}</style>
     </div>
