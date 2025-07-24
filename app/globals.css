@@ -306,3 +306,18 @@ body::before {
   background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px),
                     linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px);
 }
+
+.animated-purple-text {
+  background: linear-gradient(90deg, #a855f7, #6366f1, #c026d3);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: animatedWordFade 2s linear;
+}
+
+@keyframes animatedWordFade {
+  0% { opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { opacity: 0; }
+}
