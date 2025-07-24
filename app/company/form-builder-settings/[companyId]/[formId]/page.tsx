@@ -490,3 +490,4 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
       `}</style>
     </div>
   );
+}

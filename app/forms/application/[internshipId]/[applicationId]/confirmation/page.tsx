@@ -114,3 +114,4 @@ export default function ApplicationConfirmation({
       </div>
     </div>
   );
+}
