@@ -575,9 +575,9 @@ function ChatArea({
   };
 
   return (
-    <>
+    <div className="h-full flex flex-col max-h-full">
       {/* Chat Header */}
-      <div className="border-b border-gray-200 p-4 bg-gray-50">
+      <div className="border-b border-gray-200 p-4 bg-gray-50 flex-shrink-0">
         <div className="flex items-center space-x-3">
           <div className="flex-shrink-0">
             {getConversationAvatar(conversation) ? (
@@ -604,7 +604,7 @@ function ChatArea({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0 max-h-full bg-gray-50 border border-gray-200 m-2 rounded-lg">
         {messages.length === 0 ? (
           <div className="text-center text-gray-500 py-8">
             <p>No messages yet. Start the conversation!</p>
@@ -636,7 +636,7 @@ function ChatArea({
                   <div className={`px-4 py-2 rounded-lg ${
                     isOwnMessage 
                       ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-200 text-gray-900'
+                      : 'bg-white text-gray-900 border border-gray-200'
                   }`}>
                     <p className="text-sm">{message.content}</p>
                     <p className={`text-xs mt-1 ${
@@ -654,7 +654,7 @@ function ChatArea({
       </div>
 
       {/* Message Input */}
-      <div className="border-t border-gray-200 p-4">
+      <div className="border-t border-gray-200 p-4 flex-shrink-0">
         <div className="flex space-x-4">
           <input
             type="text"
@@ -674,6 +674,6 @@ function ChatArea({
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 } 
