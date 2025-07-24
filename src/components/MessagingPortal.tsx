@@ -126,17 +126,12 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
 
   const fetchConversations = async () => {
     try {
-      const { data, error } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          company:companies(company_name, logo_url),
-          intern:interns(full_name, profile_photo_url)
-        `)
-        .or(`company_id.eq.${user?.id},intern_id.eq.${user?.id}`);
-
-      if (error) throw error;
-      setConversations(data || []);
+      const response = await fetch('/api/conversations');
+      if (!response.ok) {
+        throw new Error('Failed to fetch conversations');
+      }
+      const { conversations } = await response.json();
+      setConversations(conversations || []);
     } catch (error) {
       console.error('Error fetching conversations:', error);
     }
@@ -163,18 +158,12 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
 
   const fetchAnnouncements = async () => {
     try {
-      const { data, error } = await supabase
-        .from('announcements')
-        .select(`
-          *,
-          company:companies(company_name, logo_url),
-          intern:interns(full_name, profile_photo_url)
-        `)
-        .eq('recipient_id', user?.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setAnnouncements(data || []);
+      const response = await fetch('/api/announcements');
+      if (!response.ok) {
+        throw new Error('Failed to fetch announcements');
+      }
+      const { announcements } = await response.json();
+      setAnnouncements(announcements || []);
     } catch (error) {
       console.error('Error fetching announcements:', error);
     }

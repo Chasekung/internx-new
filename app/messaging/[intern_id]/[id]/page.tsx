@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import MessagingPortal from '@/components/MessagingPortal';
 
 interface Conversation {
   id: string;
@@ -22,12 +21,33 @@ interface Conversation {
   };
 }
 
+interface Message {
+  id: string;
+  conversation_id: string;
+  content: string;
+  sender_id: string;
+  sender_type: 'company' | 'intern';
+  created_at: string;
+  sender?: {
+    full_name: string;
+    profile_photo_url?: string;
+  };
+  company?: {
+    company_name: string;
+    logo_url?: string;
+  };
+}
+
 export default function ConversationPage() {
   const [user, setUser] = useState<any>(null);
   const [userType, setUserType] = useState<'company' | 'intern' | null>(null);
   const [conversation, setConversation] = useState<Conversation | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const params = useParams();
   const { intern_id, id: conversationId } = params;
@@ -115,6 +135,84 @@ export default function ConversationPage() {
     }
   }, [user, conversationId]);
 
+  useEffect(() => {
+    if (conversation) {
+      fetchMessages();
+    }
+  }, [conversation]);
+
+  const fetchMessages = async () => {
+    if (!conversation) return;
+
+    try {
+      const response = await fetch(`/api/conversations/${conversation.id}/messages`);
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data.messages || []);
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  };
+
+  const sendMessage = async () => {
+    if (!newMessage.trim() || !conversation || sending) return;
+
+    setSending(true);
+    try {
+      const response = await fetch(`/api/conversations/${conversation.id}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: newMessage.trim(),
+        }),
+      });
+
+      if (response.ok) {
+        setNewMessage('');
+        await fetchMessages(); // Refresh messages
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  };
+
+  // Auto-scroll to bottom when new messages arrive
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const formatTime = (timestamp: string) => {
+    return new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const getSenderName = (message: Message) => {
+    if (message.sender_type === 'company') {
+      return message.company?.company_name || 'Company';
+    } else {
+      return message.sender?.full_name || 'User';
+    }
+  };
+
+  const getSenderAvatar = (message: Message) => {
+    if (message.sender_type === 'company') {
+      return message.company?.logo_url;
+    } else {
+      return message.sender?.profile_photo_url;
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -184,30 +282,106 @@ export default function ConversationPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-24 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
-              <p className="mt-2 text-gray-600">
-                Conversation with {userType === 'company' 
-                  ? conversation.intern?.full_name || 'Unknown User'
-                  : conversation.company?.company_name || 'Unknown Company'
-                }
-              </p>
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/messaging"
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </Link>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">
+                  {userType === 'company' 
+                    ? conversation.intern?.full_name || 'Unknown User'
+                    : conversation.company?.company_name || 'Unknown Company'
+                  }
+                </h1>
+                <p className="text-gray-600">Conversation</p>
+              </div>
             </div>
-            <Link
-              href="/messaging"
-              className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-            >
-              Back to Messages
-            </Link>
           </div>
         </div>
 
-        {/* Messaging Portal with specific conversation */}
-        <MessagingPortal selectedConversationId={conversation.id} />
+        {/* Messages Container */}
+        <div className="bg-white rounded-lg shadow-lg h-96 flex flex-col">
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {messages.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                <p>No messages yet. Start the conversation!</p>
+              </div>
+            ) : (
+              messages.map((message) => {
+                const isOwnMessage = message.sender_id === user.id;
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${isOwnMessage ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <div className="flex-shrink-0">
+                        {getSenderAvatar(message) ? (
+                          <img
+                            src={getSenderAvatar(message)}
+                            alt="Avatar"
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                            <span className="text-gray-600 text-xs font-medium">
+                              {getSenderName(message).charAt(0)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <div className={`px-4 py-2 rounded-lg ${
+                        isOwnMessage 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-gray-200 text-gray-900'
+                      }`}>
+                        <p className="text-sm">{message.content}</p>
+                        <p className={`text-xs mt-1 ${
+                          isOwnMessage ? 'text-blue-100' : 'text-gray-500'
+                        }`}>
+                          {formatTime(message.created_at)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Message Input */}
+          <div className="border-t border-gray-200 p-4">
+            <div className="flex space-x-4">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Type your message..."
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={sending}
+              />
+              <button
+                onClick={sendMessage}
+                disabled={!newMessage.trim() || sending}
+                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {sending ? 'Sending...' : 'Send'}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -39,34 +39,81 @@ export default function NewConversationModal({
     }
   }, [isOpen]);
 
+  // Helper to get intern IDs already in a conversation with this company
+  const [existingInternIds, setExistingInternIds] = useState<string[]>([]);
+  useEffect(() => {
+    if (isOpen && userType === 'company') {
+      (async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        // Get company ID from user
+        const { data: company } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('id', user.id)
+          .single();
+        if (!company) return;
+        // Fetch all conversations for this company
+        const response = await fetch('/api/conversations');
+        if (response.ok) {
+          const { conversations } = await response.json();
+          setExistingInternIds(conversations.map((c: any) => c.intern_id));
+        }
+      })();
+    }
+  }, [isOpen, userType]);
+
+  // Filter out users already in a conversation (for company)
+  const filteredUsers = users.filter(user =>
+    user.name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (userType !== 'company' || !existingInternIds.includes(user.id))
+  );
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
       // Fetch users based on user type
       if (userType === 'company') {
-        // Companies can message interns
-        const { data: interns } = await supabase
-          .from('interns')
-          .select('id, first_name, last_name, profile_photo_url')
-          .order('first_name');
+        // Companies can only message interns who have submitted applications
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          console.error('No authenticated user found');
+          return;
+        }
+
+        // Get company ID from user
+        const { data: company } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('id', user.id)
+          .single();
+
+        if (!company) {
+          console.error('Company not found for user');
+          return;
+        }
+
+        // Use the new API to get only eligible interns
+        const response = await fetch(`/api/companies/eligible-interns?companyId=${company.id}`);
+        const { interns } = await response.json();
         
         if (interns) {
-          setUsers(interns.map(intern => ({
+          setUsers(interns.map((intern: any) => ({
             ...intern,
-            name: `${intern.first_name} ${intern.last_name}`
+            name: intern.full_name
           })));
         }
       } else {
         // Interns can message companies
         const { data: companies } = await supabase
           .from('companies')
-          .select('id, name, logo_url')
-          .order('name');
+          .select('id, company_name, logo_url')
+          .order('company_name');
         
         if (companies) {
           setUsers(companies.map(company => ({
             ...company,
-            name: company.name
+            name: company.company_name
           })));
         }
       }
@@ -77,35 +124,84 @@ export default function NewConversationModal({
     }
   };
 
-  const filteredUsers = users.filter(user =>
-    user.name?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const createConversation = async () => {
-    if (!selectedUser) return;
+    if (!selectedUser || creating) return;
 
     setCreating(true);
     try {
+      let companyId = null;
+      let internId = null;
+      if (userType === 'company') {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          alert('No authenticated user found');
+          setCreating(false);
+          return;
+        }
+        const { data: company } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('id', user.id)
+          .single();
+        companyId = company?.id;
+        internId = selectedUser.id;
+      } else {
+        // userType === 'intern'
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          alert('No authenticated user found');
+          setCreating(false);
+          return;
+        }
+        companyId = selectedUser.id;
+        internId = user.id;
+      }
+
+      // First validate the conversation
+      const validationResponse = await fetch('/api/conversations/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          companyId,
+          internId,
+        }),
+      });
+
+      if (!validationResponse.ok) {
+        const errorData = await validationResponse.json();
+        console.error('Validation failed:', errorData);
+        alert('Failed to validate conversation: ' + (errorData.error || 'Unknown error'));
+        return;
+      }
+
+      // Create the conversation
       const response = await fetch('/api/conversations', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          company_id: userType === 'company' ? (await supabase.auth.getUser()).data.user?.id : selectedUser.id,
-          intern_id: userType === 'intern' ? (await supabase.auth.getUser()).data.user?.id : selectedUser.id,
+          company_id: companyId,
+          intern_id: internId,
         }),
       });
 
       const data = await response.json();
-      if (data.conversation) {
+      if (response.ok && data.conversation) {
+        console.log('Conversation created/found successfully:', data.conversation);
         onConversationCreated(data.conversation.id);
         onClose();
         setSelectedUser(null);
         setSearchTerm('');
+      } else {
+        console.error('Error creating conversation:', data);
+        alert('Failed to create conversation: ' + (data.error || 'Unknown error'));
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
+      alert('Failed to create conversation. Please try again.');
     } finally {
       setCreating(false);
     }
@@ -147,7 +243,12 @@ export default function NewConversationModal({
             </div>
           ) : filteredUsers.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <p>No {userType === 'company' ? 'interns' : 'companies'} found</p>
+              <p>
+                {userType === 'company' 
+                  ? 'No interns have submitted applications to your company yet. You can only message interns who have applied to your positions.'
+                  : 'No companies found'
+                }
+              </p>
             </div>
           ) : (
             <div className="space-y-2">

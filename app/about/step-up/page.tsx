@@ -130,53 +130,91 @@ export default function AboutStepUpPage() {
         {/* Full-width turquoise gradient background, from transparent to turquoise, starting higher */}
         <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent via-cyan-100 via-40% via-teal-200 to-teal-300 to-80% opacity-95 -z-10" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">About the team</h2>
             <p className="text-lg text-gray-600">Founded by passionate high schoolers, starting from LaunchX</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 justify-items-center">
-            {/* Siddh Rajrishi */}
-            <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center w-full max-w-xs">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-200 to-purple-200 mb-4 flex items-center justify-center">
-                {/* Profile image placeholder */}
-                <span className="text-4xl text-gray-400">👤</span>
-              </div>
-              <div className="text-center">
-                <div className="text-lg font-semibold text-gray-900">Siddh Rajrishi</div>
-                <div className="text-blue-600 font-medium mt-1">CSO & Co-founder</div>
-              </div>
-            </div>
+          
+          <div className="text-center mb-12">
+            <h3 className="text-3xl font-bold text-gray-900 mb-4">The Co-founders</h3>
+            <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+              Meet the five passionate high school students who came together to revolutionize the internship and volunteering experience for students and companies alike.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 justify-items-center">
             {/* Chase Kung */}
-            <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center w-full max-w-xs">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-200 to-purple-200 mb-4 flex items-center justify-center">
-                {/* Profile image placeholder */}
-                <span className="text-4xl text-gray-400">👤</span>
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
+              <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
+                <img
+                  src="/Chase_LaunchX.jpg"
+                  alt="Chase Kung"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="text-center">
-                <div className="text-lg font-semibold text-gray-900">Chase Kung</div>
-                <div className="text-blue-600 font-medium mt-1">CTO & Co-founder</div>
+                <div className="text-xl font-bold text-gray-900 mb-2">Chase Kung</div>
+                <div className="text-sm text-gray-600">Chief Executive Officer</div>
               </div>
             </div>
+
+            {/* Kyungjin Oh */}
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
+              <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
+                <img
+                  src="/KJ_LaunchX.jpg"
+                  alt="Kyungjin Oh"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-bold text-gray-900 mb-2">Kyungjin Oh</div>
+                <div className="text-sm text-gray-600">Chief Strategy Officer</div>
+              </div>
+            </div>
+
             {/* Albert Zhang */}
-            <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center w-full max-w-xs">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-200 to-purple-200 mb-4 flex items-center justify-center">
-                {/* Profile image placeholder */}
-                <span className="text-4xl text-gray-400">👤</span>
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
+              <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
+                <img
+                  src="/Albert_LaunchX.jpg"
+                  alt="Albert Zhang"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="text-center">
-                <div className="text-lg font-semibold text-gray-900">Albert Zhang</div>
-                <div className="text-blue-600 font-medium mt-1">CFO & Co-founder</div>
+                <div className="text-xl font-bold text-gray-900 mb-2">Albert Zhang</div>
+                <div className="text-sm text-gray-600">Chief Marketing Officer</div>
               </div>
             </div>
+
             {/* Kymi Taniwan */}
-            <div className="bg-white rounded-2xl shadow-md p-6 flex flex-col items-center w-full max-w-xs">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-200 to-purple-200 mb-4 flex items-center justify-center">
-                {/* Profile image placeholder */}
-                <span className="text-4xl text-gray-400">👤</span>
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
+              <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
+                <img
+                  src="/Kymi_LaunchX.jpg"
+                  alt="Kymi Taniwan"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div className="text-center">
-                <div className="text-lg font-semibold text-gray-900">Kymi Taniwan</div>
-                <div className="text-blue-600 font-medium mt-1">CMO & Co-founder</div>
+                <div className="text-xl font-bold text-gray-900 mb-2">Kymi Taniwan</div>
+                <div className="text-sm text-gray-600">Chief Financial Officer</div>
+              </div>
+            </div>
+
+            {/* Siddh Rajrishi */}
+            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
+              <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
+                <img
+                  src="/Siddh_LaunchX.jpg"
+                  alt="Siddh Rajrishi"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="text-center">
+                <div className="text-xl font-bold text-gray-900 mb-2">Siddh Rajrishi</div>
+                <div className="text-sm text-gray-600">Chief Communications Officer</div>
               </div>
             </div>
           </div>
