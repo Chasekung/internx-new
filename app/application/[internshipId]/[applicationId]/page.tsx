@@ -306,3 +306,4 @@ export default function Application({ params }: { params: { internshipId: string
       {/* Add your form rendering logic here */}
     </div>
   );
+}

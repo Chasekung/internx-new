@@ -19,11 +19,11 @@ interface Application {
   applied_at: string;
   intern: {
     id: string;
-    name: string;
+    full_name: string;
     email: string;
-    school?: string;
+    high_school?: string;
     graduation_year?: number;
-    profile_picture?: string;
+    profile_photo_url?: string;
   };
   form_responses: {
     id: string;
@@ -222,11 +222,18 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
 
       if (error) throw error;
       
+      // Transform the data to match the interface
+      const transformedApplications = applications.map((app: any) => ({
+        ...app,
+        intern: app.interns[0] || app.interns, // Handle both array and single object
+        interns: undefined // Remove the original property
+      }));
+      
       // Find the current application index
-      const currentAppIndex = applications.findIndex(app => app.id === applicationId);
+      const currentAppIndex = transformedApplications.findIndex(app => app.id === applicationId);
       setCurrentIndex(currentAppIndex >= 0 ? currentAppIndex : 0);
       
-      setApplications(applications);
+      setApplications(transformedApplications);
     } catch (error) {
       console.error('Error loading application data:', error);
       setError('Failed to load application data');
@@ -353,7 +360,7 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
       const { error } = await supabase
         .from('interns')
         .update({ team: teamName })
-        .eq('id', applications[currentIndex].interns.id);
+        .eq('id', applications[currentIndex].intern.id);
       
       if (error) throw error;
 
@@ -493,9 +500,9 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
         <div className="bg-white rounded-lg shadow-sm border p-6 mb-8">
             <div className="flex items-center space-x-4">
             <div className="flex-shrink-0">
-              {currentApplication.interns.profile_photo_url ? (
+              {currentApplication.intern.profile_photo_url ? (
                 <img
-                  src={currentApplication.interns.profile_photo_url}
+                  src={currentApplication.intern.profile_photo_url}
                   alt="Profile"
                   className="h-16 w-16 rounded-full object-cover"
                 />
@@ -507,12 +514,12 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-semibold text-gray-900">
-                {currentApplication.interns.full_name}
+                {currentApplication.intern.full_name}
               </h2>
-              <p className="text-gray-600">{currentApplication.interns.email}</p>
+              <p className="text-gray-600">{currentApplication.intern.email}</p>
               <p className="text-gray-500">
-                {currentApplication.interns.high_school}
-                {currentApplication.interns.graduation_year && ` • Class of ${currentApplication.interns.graduation_year}`}
+                {currentApplication.intern.high_school}
+                {currentApplication.intern.graduation_year && ` • Class of ${currentApplication.intern.graduation_year}`}
                 </p>
               </div>
             <div className="text-right">
