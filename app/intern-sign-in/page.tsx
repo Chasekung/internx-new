@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -15,6 +15,19 @@ export default function InternSignIn() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (error === 'COMPANY_USER') {
+      // Redirect after 2 seconds
+      redirectTimeout.current = setTimeout(() => {
+        router.push('/company-sign-in');
+      }, 5000);
+    }
+    return () => {
+      if (redirectTimeout.current) clearTimeout(redirectTimeout.current);
+    };
+  }, [error, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -71,7 +84,20 @@ export default function InternSignIn() {
         .eq('id', data.user.id)
         .single();
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        // Check if this user is a company
+        const { data: companyProfile, error: companyError } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('id', data.user.id)
+          .single();
+        if (companyProfile && !companyError) {
+          setError('COMPANY_USER');
+          await supabase.auth.signOut();
+          return;
+        }
+        throw profileError;
+      }
 
       // Store auth data
       localStorage.setItem('token', data.session.access_token);
@@ -90,6 +116,7 @@ export default function InternSignIn() {
       console.log('Redirecting to intern-dash page...');
       router.push('/intern-dash');
     } catch (error) {
+      if (error === 'COMPANY_USER') return;
       console.error('Sign in error:', error);
       setError(error instanceof Error ? error.message : 'An error occurred');
     } finally {
@@ -136,7 +163,13 @@ export default function InternSignIn() {
                 <div className="flex">
                   <div className="ml-3">
                     <h3 className="text-sm font-medium text-red-800">
-                      {error}
+                      {error === 'COMPANY_USER' ? (
+                        <>
+                          This account is registered as a company.<br />
+                          Please <Link href="/company-sign-in" className="underline text-blue-700">sign in through the company portal</Link>.<br />
+                          <span className="text-xs text-gray-500">Redirecting...</span>
+                        </>
+                      ) : error}
                     </h3>
                   </div>
                 </div>

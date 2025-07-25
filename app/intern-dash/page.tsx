@@ -131,7 +131,8 @@ export default function InternDash() {
   const applicationsThisMonth = applications.filter(app => {
     const applied = new Date(app.applied_at);
     const now = new Date();
-    return applied.getMonth() === now.getMonth() && applied.getFullYear() === now.getFullYear();
+    const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
+    return applied >= thirtyDaysAgo;
   }).length;
 
   const handleSignOut = () => {

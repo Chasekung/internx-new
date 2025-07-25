@@ -5,27 +5,9 @@ import { useRouter, useParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import MessagingPortal from '@/components/MessagingPortal';
 
-interface Conversation {
-  id: string;
-  company_id: string;
-  intern_id: string;
-  created_at: string;
-  updated_at: string;
-  company?: {
-    company_name: string;
-    logo_url?: string;
-  };
-  intern?: {
-    full_name: string;
-    profile_photo_url?: string;
-  };
-}
-
 export default function MessagingPage() {
   const [user, setUser] = useState<any>(null);
   const [userType, setUserType] = useState<'company' | 'intern' | null>(null);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const params = useParams();
@@ -69,37 +51,12 @@ export default function MessagingPage() {
           // Default to intern if there's an error
           setUserType('intern');
         }
-        
-        await fetchConversations();
       }
       setLoading(false);
     };
 
     getUser();
   }, []);
-
-  const fetchConversations = async () => {
-    try {
-      const { data: conversations, error } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          company:companies(company_name, logo_url),
-          intern:interns(full_name, profile_photo_url)
-        `)
-        .or(`company_id.eq.${user.id},intern_id.eq.${user.id}`)
-        .order('updated_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching conversations:', error);
-        return;
-      }
-
-      setConversations(conversations || []);
-    } catch (error) {
-      console.error('Error fetching conversations:', error);
-    }
-  };
 
   if (loading) {
     return (

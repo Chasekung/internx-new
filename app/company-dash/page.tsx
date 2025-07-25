@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon, DocumentPlusIcon, UserGroupIcon, UserCircleIcon, EnvelopeIcon, CalendarIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import ApplicationResponseView from '@/components/ApplicationResponseView';
+import { checkCompanyAuth, CompanyUser } from '@/lib/companyAuth';
 
 export default function CompanyDash() {
   const router = useRouter();
@@ -28,6 +29,8 @@ export default function CompanyDash() {
   const [isLoadingApplications, setIsLoadingApplications] = useState(false);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [isLoadingTeam, setIsLoadingTeam] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [companyUser, setCompanyUser] = useState<CompanyUser | null>(null);
 
   const handleApplicationFormClick = async (postingId: string) => {
     try {
@@ -152,105 +155,43 @@ export default function CompanyDash() {
   };
 
   useEffect(() => {
-    const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-    if (!userStr) {
-      router.replace('/company-sign-in');
-      return;
-    }
-    try {
-      const user = JSON.parse(userStr);
-      if (user.role !== 'COMPANY') {
-        router.replace('/company-sign-in');
-        return;
-      }
-    } catch {
-      router.replace('/company-sign-in');
-      return;
-    }
-    if (typeof window !== "undefined") {
-      const userStr = localStorage.getItem("user");
-      if (userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          setCompanyName(user.name || "");
-        } catch (e) {
-          setCompanyName("");
-        }
-      }
-    }
-    // Fetch companyId from Supabase Auth and contact_name from companies table
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      const userId = user?.id;
-      setCompanyId(userId || null);
-      
-      if (userId) {
-        // Fetch company contact name
-        const { data: companyData, error: companyError } = await supabase
-          .from('companies')
-          .select('contact_name')
-          .eq('id', userId)
-          .single();
-          
-        if (!companyError && companyData && companyData.contact_name) {
-          setContactName(companyData.contact_name);
-        }
-
-        // Fetch postings for this company using the userId from auth
-        const fetchPostings = async () => {
-          try {
-            const { data: postingsData, error: postingsError } = await supabase
-              .from('internships')
-              .select('id, category, position')
-              .eq('company_id', userId);
-
-            if (postingsError) throw postingsError;
-            
-            setPostings(postingsData || []);
-
-            // Fetch application counts and check for existing forms for each posting
-            const counts: Record<string, number> = {};
-            const existingForms: Record<string, boolean> = {};
-            
-            for (const posting of postingsData || []) {
-              // Get application counts
-              const { count, error } = await supabase
-                .from('applications')
-                .select('*', { count: 'exact' })
-                .eq('internship_id', posting.id);
-              
-              if (!error) {
-                counts[posting.id] = count || 0;
-              }
-
-              // Check if form exists
-              const { data: formData, error: formError } = await supabase
-                .from('forms')
-                .select('id')
-                .eq('internship_id', posting.id)
-                .maybeSingle();
-
-              if (!formError) {
-                existingForms[posting.id] = !!formData;
-              }
-            }
-            
-                        setApplicationCounts(counts);
-            setExistingApplicationForms(existingForms);
-          } catch (error) {
-            console.error('Error fetching postings:', error);
-          }
-        };
-
-        fetchPostings();
+    const checkAuth = async () => {
+      try {
+        setIsLoading(true);
         
-        // Load team members
-        loadTeamMembers(userId);
+        // Use the new company authentication check
+        const { isCompany, user, error } = await checkCompanyAuth();
+        
+        if (!isCompany || !user) {
+          console.log('Company auth failed:', error);
+          router.replace('/company-sign-in');
+          return;
+        }
+
+        // User is properly authenticated as a company
+        setCompanyUser(user);
+        setCompanyName(user.contactName);
+        setCompanyId(user.id);
+        
+        // Update localStorage with proper company data
+        localStorage.setItem('user', JSON.stringify({
+          id: user.id,
+          email: user.email,
+          role: 'COMPANY',
+          companyName: user.companyName,
+          contactName: user.contactName
+        }));
+        
+      } catch (error) {
+        console.error('Auth check error:', error);
+        router.replace('/company-sign-in');
+      } finally {
+        setIsLoading(false);
       }
     };
-    
-    fetchUser();
-  }, []);
+
+    checkAuth();
+  }, [router]);
 
   const handleSignOut = () => {
     if (typeof window !== 'undefined') {
@@ -329,6 +270,17 @@ export default function CompanyDash() {
   const getUrlSafeString = (str: string) => {
     return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full border-b-2 border-blue-600 w-8 h-8 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">

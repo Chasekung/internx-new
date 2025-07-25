@@ -1,26 +1,25 @@
 "use client";
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { checkCompanyAuth } from '@/lib/companyAuth';
 import SearchPage from '../../search/page';
 
 export default function CompanySearchWrapper() {
   const router = useRouter();
+  
   useEffect(() => {
-    const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-    if (!userStr) {
-      router.replace('/company-sign-in');
-      return;
-    }
-    try {
-      const user = JSON.parse(userStr);
-      if (user.role !== 'COMPANY') {
+    const checkAuth = async () => {
+      const { isCompany, error } = await checkCompanyAuth();
+      
+      if (!isCompany) {
+        console.log('Company auth failed:', error);
         router.replace('/company-sign-in');
         return;
       }
-    } catch {
-      router.replace('/company-sign-in');
-      return;
-    }
+    };
+
+    checkAuth();
   }, [router]);
+  
   return <SearchPage />;
 } 

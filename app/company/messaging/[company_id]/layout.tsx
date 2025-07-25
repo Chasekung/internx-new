@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter, useParams } from "next/navigation";
 import NewConversationModal from "@/components/NewConversationModal";
+import { checkCompanyAuth } from "@/lib/companyAuth";
 
 interface Conversation {
   id: string;
@@ -40,21 +41,21 @@ export default function MessagingLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
+        const { isCompany, user, error } = await checkCompanyAuth();
+        
+        if (!isCompany || !user) {
+          console.log('Company auth failed:', error);
           router.push("/company-sign-in");
           return;
         }
-        // Check if user is a company
-        const { data: companyProfile } = await supabase
-          .from("companies")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-        if (!companyProfile) {
+
+        // Verify the company ID in the URL matches the authenticated user
+        if (user.id !== companyId) {
+          console.log('Company ID mismatch');
           router.push("/company-sign-in");
           return;
         }
+
         setUser(user);
         setLoading(false);
       } catch (error) {
@@ -63,7 +64,7 @@ export default function MessagingLayout({ children }: { children: React.ReactNod
       }
     };
     checkAuth();
-  }, [supabase, router]);
+  }, [supabase, router, companyId]);
 
   useEffect(() => {
     if (user) {
