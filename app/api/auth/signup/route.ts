@@ -153,6 +153,28 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Unable to generate unique referral code' }, { status: 500 });
       }
 
+      // Look up referrer ID if referral code is provided
+      // TODO: Re-enable after fixing database schema (referred_by column needs to be UUID type)
+      let referrerUserId = null;
+      if (referralCode) {
+        console.log('Looking up referrer for code:', referralCode);
+        const { data: referrer, error: referrerError } = await supabase
+          .from('interns')
+          .select('id')
+          .eq('referral_code', referralCode)
+          .single();
+        
+        if (referrerError) {
+          console.log('Referrer lookup error:', referrerError);
+          // Continue with signup even if referral code is invalid
+        } else if (referrer) {
+          referrerUserId = referrer.id;
+          console.log('Found valid referrer UUID:', referrerUserId);
+        } else {
+          console.log('No referrer found for code:', referralCode);
+        }
+      }
+
       const { error: profileError } = await supabase
         .from('interns')
         .insert({
@@ -166,7 +188,7 @@ export async function POST(request: NextRequest) {
           signup_ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
           signup_user_agent: request.headers.get('user-agent') || null,
           referral_code: newReferralCode,
-          referred_by: referralCode || null,
+          referred_by: referrerUserId,
           high_school: highSchool || null,
           grade_level: gradeLevel || null,
           age: age || null,

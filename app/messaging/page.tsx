@@ -638,7 +638,7 @@ function ChatArea({
                       ? 'bg-blue-600 text-white' 
                       : 'bg-white text-gray-900 border border-gray-200'
                   }`}>
-                    <p className="text-sm">{message.content}</p>
+                    <p className={`text-sm ${isOwnMessage ? 'text-white' : 'text-gray-900'}`}>{message.content}</p>
                     <p className={`text-xs mt-1 ${
                       isOwnMessage ? 'text-blue-100' : 'text-gray-500'
                     }`}>

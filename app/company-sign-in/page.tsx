@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,19 @@ export default function CompanySignIn() {
   const supabase = createClientComponentClient();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (error === 'INTERN_USER') {
+      // Redirect after 5 seconds
+      redirectTimeout.current = setTimeout(() => {
+        router.push('/intern-sign-in');
+      }, 5000);
+    }
+    return () => {
+      if (redirectTimeout.current) clearTimeout(redirectTimeout.current);
+    };
+  }, [error, router]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -24,6 +37,7 @@ export default function CompanySignIn() {
     const password = formData.get('password') as string;
     
     try {
+      // First, authenticate with Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -31,19 +45,49 @@ export default function CompanySignIn() {
 
       if (error) throw error;
 
-      if (data.session) {
-        localStorage.setItem('token', data.session.access_token);
-        localStorage.setItem('user', JSON.stringify({
-          id: data.user?.id,
-          email: data.user?.email,
-          role: 'COMPANY'
-        }));
-        window.dispatchEvent(new Event('authStateChange'));
-        router.push('/company-dash');
-      } else {
+      if (!data.session || !data.user) {
         setError('Sign in failed: No session returned.');
+        return;
       }
+
+      // CRITICAL: Verify user exists in companies table
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (companyError || !companyData) {
+        // Check if this user is an intern
+        const { data: internProfile, error: internError } = await supabase
+          .from('interns')
+          .select('id')
+          .eq('id', data.user.id)
+          .single();
+        if (internProfile && !internError) {
+          setError('INTERN_USER');
+          await supabase.auth.signOut();
+          return;
+        }
+        // User is authenticated but not a company - sign them out
+        await supabase.auth.signOut();
+        setError('Access denied. This account is not authorized for company access.');
+        return;
+      }
+
+      // User is both authenticated AND a company - proceed
+      localStorage.setItem('token', data.session.access_token);
+      localStorage.setItem('user', JSON.stringify({
+        id: data.user?.id,
+        email: data.user?.email,
+        role: 'COMPANY',
+        companyName: companyData.company_name,
+        contactName: companyData.contact_name
+      }));
+      window.dispatchEvent(new Event('authStateChange'));
+      router.push('/company-dash');
     } catch (err: any) {
+      if (err === 'INTERN_USER') return;
       setError(err.message || 'Sign in failed');
       console.error('Sign in error:', err);
     } finally {
@@ -110,7 +154,15 @@ export default function CompanySignIn() {
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="rounded-md bg-red-50 p-4 mb-2">
-                <p className="text-red-700 text-sm">{error}</p>
+                <p className="text-red-700 text-sm">
+                  {error === 'INTERN_USER' ? (
+                    <>
+                      This account is registered as an intern.<br />
+                      Please <Link href="/intern-sign-in" className="underline text-blue-700">sign in through the intern portal</Link>.<br />
+                      <span className="text-xs text-gray-500">Redirecting...</span>
+                    </>
+                  ) : error}
+                </p>
               </div>
             )}
             <div className="rounded-md shadow-sm -space-y-px">

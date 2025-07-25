@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     const { data: referredInterns, error: referredError } = await supabase
       .from('interns')
       .select('id, username, full_name, email, location, created_at')
-      .eq('referred_by', user.referral_code);
+      .eq('referred_by', userId);
 
     if (referredError) {
       console.error('Error fetching referred interns:', referredError);

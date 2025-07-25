@@ -128,8 +128,9 @@ export default function ReferralPage({ params }: ReferralPageProps) {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-6">
             <CheckCircleIcon className="h-8 w-8 text-green-600" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to InternX! 🎉
+          <h1 className="text-4xl font-bold text-gray-900 mb-4 flex flex-col items-center justify-center">
+            <span>Welcome to</span>
+            <img src="/stepupflat.png" alt="StepUp Logo" className="h-24 md:h-32 mt-4" style={{ display: 'inline-block' }} />
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             You've been invited by a friend to join the best internship platform
@@ -139,8 +140,9 @@ export default function ReferralPage({ params }: ReferralPageProps) {
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Why InternX?
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
+                <span>Why</span>
+                <img src="/stepupflat.png" alt="StepUp Logo" className="h-16 md:h-20 inline-block align-middle" />
               </h2>
               <ul className="space-y-3">
                 <li className="flex items-center">

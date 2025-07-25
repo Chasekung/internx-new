@@ -8,34 +8,34 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import supabase from '@/lib/supabaseClient';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { checkCompanyAuth } from '@/lib/companyAuth';
 
 export default function CompanyNavbar() {
   const isVisible = useScrollPosition();
   const [isAboutUsOpen, setIsAboutUsOpen] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isSwitchDropdownOpen, setIsSwitchDropdownOpen] = useState(false);
   const aboutUsRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
+  const switchDropdownRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     // Check if company user is signed in
-    const checkAuth = () => {
-      if (typeof window !== 'undefined') {
-        const userStr = localStorage.getItem('user');
-        let isAuthenticated = false;
-        if (userStr) {
-          try {
-            const user = JSON.parse(userStr);
-            isAuthenticated = user.role === 'COMPANY';
-          } catch (e) {
-            isAuthenticated = false;
-          }
+    const checkAuth = async () => {
+      try {
+        const { isCompany, user } = await checkCompanyAuth();
+        setIsSignedIn(isCompany);
+        if (isCompany && user) {
+          setCompanyId(user.id);
         }
-        setIsSignedIn(isAuthenticated);
+      } catch (e) {
+        setIsSignedIn(false);
       }
     };
+    
     checkAuth();
     window.addEventListener('storage', checkAuth);
     window.addEventListener('authStateChange', checkAuth);
@@ -71,6 +71,9 @@ export default function CompanyNavbar() {
       }
       if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
         setIsSettingsOpen(false);
+      }
+      if (switchDropdownRef.current && !switchDropdownRef.current.contains(event.target as Node)) {
+        setIsSwitchDropdownOpen(false);
       }
     };
 
@@ -239,12 +242,34 @@ export default function CompanyNavbar() {
                 Sign in
               </Link>
             )}
-            <Link
-              href="/"
-              className="ml-4 bg-blue-600 text-white px-5 py-2.5 rounded-md text-base font-medium hover:bg-blue-700"
-            >
-              For Students
-            </Link>
+            <div className="relative" ref={switchDropdownRef}>
+              <button
+                onClick={() => setIsSwitchDropdownOpen(!isSwitchDropdownOpen)}
+                className="ml-4 bg-blue-600 text-white px-5 py-2.5 rounded-md text-base font-medium hover:bg-blue-700 inline-flex items-center"
+              >
+                For Companies
+                <div className={`ml-2 transition-transform duration-200 ${isSwitchDropdownOpen ? 'rotate-180' : ''}`}>
+                  <FiChevronDown size={16} />
+                </div>
+              </button>
+              {isSwitchDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                  <div className="py-1" role="menu" aria-orientation="vertical">
+                    <div className="px-4 py-2 text-sm text-white bg-blue-600 rounded-t-md">
+                      For Companies
+                    </div>
+                    <Link
+                      href="/"
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      role="menuitem"
+                      onClick={() => setIsSwitchDropdownOpen(false)}
+                    >
+                      For Students
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
