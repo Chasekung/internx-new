@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon, DocumentPlusIcon, UserGroupIcon, UserCircleIcon, EnvelopeIcon, CalendarIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import ApplicationResponseView from '@/components/ApplicationResponseView';
-import { checkCompanyAuth, CompanyUser } from '@/lib/companyAuth';
+import { checkCompanyAuth, CompanyUser } from '../../src/lib/companyAuth';
 
 export default function CompanyDash() {
   const router = useRouter();
@@ -135,11 +135,24 @@ export default function CompanyDash() {
   const loadTeamMembers = async (companyId: string) => {
     try {
       setIsLoadingTeam(true);
+      
+      // Get the company name to filter team members
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .select('company_name')
+        .eq('id', companyId)
+        .single();
+      
+      if (companyError || !companyData) {
+        console.error('Error getting company data:', companyError);
+        setTeamMembers([]);
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('interns')
         .select('id, full_name, email, high_school, graduation_year, profile_photo_url, team')
-        .not('team', 'is', null)
-        .order('team', { ascending: true })
+        .eq('team', companyData.company_name)
         .order('full_name', { ascending: true });
 
       if (error) {
@@ -151,6 +164,57 @@ export default function CompanyDash() {
       console.error('Error loading team members:', error);
     } finally {
       setIsLoadingTeam(false);
+    }
+  };
+
+  const loadPostings = async (companyId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('internships')
+        .select('*')
+        .eq('company_id', companyId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading postings:', error);
+      } else {
+        setPostings(data || []);
+        
+        // Load application counts for each posting
+        if (data && data.length > 0) {
+          const counts: Record<string, number> = {};
+          const existingForms: Record<string, boolean> = {};
+          
+          for (const posting of data) {
+            // Get application count from the applications table
+            const { data: appData, error: appError } = await supabase
+              .from('applications')
+              .select('id')
+              .eq('internship_id', posting.id);
+            
+            if (!appError) {
+              counts[posting.id] = appData?.length || 0;
+            }
+            
+            // Check if form exists
+            const { data: formData, error: formError } = await supabase
+              .from('forms')
+              .select('id')
+              .eq('internship_id', posting.id)
+              .eq('company_id', companyId)
+              .single();
+            
+            if (!formError && formData) {
+              existingForms[posting.id] = true;
+            }
+          }
+          
+          setApplicationCounts(counts);
+          setExistingApplicationForms(existingForms);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading postings:', error);
     }
   };
 
@@ -170,7 +234,8 @@ export default function CompanyDash() {
 
         // User is properly authenticated as a company
         setCompanyUser(user);
-        setCompanyName(user.contactName);
+        setCompanyName(user.companyName);
+        setContactName(user.contactName);
         setCompanyId(user.id);
         
         // Update localStorage with proper company data
@@ -181,6 +246,13 @@ export default function CompanyDash() {
           companyName: user.companyName,
           contactName: user.contactName
         }));
+        
+        // Load all data after successful authentication
+        await Promise.all([
+          loadPostings(user.id),
+          loadApplications(user.id),
+          loadTeamMembers(user.id)
+        ]);
         
       } catch (error) {
         console.error('Auth check error:', error);
