@@ -165,7 +165,8 @@ const volunteerTestimonials = [
 
 function Home() {
   const [currentIndex, setCurrentIndex] = useState(2);
-  const [activeTab, setActiveTab] = useState('internships');
+  // Remove tab state and UI
+  // Remove: const [activeTab, setActiveTab] = useState('internships');
   const animatedWords = ["Internship", "Volunteering", "Research", "Summer Camp"];
   const [wordIndex, setWordIndex] = useState(0);
 
@@ -282,11 +283,12 @@ function Home() {
             </motion.div>
             <motion.h1
               variants={itemVariants}
-              className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl"
+              className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl leading-normal"
             >
-              <span className="block">Find</span>
               <span className="block">
-                <span className="gradient-text">Your Perfect </span>
+                Find <span className="text-blue-600">Your Perfect</span>
+              </span>
+              <span className="block">
                 <span style={{ display: 'inline-block', position: 'relative' }}>
                   <motion.span
                     key={animatedWords[wordIndex]}
@@ -316,7 +318,9 @@ function Home() {
                     />
                   </motion.span>
                 </span>
-                <span className="gradient-text"> Opportunity</span>
+              </span>
+              <span className="block gradient-text pb-2" style={{lineHeight: '1.2', paddingBottom: '0.5rem'}}>
+                Opportunity
               </span>
             </motion.h1>
             <motion.p
@@ -411,303 +415,143 @@ function Home() {
       {/* Tabs Section */}
       <div className="bg-white py-24 sm:py-32">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          <div className="sm:flex sm:justify-center mb-12">
-            <div className="relative flex rounded-full p-1 bg-gray-200 text-gray-500">
-              <button
-                onClick={() => setActiveTab('internships')}
-                className={`relative rounded-full py-2 px-6 text-sm font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeTab === 'internships' ? 'text-white' : 'hover:text-gray-700'}`}
-              >
-                {activeTab === 'internships' && (
-                  <motion.span
-                    layoutId="bubble"
-                    className="absolute inset-0 z-10 bg-blue-600 rounded-full"
-                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <span className="relative z-20">Internships</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('volunteering')}
-                className={`relative rounded-full py-2 px-6 text-sm font-medium transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${activeTab === 'volunteering' ? 'text-white' : 'hover:text-gray-700'}`}
-              >
-                {activeTab === 'volunteering' && (
-                  <motion.span
-                    layoutId="bubble"
-                    className="absolute inset-0 z-10 bg-blue-600 rounded-full"
-                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <span className="relative z-20">Volunteering</span>
-              </button>
+          {/* Internships content goes here (from Traditional Current Issues to reviews) */}
+          {/* Stats Section */}
+          <div className="bg-white py-16">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-8">
+                <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Traditional Current Issues</h2>
+                <h2 className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                  The High School Opportunity Gap
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {stats.map((stat) => (
+                  <div key={stat.name} className="text-center">
+                    <div className="text-4xl font-bold text-blue-600">{stat.value}</div>
+                    <div className="mt-2 text-lg font-semibold text-gray-900">{stat.name}</div>
+                    <div className="mt-1 text-sm text-gray-500">{stat.description}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {activeTab === 'internships' && (
-            <div>
-              {/* Existing internships content goes here (from Traditional Current Issues to reviews) */}
-              {/* Stats Section */}
-              <div className="bg-white py-16">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                  <div className="text-center mb-8">
-                    <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Traditional Current Issues</h2>
-                    <h2 className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                      The High School Opportunity Gap
-                    </h2>
-                  </div>
-                  <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                    {stats.map((stat) => (
-                      <div key={stat.name} className="text-center">
-                        <div className="text-4xl font-bold text-blue-600">{stat.value}</div>
-                        <div className="mt-2 text-lg font-semibold text-gray-900">{stat.name}</div>
-                        <div className="mt-1 text-sm text-gray-500">{stat.description}</div>
+          {/* Feature Section */}
+          <div className="py-12 bg-gray-50">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="lg:text-center">
+                <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Features</h2>
+                <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                  Revolutionizing High School Opportunities
+                </p>
+                <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                  Our AI-powered platform connects high school students with meaningful Opportunity opportunities while reducing the management burden on companies.
+                </p>
+              </div>
+
+              <div className="mt-10">
+                <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+                  {features.map((feature) => (
+                    <div key={feature.name} className="relative">
+                      <dt>
+                        <div className="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
+                          {feature.icon}
+                        </div>
+                        <p className="ml-16 text-lg leading-6 font-medium text-gray-900">{feature.name}</p>
+                      </dt>
+                      <dd className="mt-2 ml-16 text-base text-gray-500">
+                        {feature.description}
+                      </dd>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Testimonials Section */}
+          <div className="py-8 bg-white">
+            <div className="mx-auto max-[1275px] px-4 sm:px-6 lg:px-8">
+              <div className="text-center">
+                <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                  Based on <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">skill and mindset</span>, not experience
+                </h2>
+                <p className="mt-2 text-xl text-gray-500">
+                  As revealed by past users
+                </p>
+              </div>
+
+              <div className="mt-8 relative">
+                <div className="flex items-center justify-between">
+                  <button
+                    onClick={handlePrevious}
+                    className="absolute left-0 top-1/2 -translate-y-1/2 transform bg-white w-14 h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    aria-label="Previous reviews"
+                    disabled={currentIndex === 0}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 text-blue-600">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={handleNext}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 transform bg-white w-14 h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    aria-label="Next reviews"
+                    disabled={currentIndex >= testimonials.length - 3}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 text-blue-600">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div
+                  className="flex overflow-hidden"
+                  onWheel={handleWheel}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  onMouseLeave={handleMouseUp}
+                >
+                  <div
+                    className="flex transition-transform duration-300 ease-in-out"
+                    style={{ transform: `translateX(-${currentIndex * 400}px)` }}
+                  >
+                    {testimonials.map((testimonial, index) => (
+                      <div key={index} className="w-[400px] px-2">
+                        <div className="bg-white rounded-lg shadow-lg p-6 h-[280px] flex flex-col">
+                          <div className="flex items-center">
+                            <img
+                              className="h-12 w-12 rounded-full"
+                              src={testimonial.image}
+                              alt={testimonial.name}
+                            />
+                            <div className="ml-4">
+                              <h3 className="text-lg font-medium text-gray-900">{testimonial.name}</h3>
+                              <div className="flex items-center mt-1">
+                                {[...Array(testimonial.rating)].map((_, i) => (
+                                  <svg
+                                    key={i}
+                                    className="h-5 w-5 text-yellow-400"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                  >
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                  </svg>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <p className="mt-4 text-base text-gray-600 flex-grow">{testimonial.text}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-
-              {/* Feature Section */}
-              <div className="py-12 bg-gray-50">
-                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                  <div className="lg:text-center">
-                    <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Features</h2>
-                    <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                      Revolutionizing High School Opportunities
-                    </p>
-                    <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
-                      Our AI-powered platform connects high school students with meaningful Opportunity opportunities while reducing the management burden on companies.
-                    </p>
-                  </div>
-
-                  <div className="mt-10">
-                    <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
-                      {features.map((feature) => (
-                        <div key={feature.name} className="relative">
-                          <dt>
-                            <div className="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
-                              {feature.icon}
-                            </div>
-                            <p className="ml-16 text-lg leading-6 font-medium text-gray-900">{feature.name}</p>
-                          </dt>
-                          <dd className="mt-2 ml-16 text-base text-gray-500">
-                            {feature.description}
-                          </dd>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Testimonials Section */}
-              <div className="py-8 bg-white">
-                <div className="mx-auto max-[1275px] px-4 sm:px-6 lg:px-8">
-                  <div className="text-center">
-                    <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-                      Based on <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">skill and mindset</span>, not experience
-                    </h2>
-                    <p className="mt-2 text-xl text-gray-500">
-                      As revealed by past users
-                    </p>
-                  </div>
-
-                  <div className="mt-8 relative">
-                    <div className="flex items-center justify-between">
-                      <button
-                        onClick={handlePrevious}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 transform bg-white w-14 h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                        aria-label="Previous reviews"
-                        disabled={currentIndex === 0}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 text-blue-600">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={handleNext}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 transform bg-white w-14 h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                        aria-label="Next reviews"
-                        disabled={currentIndex >= testimonials.length - 3}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 text-blue-600">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    <div
-                      className="flex overflow-hidden"
-                      onWheel={handleWheel}
-                      onMouseDown={handleMouseDown}
-                      onMouseMove={handleMouseMove}
-                      onMouseUp={handleMouseUp}
-                      onMouseLeave={handleMouseUp}
-                    >
-                      <div
-                        className="flex transition-transform duration-300 ease-in-out"
-                        style={{ transform: `translateX(-${currentIndex * 400}px)` }}
-                      >
-                        {testimonials.map((testimonial, index) => (
-                          <div key={index} className="w-[400px] px-2">
-                            <div className="bg-white rounded-lg shadow-lg p-6 h-[280px] flex flex-col">
-                              <div className="flex items-center">
-                                <img
-                                  className="h-12 w-12 rounded-full"
-                                  src={testimonial.image}
-                                  alt={testimonial.name}
-                                />
-                                <div className="ml-4">
-                                  <h3 className="text-lg font-medium text-gray-900">{testimonial.name}</h3>
-                                  <div className="flex items-center mt-1">
-                                    {[...Array(testimonial.rating)].map((_, i) => (
-                                      <svg
-                                        key={i}
-                                        className="h-5 w-5 text-yellow-400"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                      >
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                      </svg>
-                                    ))}
-                                  </div>
-                                </div>
-                              </div>
-                              <p className="mt-4 text-base text-gray-600 flex-grow">{testimonial.text}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
-          )}
-
-          {activeTab === 'volunteering' && (
-            <div>
-              {/* Placeholder for Volunteering Content */}
-              <div className="bg-white py-24 sm:py-32">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                  <div className="text-center">
-                    <h2 className="text-base font-semibold leading-7 text-blue-600">TRADITIONAL CURRENT ISSUES</h2>
-                    <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">The High School Volunteering Gap</p>
-                  </div>
-                  <dl className="mt-20 grid grid-cols-1 gap-y-16 text-center lg:grid-cols-3">
-                    <div className="mx-auto flex max-w-xs flex-col gap-y-4">
-                      <dt className="text-base leading-7 text-gray-600">Placeholder Stat 1</dt>
-                      <dd className="order-first text-5xl font-semibold tracking-tight text-blue-600">0%</dd>
-                      <p className="text-sm text-gray-500">Description for placeholder stat 1.</p>
-                    </div>
-                    <div className="mx-auto flex max-w-xs flex-col gap-y-4">
-                      <dt className="text-base leading-7 text-gray-600">Placeholder Stat 2</dt>
-                      <dd className="order-first text-5xl font-semibold tracking-tight text-blue-600">0%</dd>
-                      <p className="text-sm text-gray-500">Description for placeholder stat 2.</p>
-                    </div>
-                    <div className="mx-auto flex max-w-xs flex-col gap-y-4">
-                      <dt className="text-base leading-7 text-gray-600">Placeholder Stat 3</dt>
-                      <dd className="order-first text-5xl font-semibold tracking-tight text-blue-600">0%</dd>
-                      <p className="text-sm text-gray-500">Description for placeholder stat 3.</p>
-                    </div>
-                  </dl>
-                </div>
-              </div>
-
-              <div id="features-volunteering" className="bg-white py-24 sm:py-32">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                  <div className="text-center">
-                    <h2 className="text-base font-semibold leading-7 text-blue-600">FEATURES</h2>
-                    <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Revolutionizing High School Volunteering</p>
-                    <p className="mt-6 text-lg leading-8 text-gray-600">
-                      Placeholder text for volunteering features.
-                    </p>
-                  </div>
-                  <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
-                    <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-                      {/* Placeholder features */}
-                    </dl>
-                  </div>
-                </div>
-              </div>
-
-              <section className="bg-white py-24 sm:py-32">
-                <div className="mx-auto max-w-7xl px-6 lg:px-8">
-                  <div className="text-center">
-                    <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Based on <span className="text-blue-600">passion and commitment,</span> not connections</h2>
-                    <p className="mt-4 text-lg leading-8 text-gray-600">As revealed by past volunteers</p>
-                  </div>
-                  <div className="relative mt-16 flex justify-center">
-                    <button
-                      onClick={handlePrevious}
-                      className="absolute left-0 top-1/2 -translate-y-1/2 transform bg-white w-14 h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                      aria-label="Previous reviews"
-                      disabled={currentIndex === 0}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 text-blue-600">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                      </svg>
-                    </button>
-                    <div
-                      className="overflow-hidden mx-auto"
-                      style={{ width: '1320px', maxWidth: '100%' }} // 3 * 400px + 2 * 40px gap
-                    >
-                      <div
-                        className="flex transition-transform duration-300 ease-in-out gap-[40px]"
-                        style={{ transform: `translateX(-${currentIndex * 440}px)` }}
-                      >
-                        {volunteerTestimonials.map((testimonial, index) => {
-                          const isCenter = index === currentIndex + 1;
-                          return (
-                            <div
-                              key={index}
-                              className={`w-[400px] ${isCenter ? 'scale-105 shadow-2xl border-2 border-blue-500 z-10' : 'scale-100 opacity-80'} transition-all duration-300 bg-white rounded-lg`}
-                              style={{ flexShrink: 0 }}
-                            >
-                              <div className="rounded-2xl bg-gray-50 p-10 text-base leading-6 shadow ring-1 ring-gray-900/5 h-[320px] flex flex-col">
-                                <div className="flex items-center">
-                                  <img
-                                    className="h-14 w-14 rounded-full"
-                                    src={testimonial.image}
-                                    alt={testimonial.name}
-                                  />
-                                  <div className="ml-4">
-                                    <h3 className="text-xl font-medium text-gray-900">{testimonial.name}</h3>
-                                    <div className="flex items-center mt-1">
-                                      {[...Array(testimonial.rating)].map((_, i) => (
-                                        <svg
-                                          key={i}
-                                          className="h-5 w-5 text-yellow-400"
-                                          fill="currentColor"
-                                          viewBox="0 0 20 20"
-                                        >
-                                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                        </svg>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                                <p className="mt-6 text-lg text-gray-600 flex-grow">{testimonial.text}</p>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleNext}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 transform bg-white w-14 h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                      aria-label="Next reviews"
-                      disabled={currentIndex >= volunteerTestimonials.length - 3}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 text-blue-600">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-              </section>
-            </div>
-          )}
+          </div>
         </div>
       </div>
 
