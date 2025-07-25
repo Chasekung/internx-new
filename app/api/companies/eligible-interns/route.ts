@@ -38,34 +38,24 @@ export async function GET(request: NextRequest) {
 
     const internshipIds = internships.map(i => i.id);
 
-    // Step 2: Get form responses that are submitted
-    const { data: submittedFormResponses, error: formError } = await supabase
-      .from('form_responses')
-      .select('id')
-      .eq('status', 'submitted')
-      .not('submitted_at', 'is', null);
 
-    if (formError) {
-      console.error('Error fetching form responses:', formError);
-      return NextResponse.json({ error: 'Failed to fetch form responses' }, { status: 500 });
-    }
 
-    console.log('API: Found submitted form responses:', submittedFormResponses?.length);
-
-    if (!submittedFormResponses || submittedFormResponses.length === 0) {
-      console.log('API: No submitted form responses found');
-      return NextResponse.json({ interns: [] });
-    }
-
-    const submittedFormResponseIds = submittedFormResponses.map(fr => fr.id);
-
-    // Step 3: Get applications that have submitted form responses for this company's internships
+    // Step 3: Get applications for this company's internships that have submitted form responses
     const { data: applications, error: appError } = await supabase
       .from('applications')
-      .select('intern_id')
+      .select(`
+        intern_id,
+        form_response_id,
+        form_responses!inner(
+          id,
+          status,
+          submitted_at
+        )
+      `)
       .in('internship_id', internshipIds)
       .not('form_response_id', 'is', null)
-      .in('form_response_id', submittedFormResponseIds);
+      .eq('form_responses.status', 'submitted')
+      .not('form_responses.submitted_at', 'is', null);
 
     if (appError) {
       console.error('Error fetching applications:', appError);

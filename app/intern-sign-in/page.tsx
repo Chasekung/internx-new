@@ -18,8 +18,49 @@ export default function InternSignIn() {
   const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    const checkAuthAndRedirect = async () => {
+      try {
+        // Check if user is already authenticated
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Check if user is an intern
+          const { data: internData, error: internError } = await supabase
+            .from('interns')
+            .select('id')
+            .eq('id', user.id)
+            .single();
+          
+          if (!internError && internData) {
+            // User is authenticated and is an intern - redirect to dashboard
+            router.replace('/intern-dash');
+            return;
+          }
+          
+          // Check if user is a company
+          const { data: companyData, error: companyError } = await supabase
+            .from('companies')
+            .select('id')
+            .eq('id', user.id)
+            .single();
+          
+          if (!companyError && companyData) {
+            // User is authenticated and is a company - redirect to company dashboard
+            router.replace('/company-dash');
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
+    };
+    
+    checkAuthAndRedirect();
+  }, [router]);
+
+  useEffect(() => {
     if (error === 'COMPANY_USER') {
-      // Redirect after 2 seconds
+      // Redirect after 5 seconds
       redirectTimeout.current = setTimeout(() => {
         router.push('/company-sign-in');
       }, 5000);

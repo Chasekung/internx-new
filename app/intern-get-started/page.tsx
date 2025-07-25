@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function InternGetStarted() {
   const router = useRouter();
+  const supabase = createClientComponentClient();
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
@@ -21,6 +23,47 @@ export default function InternGetStarted() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    const checkAuthAndRedirect = async () => {
+      try {
+        // Check if user is already authenticated
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Check if user is an intern
+          const { data: internData, error: internError } = await supabase
+            .from('interns')
+            .select('id')
+            .eq('id', user.id)
+            .single();
+          
+          if (!internError && internData) {
+            // User is authenticated and is an intern - redirect to dashboard
+            router.replace('/intern-dash');
+            return;
+          }
+          
+          // Check if user is a company
+          const { data: companyData, error: companyError } = await supabase
+            .from('companies')
+            .select('id')
+            .eq('id', user.id)
+            .single();
+          
+          if (!companyError && companyData) {
+            // User is authenticated and is a company - redirect to company dashboard
+            router.replace('/company-dash');
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
+    };
+    
+    checkAuthAndRedirect();
+  }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

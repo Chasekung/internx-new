@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon, DocumentPlusIcon, UserGroupIcon, UserCircleIcon, EnvelopeIcon, CalendarIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import ApplicationResponseView from '@/components/ApplicationResponseView';
-import { checkCompanyAuth, CompanyUser } from '../../src/lib/companyAuth';
+import { checkCompanyAuth, CompanyUser } from '@/lib/companyAuth';
 
 export default function CompanyDash() {
   const router = useRouter();
@@ -132,52 +132,6 @@ export default function CompanyDash() {
     }
   };
 
-  const loadTeamMembers = async (companyId: string) => {
-    try {
-      setIsLoadingTeam(true);
-      
-      // Find interns who have applied to this company's internships AND have been assigned to a team
-      const { data, error } = await supabase
-        .from('interns')
-        .select(`
-          id, 
-          full_name, 
-          email, 
-          high_school, 
-          graduation_year, 
-          profile_photo_url, 
-          team,
-          applications!inner(
-            internship_id,
-            internships!inner(
-              company_id
-            )
-          )
-        `)
-        .eq('applications.internships.company_id', companyId)
-        .not('team', 'is', null)
-        .order('team', { ascending: true })
-        .order('full_name', { ascending: true });
-
-      if (error) {
-        console.error('Error loading team members:', error);
-        setTeamMembers([]);
-      } else {
-        // Remove duplicates (same intern might have multiple applications)
-        const uniqueInterns = data?.filter((intern, index, array) => 
-          array.findIndex(i => i.id === intern.id) === index
-        ) || [];
-        
-        setTeamMembers(uniqueInterns);
-      }
-    } catch (error) {
-      console.error('Error loading team members:', error);
-      setTeamMembers([]);
-    } finally {
-      setIsLoadingTeam(false);
-    }
-  };
-
   const loadPostings = async (companyId: string) => {
     try {
       const { data, error } = await supabase
@@ -229,6 +183,52 @@ export default function CompanyDash() {
     }
   };
 
+  const loadTeamMembers = async (companyId: string) => {
+    try {
+      setIsLoadingTeam(true);
+      
+      // Find interns who have applied to this company's internships AND have been assigned to a team
+      const { data, error } = await supabase
+        .from('interns')
+        .select(`
+          id, 
+          full_name, 
+          email, 
+          high_school, 
+          graduation_year, 
+          profile_photo_url, 
+          team,
+          applications!inner(
+            internship_id,
+            internships!inner(
+              company_id
+            )
+          )
+        `)
+        .eq('applications.internships.company_id', companyId)
+        .not('team', 'is', null)
+        .order('team', { ascending: true })
+        .order('full_name', { ascending: true });
+
+      if (error) {
+        console.error('Error loading team members:', error);
+        setTeamMembers([]);
+      } else {
+        // Remove duplicates (same intern might have multiple applications)
+        const uniqueInterns = data?.filter((intern, index, array) => 
+          array.findIndex(i => i.id === intern.id) === index
+        ) || [];
+        
+        setTeamMembers(uniqueInterns);
+      }
+    } catch (error) {
+      console.error('Error loading team members:', error);
+      setTeamMembers([]);
+    } finally {
+      setIsLoadingTeam(false);
+    }
+  };
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -245,8 +245,7 @@ export default function CompanyDash() {
 
         // User is properly authenticated as a company
         setCompanyUser(user);
-        setCompanyName(user.companyName);
-        setContactName(user.contactName);
+        setCompanyName(user.contactName);
         setCompanyId(user.id);
         
         // Update localStorage with proper company data

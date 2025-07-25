@@ -6,7 +6,7 @@ import { useScrollPosition } from '@/hooks/useScrollPosition';
 import { FiChevronDown } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import supabase from '@/lib/supabaseClient';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { checkCompanyAuth } from '@/lib/companyAuth';
 
@@ -21,6 +21,7 @@ export default function CompanyNavbar() {
   const router = useRouter();
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const supabase = createClientComponentClient();
 
   useEffect(() => {
     // Check if company user is signed in
@@ -30,9 +31,12 @@ export default function CompanyNavbar() {
         setIsSignedIn(isCompany);
         if (isCompany && user) {
           setCompanyId(user.id);
+        } else {
+          setCompanyId(null);
         }
       } catch (e) {
         setIsSignedIn(false);
+        setCompanyId(null);
       }
     };
     
@@ -47,20 +51,52 @@ export default function CompanyNavbar() {
     };
   }, []);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setCompanyId(user?.id || null);
-    };
-    fetchUser();
-  }, []);
-
-  const handleSignOut = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setIsSignedIn(false);
-    window.dispatchEvent(new Event('authStateChange'));
-    router.push('/company-sign-in');
+  const handleSignOut = async () => {
+    try {
+      console.log('🔄 Starting sign out process...');
+      
+      // Check current auth state before sign out
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      console.log('👤 Current user before sign out:', currentUser?.id);
+      
+      // Sign out from Supabase Auth
+      const { error: signOutError } = await supabase.auth.signOut();
+      
+      if (signOutError) {
+        console.error('❌ Supabase sign out error:', signOutError);
+        throw signOutError;
+      }
+      
+      console.log('✅ Supabase sign out successful');
+      
+      // Clear localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      console.log('🗑️ localStorage cleared');
+      
+      // Update state
+      setIsSignedIn(false);
+      setCompanyId(null);
+      console.log('🔄 Component state updated');
+      
+      // Dispatch event to notify other components
+      window.dispatchEvent(new Event('authStateChange'));
+      console.log('📢 Auth state change event dispatched');
+      
+      // Redirect to sign in page
+      router.push('/company-sign-in');
+      console.log('🔄 Redirecting to sign in page');
+      
+    } catch (error) {
+      console.error('❌ Error signing out:', error);
+      // Still clear localStorage and redirect even if Supabase signout fails
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      setIsSignedIn(false);
+      setCompanyId(null);
+      window.dispatchEvent(new Event('authStateChange'));
+      router.push('/company-sign-in');
+    }
   };
 
   useEffect(() => {
