@@ -96,16 +96,45 @@ export default function CompanySignIn() {
   }
 
   useEffect(() => {
-    const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
-    if (userStr) {
+    const checkAuthAndRedirect = async () => {
       try {
-        const user = JSON.parse(userStr);
-        if (user.role === 'COMPANY') {
-          router.replace('/company-dash');
-          return;
+        // Check if user is already authenticated
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user) {
+          // Check if user is a company
+          const { data: companyData, error: companyError } = await supabase
+            .from('companies')
+            .select('id')
+            .eq('id', user.id)
+            .single();
+          
+          if (!companyError && companyData) {
+            // User is authenticated and is a company - redirect to dashboard
+            router.replace('/company-dash');
+            return;
+          }
+          
+          // Check if user is an intern
+          const { data: internData, error: internError } = await supabase
+            .from('interns')
+            .select('id')
+            .eq('id', user.id)
+            .single();
+          
+          if (!internError && internData) {
+            // User is authenticated and is an intern - redirect to intern dashboard
+            router.replace('/intern-dash');
+            return;
+          }
         }
-      } catch {}
-    }
+      } catch (error) {
+        console.error('Auth check error:', error);
+      }
+    };
+    
+    checkAuthAndRedirect();
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN') {
         console.log('Company user signed in:', session?.user);
@@ -116,7 +145,7 @@ export default function CompanySignIn() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
