@@ -136,32 +136,43 @@ export default function CompanyDash() {
     try {
       setIsLoadingTeam(true);
       
-      // Get the company name to filter team members
-      const { data: companyData, error: companyError } = await supabase
-        .from('companies')
-        .select('company_name')
-        .eq('id', companyId)
-        .single();
-      
-      if (companyError || !companyData) {
-        console.error('Error getting company data:', companyError);
-        setTeamMembers([]);
-        return;
-      }
-      
+      // Find interns who have applied to this company's internships AND have been assigned to a team
       const { data, error } = await supabase
         .from('interns')
-        .select('id, full_name, email, high_school, graduation_year, profile_photo_url, team')
-        .eq('team', companyData.company_name)
+        .select(`
+          id, 
+          full_name, 
+          email, 
+          high_school, 
+          graduation_year, 
+          profile_photo_url, 
+          team,
+          applications!inner(
+            internship_id,
+            internships!inner(
+              company_id
+            )
+          )
+        `)
+        .eq('applications.internships.company_id', companyId)
+        .not('team', 'is', null)
+        .order('team', { ascending: true })
         .order('full_name', { ascending: true });
 
       if (error) {
         console.error('Error loading team members:', error);
+        setTeamMembers([]);
       } else {
-        setTeamMembers(data || []);
+        // Remove duplicates (same intern might have multiple applications)
+        const uniqueInterns = data?.filter((intern, index, array) => 
+          array.findIndex(i => i.id === intern.id) === index
+        ) || [];
+        
+        setTeamMembers(uniqueInterns);
       }
     } catch (error) {
       console.error('Error loading team members:', error);
+      setTeamMembers([]);
     } finally {
       setIsLoadingTeam(false);
     }
