@@ -97,8 +97,7 @@ export async function POST(request: NextRequest) {
         .insert({
           title: `${internship.title} Application Form`,
           description: `Application form for ${internship.position} position`,
-          internship_id: internshipId,
-          is_template: true
+          internship_id: internshipId
         })
         .select()
         .single();
