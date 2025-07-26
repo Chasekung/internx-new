@@ -14,6 +14,7 @@ export default function CompanySignIn() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
+  const authChecked = useRef(false);
 
   useEffect(() => {
     if (error === 'INTERN_USER') {
@@ -96,21 +97,25 @@ export default function CompanySignIn() {
   }
 
   useEffect(() => {
+    if (authChecked.current) return;
+    
     const checkAuthAndRedirect = async () => {
       try {
-        // Check if user is already authenticated
-        const { data: { user } } = await supabase.auth.getUser();
+        authChecked.current = true;
         
-        if (user) {
+        // Check if user has an active session
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session && session.user) {
           // Check if user is a company
           const { data: companyData, error: companyError } = await supabase
             .from('companies')
             .select('id')
-            .eq('id', user.id)
+            .eq('id', session.user.id)
             .single();
           
           if (!companyError && companyData) {
-            // User is authenticated and is a company - redirect to dashboard
+            // User has active session and is a company - redirect to dashboard
             router.replace('/company-dash');
             return;
           }
@@ -119,17 +124,18 @@ export default function CompanySignIn() {
           const { data: internData, error: internError } = await supabase
             .from('interns')
             .select('id')
-            .eq('id', user.id)
+            .eq('id', session.user.id)
             .single();
           
           if (!internError && internData) {
-            // User is authenticated and is an intern - redirect to intern dashboard
+            // User has active session and is an intern - redirect to intern dashboard
             router.replace('/intern-dash');
             return;
           }
         }
       } catch (error) {
         console.error('Auth check error:', error);
+        authChecked.current = false; // Reset on error so we can try again
       }
     };
     
@@ -145,7 +151,7 @@ export default function CompanySignIn() {
     return () => {
       subscription.unsubscribe();
     };
-  }, [router]);
+  }, []); // Remove router from dependencies
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
