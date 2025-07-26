@@ -59,8 +59,7 @@ export async function POST(request: NextRequest) {
       .select(`
         id,
         title,
-        position,
-        form_template_id
+        position
       `)
       .eq('id', internshipId)
       .single();
@@ -72,23 +71,16 @@ export async function POST(request: NextRequest) {
       }, { status: 500 });
     }
 
-    // Create or get the form template
+    // Look for existing form template for this internship
+    const { data: existingForm, error: formError } = await supabase
+      .from('forms')
+      .select('*')
+      .eq('internship_id', internshipId)
+      .maybeSingle();
+
     let formTemplate;
-    if (internship.form_template_id) {
+    if (existingForm && !formError) {
       // Use existing form template
-      const { data: existingForm, error: formError } = await supabase
-        .from('forms')
-        .select('*')
-        .eq('id', internship.form_template_id)
-        .single();
-
-      if (formError) {
-        console.error('API: Error fetching form template:', formError);
-        return NextResponse.json({ 
-          error: 'Failed to fetch form template' 
-        }, { status: 500 });
-      }
-
       formTemplate = existingForm;
     } else {
       // Create a new form template for this internship
