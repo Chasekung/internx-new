@@ -227,6 +227,137 @@ body::before {
   left: 40%;
 }
 
+/* Mobile-friendly utilities */
+@layer utilities {
+  .mobile-container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  .mobile-text {
+    @apply text-sm sm:text-base lg:text-lg;
+  }
+  
+  .mobile-heading {
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl;
+  }
+  
+  .mobile-padding {
+    @apply p-4 sm:p-6 lg:p-8;
+  }
+  
+  .mobile-margin {
+    @apply m-4 sm:m-6 lg:m-8;
+  }
+  
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6;
+  }
+  
+  .mobile-flex {
+    @apply flex flex-col sm:flex-row;
+  }
+  
+  .mobile-card {
+    @apply bg-white/90 backdrop-blur-sm rounded-lg shadow-lg border border-gray-200/50 p-4 sm:p-6;
+  }
+  
+  .mobile-button {
+    @apply w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base font-medium rounded-md transition-all duration-200;
+  }
+  
+  .mobile-input {
+    @apply w-full px-3 py-2 sm:px-4 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  }
+  
+  .mobile-nav {
+    @apply fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200;
+  }
+  
+  .mobile-menu {
+    @apply absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg;
+  }
+  
+  .mobile-menu-item {
+    @apply block w-full text-left px-4 py-3 text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors;
+  }
+  
+  .mobile-safe-area {
+    @apply pt-20 pb-4;
+  }
+  
+  .mobile-responsive-image {
+    @apply w-full h-auto object-cover rounded-lg;
+  }
+  
+  .mobile-responsive-text {
+    @apply text-sm sm:text-base lg:text-lg leading-relaxed;
+  }
+  
+  .mobile-responsive-spacing {
+    @apply space-y-4 sm:space-y-6 lg:space-y-8;
+  }
+  
+  .mobile-responsive-gap {
+    @apply gap-4 sm:gap-6 lg:gap-8;
+  }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  .gradient-orb {
+    opacity: 0.2;
+  }
+  
+  .gradient-blob {
+    opacity: 0.3;
+  }
+  
+  /* Improve touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better mobile scrolling */
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Mobile-friendly shadows */
+  .mobile-shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Mobile-friendly borders */
+  .mobile-border {
+    border-radius: 12px;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .gradient-orb {
+    opacity: 0.3;
+  }
+  
+  .gradient-blob {
+    opacity: 0.4;
+  }
+}
+
 @layer base {
   :root {
     --background: transparent;

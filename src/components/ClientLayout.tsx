@@ -34,96 +34,96 @@ function ClientLayout({
       <div className="relative z-10">
         {isCompanyPage ? <CompanyNavbar /> : <UserNavbar />}
         
-        <main>
+        <main className="mobile-safe-area">
           {children}
         </main>
         
         <footer className="glass-effect mt-auto">
-          <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div>
+          <div className="mobile-container py-8 sm:py-12">
+            <div className="mobile-grid md:grid-cols-4">
+              <div className="mobile-responsive-spacing">
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">About</h3>
-                <ul className="mt-4 space-y-4">
+                <ul className="mobile-responsive-spacing">
                   <li>
-                    <Link href="/about/step-up" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/about/step-up" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       About Us
                     </Link>
                   </li>
                   <li>
-                    <Link href="/about/contact" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/about/contact" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Contact
                     </Link>
                   </li>
                   <li>
-                    <Link href="/blog" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/blog" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Blog
                     </Link>
                   </li>
                 </ul>
               </div>
-              <div>
+              <div className="mobile-responsive-spacing">
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">For Students</h3>
-                <ul className="mt-4 space-y-4">
+                <ul className="mobile-responsive-spacing">
                   <li>
-                    <Link href="/intern-get-started" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/intern-get-started" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Create Profile
                     </Link>
                   </li>
                   <li>
-                    <Link href="/opportunities" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/opportunities" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Browse Opportunities
                     </Link>
                   </li>
                   <li>
-                    <Link href="/resources" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/resources" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Resources
                     </Link>
                   </li>
                 </ul>
               </div>
-              <div>
+              <div className="mobile-responsive-spacing">
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">For Companies</h3>
-                <ul className="mt-4 space-y-4">
+                <ul className="mobile-responsive-spacing">
                   <li>
-                    <Link href="/company" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/company" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Register Company
                     </Link>
                   </li>
                   <li>
-                    <Link href="/company/b2b-pricing" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/company/b2b-pricing" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Pricing
                     </Link>
                   </li>
                   <li>
-                    <Link href="/company" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/company" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Post an Internship
                     </Link>
                   </li>
                 </ul>
               </div>
-              <div>
+              <div className="mobile-responsive-spacing">
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Legal</h3>
-                <ul className="mt-4 space-y-4">
+                <ul className="mobile-responsive-spacing">
                   <li>
-                    <Link href="/privacy" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/privacy" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Privacy Policy
                     </Link>
                   </li>
                   <li>
-                    <Link href="/terms" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/terms" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Terms of Service
                     </Link>
                   </li>
                   <li>
-                    <Link href="/cookies" className="text-base text-gray-500 hover:text-gray-900">
+                    <Link href="/cookies" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Cookie Policy
                     </Link>
                   </li>
                 </ul>
               </div>
             </div>
-            <div className="mt-8 border-t border-gray-200 pt-8">
-              <p className="text-base text-gray-400 text-center">
+            <div className="mt-6 sm:mt-8 border-t border-gray-200 pt-6 sm:pt-8">
+              <p className="mobile-text text-gray-400 text-center">
                 © {new Date().getFullYear()} Step Up. All rights reserved.
               </p>
             </div>

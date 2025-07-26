@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useScrollPosition } from '@/hooks/useScrollPosition';
-import { FiChevronDown } from 'react-icons/fi';
+import { FiChevronDown, FiMenu, FiX } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
@@ -15,9 +15,11 @@ export default function CompanyNavbar() {
   const [isAboutUsOpen, setIsAboutUsOpen] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isSwitchDropdownOpen, setIsSwitchDropdownOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const aboutUsRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
   const switchDropdownRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -111,6 +113,9 @@ export default function CompanyNavbar() {
       if (switchDropdownRef.current && !switchDropdownRef.current.contains(event.target as Node)) {
         setIsSwitchDropdownOpen(false);
       }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -119,6 +124,11 @@ export default function CompanyNavbar() {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [router]);
 
   return (
     <nav className={`glass-effect fixed top-0 left-0 right-0 z-50 transition-transform duration-300 ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
@@ -133,14 +143,16 @@ export default function CompanyNavbar() {
                   width={360} 
                   height={90} 
                   priority
-                  className="w-auto h-[90px] hover:opacity-90 transition-opacity"
-                  style={{ width: 'auto', height: '90px' }}
-                  sizes="360px"
+                  className="w-auto h-[60px] lg:h-[90px] hover:opacity-90 transition-opacity"
+                  style={{ width: 'auto', height: '60px' }}
+                  sizes="(max-width: 1024px) 240px, 360px"
                 />
               </Link>
             </div>
           </div>
-          <div className="hidden sm:flex sm:items-center sm:space-x-8">
+          
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex lg:items-center lg:space-x-8">
             {!isSignedIn && (
               <Link
                 href="/company-reviews"
@@ -239,7 +251,9 @@ export default function CompanyNavbar() {
               </div>
             )}
           </div>
-          <div className="hidden sm:ml-6 sm:flex sm:items-center">
+          
+          {/* Desktop Right Side */}
+          <div className="hidden lg:ml-6 lg:flex lg:items-center">
             {isSignedIn ? (
               <div className="relative" ref={settingsRef}>
                 <button
@@ -307,8 +321,146 @@ export default function CompanyNavbar() {
               )}
             </div>
           </div>
+
+          {/* Mobile menu button */}
+          <div className="lg:hidden flex items-center">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-gray-500 hover:text-gray-700 p-2 rounded-md"
+              aria-label="Toggle mobile menu"
+            >
+              {isMobileMenuOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div 
+          ref={mobileMenuRef}
+          className="lg:hidden absolute top-20 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-lg"
+        >
+          <div className="px-4 py-6 space-y-4">
+            {/* Mobile Navigation Links */}
+            {!isSignedIn && (
+              <Link
+                href="/company-reviews"
+                className="block text-gray-700 hover:text-gray-900 text-lg font-medium py-2"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Reviews
+              </Link>
+            )}
+            <Link
+              href="/company/b2b-pricing"
+              className="block text-gray-700 hover:text-gray-900 text-lg font-medium py-2"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Pricing
+            </Link>
+            {isSignedIn && (
+              <>
+                <Link
+                  href="/company-dash"
+                  className="block text-gray-700 hover:text-gray-900 text-lg font-medium py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/company/search"
+                  className="block text-gray-700 hover:text-gray-900 text-lg font-medium py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Find Interns
+                </Link>
+                <Link
+                  href={isSignedIn && companyId ? `/company/opportunities/${companyId}` : "/company/opportunities"}
+                  className="block text-gray-700 hover:text-gray-900 text-lg font-medium py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Manage Internships
+                </Link>
+                <Link
+                  href={isSignedIn && companyId ? `/company/messaging/${companyId}` : "/company/messaging"}
+                  className="block text-gray-700 hover:text-gray-900 text-lg font-medium py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Messaging
+                </Link>
+              </>
+            )}
+            {!isSignedIn && (
+              <div className="space-y-2">
+                <div className="text-gray-700 text-lg font-medium py-2">About Us</div>
+                <div className="pl-4 space-y-2">
+                  <Link
+                    href="/about/step-up"
+                    className="block text-gray-600 hover:text-gray-900 py-1"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    About Step Up
+                  </Link>
+                  <Link
+                    href="/about/careers"
+                    className="block text-gray-600 hover:text-gray-900 py-1"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Careers
+                  </Link>
+                  <Link
+                    href="/about/contact"
+                    className="block text-gray-600 hover:text-gray-900 py-1"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Contact Us
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {/* Mobile Auth Section */}
+            <div className="pt-4 border-t border-gray-200">
+              {isSignedIn ? (
+                <div className="space-y-3">
+                  <button
+                    onClick={() => { setIsMobileMenuOpen(false); router.push('/company/edit-page'); }}
+                    className="block w-full text-left text-gray-700 hover:text-gray-900 text-lg font-medium py-2"
+                  >
+                    Edit Organization Page
+                  </button>
+                  <button
+                    onClick={() => { setIsMobileMenuOpen(false); handleSignOut(); }}
+                    className="block w-full text-left text-gray-700 hover:text-gray-900 text-lg font-medium py-2"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  href="/company-sign-in"
+                  className="block text-gray-700 hover:text-gray-900 text-lg font-medium py-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign in
+                </Link>
+              )}
+              
+              {/* Mobile Switch Button */}
+              <div className="pt-4">
+                <Link
+                  href="/"
+                  className="block w-full bg-blue-600 text-white px-4 py-3 rounded-md text-lg font-medium text-center hover:bg-blue-700 transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Switch to Student View
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 } 
