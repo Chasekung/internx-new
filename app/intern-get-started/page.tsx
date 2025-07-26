@@ -25,51 +25,24 @@ export default function InternGetStarted() {
   const [isSuccess, setIsSuccess] = useState(false);
   const authChecked = useRef(false);
 
+  // Clear any expired tokens on page load
   useEffect(() => {
-    if (authChecked.current) return;
-    
-    const checkAuthAndRedirect = async () => {
+    const clearExpiredTokens = async () => {
       try {
-        authChecked.current = true;
-        
-        // Check if user has an active session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session && session.user) {
-          // Check if user is an intern
-          const { data: internData, error: internError } = await supabase
-            .from('interns')
-            .select('id')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (!internError && internData) {
-            // User has active session and is an intern - redirect to dashboard
-            router.replace('/intern-dash');
-            return;
-          }
-          
-          // Check if user is a company
-          const { data: companyData, error: companyError } = await supabase
-            .from('companies')
-            .select('id')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (!companyError && companyData) {
-            // User has active session and is a company - redirect to company dashboard
-            router.replace('/company-dash');
-            return;
-          }
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (user && error) {
+          // If we get an error, the token is likely expired
+          console.log('Clearing expired token');
+          await supabase.auth.signOut();
         }
       } catch (error) {
-        console.error('Auth check error:', error);
-        authChecked.current = false; // Reset on error so we can try again
+        console.log('Clearing invalid session');
+        await supabase.auth.signOut();
       }
     };
     
-    checkAuthAndRedirect();
-  }, []); // Remove router from dependencies
+    clearExpiredTokens();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
