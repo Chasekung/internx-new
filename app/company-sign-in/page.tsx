@@ -96,62 +96,38 @@ export default function CompanySignIn() {
     }
   }
 
+  // Clear any expired tokens on page load
   useEffect(() => {
-    if (authChecked.current) return;
-    
-    const checkAuthAndRedirect = async () => {
+    const clearExpiredTokens = async () => {
       try {
-        authChecked.current = true;
-        
-        // Check if user has an active session
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session && session.user) {
-          // Check if user is a company
-          const { data: companyData, error: companyError } = await supabase
-            .from('companies')
-            .select('id')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (!companyError && companyData) {
-            // User has active session and is a company - redirect to dashboard
-            router.replace('/company-dash');
-            return;
-          }
-          
-          // Check if user is an intern
-          const { data: internData, error: internError } = await supabase
-            .from('interns')
-            .select('id')
-            .eq('id', session.user.id)
-            .single();
-          
-          if (!internError && internData) {
-            // User has active session and is an intern - redirect to intern dashboard
-            router.replace('/intern-dash');
-            return;
-          }
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (user && error) {
+          // If we get an error, the token is likely expired
+          console.log('Clearing expired token');
+          await supabase.auth.signOut();
         }
       } catch (error) {
-        console.error('Auth check error:', error);
-        authChecked.current = false; // Reset on error so we can try again
+        console.log('Clearing invalid session');
+        await supabase.auth.signOut();
       }
     };
     
-    checkAuthAndRedirect();
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') {
-        console.log('Company user signed in:', session?.user);
-      } else if (event === 'SIGNED_OUT') {
-        console.log('Company user signed out');
-      }
-    });
+    clearExpiredTokens();
+  }, []);
+  
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN') {
+      console.log('Company user signed in:', session?.user);
+    } else if (event === 'SIGNED_OUT') {
+      console.log('Company user signed out');
+    }
+  });
+  
+  useEffect(() => {
     return () => {
       subscription.unsubscribe();
     };
-  }, []); // Remove router from dependencies
+  }, [subscription]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
