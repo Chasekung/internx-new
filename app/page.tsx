@@ -235,7 +235,7 @@ function Home() {
   return (
     <div className="relative">
       {/* Hero Section */}
-      <div className="relative pt-32 pb-64 sm:pt-36 sm:pb-72 overflow-hidden">
+      <div className="relative pt-12 sm:pt-20 pb-32 sm:pb-64 overflow-hidden">
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden z-0">
           <motion.div
@@ -270,12 +270,12 @@ function Home() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10"
+          className="mobile-container relative z-10"
         >
           <div className="text-center">
             <motion.div variants={itemVariants} className="inline-block">
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-blue-100 text-blue-800 mb-8">
-                <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <span className="inline-flex items-center px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium bg-blue-100 text-blue-800 mb-6 sm:mb-8">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 Powered by AI
@@ -283,7 +283,7 @@ function Home() {
             </motion.div>
             <motion.h1
               variants={itemVariants}
-              className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl leading-normal"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight"
             >
               <span className="block">
                 Find <span className="text-blue-600">Your Perfect</span>
@@ -325,29 +325,31 @@ function Home() {
             </motion.h1>
             <motion.p
               variants={itemVariants}
-              className="mx-auto mt-3 max-w-md text-base text-black sm:text-lg md:mt-5 md:max-w-3xl md:text-xl"
+              className="mx-auto mt-3 max-w-md mobile-text text-black md:mt-5 md:max-w-3xl"
             >
               Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship.
             </motion.p>
             <motion.div
               variants={itemVariants}
-              className="mx-auto mt-8 max-w-md sm:flex sm:justify-center md:mt-12"
+              className="mx-auto mt-6 sm:mt-8 max-w-md sm:flex sm:justify-center md:mt-12"
             >
-              <div className="rounded-md shadow">
-                <Link
-                  href="/intern-get-started"
-                  className="flex w-full items-center justify-center rounded-md border border-transparent bg-blue-600 px-8 py-3 text-base font-medium text-white hover:bg-blue-700 md:px-10 md:py-4 md:text-lg transition-all duration-300 hover:scale-105"
-                >
-                  Get Started
-                </Link>
-              </div>
-              <div className="mt-3 sm:mt-0 sm:ml-3">
-                <Link
-                  href="#features"
-                  className="flex w-full items-center justify-center rounded-md border border-transparent bg-blue-100 px-8 py-3 text-base font-medium text-blue-700 hover:bg-blue-200 md:px-10 md:py-4 md:text-lg transition-all duration-300 hover:scale-105"
-                >
-                  Learn More
-                </Link>
+              <div className="mobile-flex gap-3 sm:gap-4">
+                <div className="rounded-md shadow">
+                  <Link
+                    href="/intern-get-started"
+                    className="mobile-button bg-blue-600 text-white hover:bg-blue-700 transition-all duration-300 hover:scale-105"
+                  >
+                    Get Started
+                  </Link>
+                </div>
+                <div className="mt-3 sm:mt-0">
+                  <Link
+                    href="#features"
+                    className="mobile-button bg-blue-100 text-blue-700 hover:bg-blue-200 transition-all duration-300 hover:scale-105"
+                  >
+                    Learn More
+                  </Link>
+                </div>
               </div>
             </motion.div>
           </div>
@@ -355,12 +357,12 @@ function Home() {
           {/* Feature highlights */}
           <motion.div
             variants={containerVariants}
-            className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-3"
+            className="mt-12 sm:mt-16 mobile-grid sm:grid-cols-3"
           >
             <motion.div
               variants={itemVariants}
               whileHover={{ scale: 1.05 }}
-              className="relative p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
+              className="mobile-card"
             >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -377,7 +379,7 @@ function Home() {
             <motion.div
               variants={itemVariants}
               whileHover={{ scale: 1.05 }}
-              className="relative p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
+              className="mobile-card"
             >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -394,7 +396,7 @@ function Home() {
             <motion.div
               variants={itemVariants}
               whileHover={{ scale: 1.05 }}
-              className="relative p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300"
+              className="mobile-card"
             >
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -413,23 +415,22 @@ function Home() {
       </div>
 
       {/* Tabs Section */}
-      <div className="bg-white py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl px-6 lg:px-8">
-          {/* Internships content goes here (from Traditional Current Issues to reviews) */}
+      <div className="bg-white py-12 sm:py-24">
+        <div className="mobile-container">
           {/* Stats Section */}
-          <div className="bg-white py-16">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="bg-white py-12 sm:py-16">
+            <div className="mobile-container">
               <div className="text-center mb-8">
                 <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Traditional Current Issues</h2>
-                <h2 className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                <h2 className="mt-2 mobile-heading font-extrabold tracking-tight text-gray-900">
                   The High School Opportunity Gap
                 </h2>
               </div>
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="mobile-grid sm:grid-cols-2 lg:grid-cols-3">
                 {stats.map((stat) => (
                   <div key={stat.name} className="text-center">
-                    <div className="text-4xl font-bold text-blue-600">{stat.value}</div>
-                    <div className="mt-2 text-lg font-semibold text-gray-900">{stat.name}</div>
+                    <div className="text-3xl sm:text-4xl font-bold text-blue-600">{stat.value}</div>
+                    <div className="mt-2 text-base sm:text-lg font-semibold text-gray-900">{stat.name}</div>
                     <div className="mt-1 text-sm text-gray-500">{stat.description}</div>
                   </div>
                 ))}
@@ -438,29 +439,29 @@ function Home() {
           </div>
 
           {/* Feature Section */}
-          <div className="py-12 bg-gray-50">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="py-8 sm:py-12 bg-gray-50">
+            <div className="mobile-container">
               <div className="lg:text-center">
                 <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Features</h2>
-                <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                <p className="mt-2 mobile-heading font-extrabold tracking-tight text-gray-900">
                   Revolutionizing High School Opportunities
                 </p>
-                <p className="mt-4 max-w-2xl text-xl text-gray-500 lg:mx-auto">
+                <p className="mt-4 max-w-2xl mobile-text text-gray-500 lg:mx-auto">
                   Our AI-powered platform connects high school students with meaningful Opportunity opportunities while reducing the management burden on companies.
                 </p>
               </div>
 
-              <div className="mt-10">
-                <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
+              <div className="mt-8 sm:mt-10">
+                <div className="mobile-responsive-spacing md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
                   {features.map((feature) => (
                     <div key={feature.name} className="relative">
                       <dt>
                         <div className="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
                           {feature.icon}
                         </div>
-                        <p className="ml-16 text-lg leading-6 font-medium text-gray-900">{feature.name}</p>
+                        <p className="ml-16 text-base sm:text-lg leading-6 font-medium text-gray-900">{feature.name}</p>
                       </dt>
-                      <dd className="mt-2 ml-16 text-base text-gray-500">
+                      <dd className="mt-2 ml-16 mobile-text text-gray-500">
                         {feature.description}
                       </dd>
                     </div>
@@ -472,12 +473,12 @@ function Home() {
 
           {/* Testimonials Section */}
           <div className="py-8 bg-white">
-            <div className="mx-auto max-[1275px] px-4 sm:px-6 lg:px-8">
+            <div className="mobile-container">
               <div className="text-center">
-                <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+                <h2 className="mobile-heading font-extrabold tracking-tight text-gray-900">
                   Based on <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">skill and mindset</span>, not experience
                 </h2>
-                <p className="mt-2 text-xl text-gray-500">
+                <p className="mt-2 mobile-text text-gray-500">
                   As revealed by past users
                 </p>
               </div>
@@ -486,21 +487,21 @@ function Home() {
                 <div className="flex items-center justify-between">
                   <button
                     onClick={handlePrevious}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 transform bg-white w-14 h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 transform bg-white w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
                     aria-label="Previous reviews"
                     disabled={currentIndex === 0}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>
                   </button>
                   <button
                     onClick={handleNext}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 transform bg-white w-14 h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    className="absolute right-0 top-1/2 -translate-y-1/2 transform bg-white w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
                     aria-label="Next reviews"
                     disabled={currentIndex >= testimonials.length - 3}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-8 h-8 text-blue-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                     </svg>
                   </button>
@@ -519,21 +520,21 @@ function Home() {
                     style={{ transform: `translateX(-${currentIndex * 400}px)` }}
                   >
                     {testimonials.map((testimonial, index) => (
-                      <div key={index} className="w-[400px] px-2">
-                        <div className="bg-white rounded-lg shadow-lg p-6 h-[280px] flex flex-col">
+                      <div key={index} className="w-[300px] sm:w-[400px] px-2">
+                        <div className="mobile-card h-[280px] flex flex-col">
                           <div className="flex items-center">
                             <img
-                              className="h-12 w-12 rounded-full"
+                              className="h-10 w-10 sm:h-12 sm:w-12 rounded-full"
                               src={testimonial.image}
                               alt={testimonial.name}
                             />
-                            <div className="ml-4">
-                              <h3 className="text-lg font-medium text-gray-900">{testimonial.name}</h3>
+                            <div className="ml-3 sm:ml-4">
+                              <h3 className="text-base sm:text-lg font-medium text-gray-900">{testimonial.name}</h3>
                               <div className="flex items-center mt-1">
                                 {[...Array(testimonial.rating)].map((_, i) => (
                                   <svg
                                     key={i}
-                                    className="h-5 w-5 text-yellow-400"
+                                    className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400"
                                     fill="currentColor"
                                     viewBox="0 0 20 20"
                                   >
@@ -543,7 +544,7 @@ function Home() {
                               </div>
                             </div>
                           </div>
-                          <p className="mt-4 text-base text-gray-600 flex-grow">{testimonial.text}</p>
+                          <p className="mt-4 mobile-text text-gray-600 flex-grow">{testimonial.text}</p>
                         </div>
                       </div>
                     ))}
@@ -555,18 +556,18 @@ function Home() {
         </div>
       </div>
 
-      {/* CTA Section (Ready to find your next opportunity) remains outside the tabs */}
+      {/* CTA Section */}
       <div className="bg-white">
-        <div className="mx-auto max-w-7xl py-12 px-4 sm:px-6 lg:py-16 lg:px-8 lg:flex lg:items-center lg:justify-between">
-          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+        <div className="mobile-container py-8 sm:py-12 lg:py-16 lg:flex lg:items-center lg:justify-between">
+          <h2 className="mobile-heading font-bold tracking-tight text-gray-900">
             <span className="block">Ready to find your next opportunity?</span>
             <span className="block text-blue-600">Join Step Up today.</span>
           </h2>
-          <div className="mt-8 flex lg:mt-0 lg:flex-shrink-0">
+          <div className="mt-6 lg:mt-0 lg:flex-shrink-0">
             <div className="inline-flex rounded-md shadow">
               <Link
                 href="/intern-get-started"
-                className="inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-8 py-3 text-base font-medium text-white hover:bg-blue-700 md:px-10 md:py-4 md:text-lg"
+                className="mobile-button bg-blue-600 text-white hover:bg-blue-700"
               >
                 Get Started
               </Link>
@@ -640,6 +641,7 @@ function Home() {
           text-fill-color: transparent;
           font-weight: bold;
           display: inline-block;
+          font-size: inherit;
         }
       `}</style>
     </div>
