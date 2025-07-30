@@ -2,9 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { MapPinIcon, GlobeAltIcon, PhoneIcon, BuildingOfficeIcon, BriefcaseIcon, EnvelopeIcon, ClockIcon, CurrencyDollarIcon, BuildingOffice2Icon, StarIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect } from 'react';
+import { MapPinIcon, GlobeAltIcon, PhoneIcon, BuildingOfficeIcon, BriefcaseIcon, EnvelopeIcon, ClockIcon, CurrencyDollarIcon, BuildingOffice2Icon, StarIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { type Posting, type CompanyLocation, getCompanyLocations } from '@/lib/postingUtils';
 import AnimatedBackground from './AnimatedBackground';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface PostingContentProps {
   posting: Posting;
@@ -13,6 +15,9 @@ interface PostingContentProps {
 export default function PublicPostingContent({ posting }: PostingContentProps) {
   const company = posting.companies!;
   const locations = getCompanyLocations(company);
+  const [hasApplicationForm, setHasApplicationForm] = useState<boolean | null>(null);
+  const [isCheckingForm, setIsCheckingForm] = useState(true);
+  const supabase = createClientComponentClient();
 
   // Group locations by state
   const locationsByState = locations.reduce((acc, location) => {
@@ -32,6 +37,36 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
     posting.internship_picture_4,
     posting.internship_picture_5
   ].filter((img): img is string => Boolean(img));
+
+  // Check if application form exists for this internship
+  useEffect(() => {
+    const checkApplicationForm = async () => {
+      try {
+        setIsCheckingForm(true);
+        
+        // Check if a form exists for this internship
+        const { data: form, error } = await supabase
+          .from('forms')
+          .select('id')
+          .eq('internship_id', posting.id)
+          .maybeSingle();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error checking for application form:', error);
+          setHasApplicationForm(false);
+        } else {
+          setHasApplicationForm(!!form);
+        }
+      } catch (error) {
+        console.error('Error checking for application form:', error);
+        setHasApplicationForm(false);
+      } finally {
+        setIsCheckingForm(false);
+      }
+    };
+
+    checkApplicationForm();
+  }, [posting.id, supabase]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
@@ -264,13 +299,25 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
             <p className="text-gray-600 whitespace-pre-wrap mb-8">{posting.description || 'No position description available.'}</p>
             
             <div className="flex justify-center">
-              <Link
-                href={`/apply?internshipId=${posting.id}`}
-                className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl shadow-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105"
-              >
-                <EnvelopeIcon className="mr-2 h-6 w-6" />
-                Apply Now
-              </Link>
+              {isCheckingForm ? (
+                <div className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl shadow-lg bg-gray-400 text-white">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                  Checking Application Status...
+                </div>
+              ) : hasApplicationForm ? (
+                <Link
+                  href={`/apply?internshipId=${posting.id}`}
+                  className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl shadow-lg text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105"
+                >
+                  <EnvelopeIcon className="mr-2 h-6 w-6" />
+                  Apply Now
+                </Link>
+              ) : (
+                <div className="inline-flex items-center px-8 py-4 border border-transparent text-lg font-medium rounded-xl shadow-lg bg-yellow-500 text-white">
+                  <ExclamationTriangleIcon className="mr-2 h-6 w-6" />
+                  Application has not been created for this listing
+                </div>
+              )}
             </div>
           </div>
         </div>
