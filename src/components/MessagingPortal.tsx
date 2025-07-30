@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 interface Conversation {
   id: string;
@@ -66,8 +67,20 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
   const [sending, setSending] = useState(false);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [activeTab, setActiveTab] = useState<'messages' | 'announcements'>('messages');
+  const [isMobileView, setIsMobileView] = useState(false);
 
   const supabase = createClientComponentClient();
+
+  // Check for mobile view
+  useEffect(() => {
+    const checkMobileView = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+
+    checkMobileView();
+    window.addEventListener('resize', checkMobileView);
+    return () => window.removeEventListener('resize', checkMobileView);
+  }, []);
 
   useEffect(() => {
     const getUser = async () => {
@@ -224,6 +237,14 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
     return new Date(timestamp).toLocaleDateString();
   };
 
+  const handleConversationSelect = (conversation: Conversation) => {
+    setSelectedConversation(conversation);
+  };
+
+  const handleBackToConversations = () => {
+    setSelectedConversation(null);
+  };
+
   useEffect(() => {
     if (selectedConversation) {
       fetchMessages(selectedConversation.id);
@@ -238,6 +259,224 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
     );
   }
 
+  // Mobile view - show conversation list or selected conversation
+  if (isMobileView) {
+    return (
+      <div className="h-[600px] bg-white rounded-lg shadow-lg">
+        {!selectedConversation ? (
+          // Mobile: Conversation List View
+          <div className="h-full flex flex-col">
+            {/* Tabs */}
+            <div className="flex border-b border-gray-200">
+              <button
+                onClick={() => setActiveTab('messages')}
+                className={`flex-1 px-4 py-3 text-sm font-medium ${
+                  activeTab === 'messages'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Messages
+              </button>
+              <button
+                onClick={() => setActiveTab('announcements')}
+                className={`flex-1 px-4 py-3 text-sm font-medium ${
+                  activeTab === 'announcements'
+                    ? 'text-blue-600 border-b-2 border-blue-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Announcements
+              </button>
+            </div>
+
+            {/* Conversations List */}
+            <div className="flex-1 overflow-y-auto">
+              {activeTab === 'messages' ? (
+                <div>
+                  {conversations.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      <p>No conversations yet</p>
+                      <p className="text-sm mt-1">Start a conversation to begin messaging</p>
+                    </div>
+                  ) : (
+                    conversations.map((conversation) => (
+                      <div
+                        key={conversation.id}
+                        onClick={() => handleConversationSelect(conversation)}
+                        className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50"
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className="flex-shrink-0">
+                            {getConversationAvatar(conversation) ? (
+                              <img
+                                src={getConversationAvatar(conversation)!}
+                                alt="Avatar"
+                                className="w-12 h-12 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span className="text-gray-600 text-sm font-medium">
+                                  {getConversationName(conversation).charAt(0)}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900">
+                              {getConversationName(conversation)}
+                            </p>
+                            <p className="text-xs text-gray-500">
+                              {formatDate(conversation.updated_at)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              ) : (
+                // Announcements List
+                <div>
+                  {announcements.length === 0 ? (
+                    <div className="p-4 text-center text-gray-500">
+                      <p>No announcements yet</p>
+                    </div>
+                  ) : (
+                    announcements.map((announcement) => (
+                      <div key={announcement.id} className="p-4 border-b border-gray-100">
+                        <div className="flex items-start space-x-3">
+                          <div className="flex-shrink-0">
+                            {announcement.company?.logo_url ? (
+                              <img
+                                src={announcement.company.logo_url}
+                                alt="Company"
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                            ) : announcement.intern?.profile_photo_url ? (
+                              <img
+                                src={announcement.intern.profile_photo_url}
+                                alt="User"
+                                className="w-8 h-8 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                                <span className="text-gray-600 text-xs font-medium">
+                                  {announcement.sender_type === 'company' ? 'C' : 'I'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900">
+                              {announcement.title}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {announcement.content}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-1">
+                              {formatDate(announcement.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        ) : (
+          // Mobile: Selected Conversation View
+          <div className="h-full flex flex-col">
+            {/* Chat Header with Back Button */}
+            <div className="p-4 border-b border-gray-200 bg-gray-50">
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleBackToConversations}
+                  className="p-1 rounded-full hover:bg-gray-200 transition-colors"
+                >
+                  <ChevronLeftIcon className="h-6 w-6 text-gray-600" />
+                </button>
+                <div className="flex items-center space-x-3 flex-1">
+                  {getConversationAvatar(selectedConversation) ? (
+                    <img
+                      src={getConversationAvatar(selectedConversation)!}
+                      alt="Avatar"
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                      <span className="text-gray-600 text-sm font-medium">
+                        {getConversationName(selectedConversation).charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-900">
+                      {getConversationName(selectedConversation)}
+                    </h3>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {messages.map((message) => {
+                const isOwnMessage = message.sender_id === user?.id;
+                return (
+                  <div
+                    key={message.id}
+                    className={`flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div
+                      className={`max-w-xs px-4 py-2 rounded-lg ${
+                        isOwnMessage
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-white text-gray-900 border border-gray-200'
+                      }`}
+                    >
+                      <p className="text-sm">{message.content}</p>
+                      <p className={`text-xs mt-1 ${
+                        isOwnMessage ? 'text-blue-100' : 'text-gray-500'
+                      }`}>
+                        {formatTime(message.created_at)}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Message Input */}
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  placeholder="Type a message..."
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                  disabled={sending}
+                />
+                <button
+                  onClick={sendMessage}
+                  disabled={!newMessage.trim() || sending}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {sending ? 'Sending...' : 'Send'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Desktop view - show sidebar and chat area side by side
   return (
     <div className="flex h-[600px] bg-white rounded-lg shadow-lg">
       {/* Sidebar */}
@@ -302,10 +541,10 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="mobile-conversation-name">
+                        <p className="text-sm font-medium text-gray-900">
                           {getConversationName(conversation)}
                         </p>
-                        <p className="mobile-timestamp">
+                        <p className="text-xs text-gray-500">
                           {formatDate(conversation.updated_at)}
                         </p>
                       </div>
@@ -411,8 +650,8 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                             : 'bg-white text-gray-900 border border-gray-200'
                         }`}
                       >
-                        <p className="mobile-message-content">{message.content}</p>
-                        <p className={`mobile-timestamp mt-1 ${
+                        <p className="text-sm">{message.content}</p>
+                        <p className={`text-xs mt-1 ${
                           isOwnMessage ? 'text-blue-100' : 'text-gray-500'
                         }`}>
                           {formatTime(message.created_at)}

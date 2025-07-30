@@ -12,9 +12,21 @@ export default function CompanyMessagingPage() {
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isMobileView, setIsMobileView] = useState(false);
   const router = useRouter();
 
   const supabase = createClientComponentClient();
+
+  // Check for mobile view
+  useEffect(() => {
+    const checkMobileView = () => {
+      setIsMobileView(window.innerWidth < 768);
+    };
+
+    checkMobileView();
+    window.addEventListener('resize', checkMobileView);
+    return () => window.removeEventListener('resize', checkMobileView);
+  }, []);
 
   useEffect(() => {
     const getUser = async () => {
@@ -62,23 +74,23 @@ export default function CompanyMessagingPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-4 sm:mb-0">
               <h1 className="text-3xl font-bold text-gray-900">Company Messages</h1>
               <p className="mt-2 text-gray-600">
                 Connect with interns through messaging and announcements
               </p>
             </div>
-            <div className="flex space-x-3">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => setShowNewConversationModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 text-sm sm:text-base"
               >
                 Message Intern
               </button>
               <button
                 onClick={() => setShowAnnouncementModal(true)}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-sm sm:text-base"
               >
                 Send Announcement
               </button>
@@ -87,7 +99,9 @@ export default function CompanyMessagingPage() {
         </div>
 
         {/* Messaging Portal */}
-        <MessagingPortal />
+        <div className={isMobileView ? "h-[calc(100vh-200px)]" : ""}>
+          <MessagingPortal />
+        </div>
 
         {/* New Conversation Modal */}
         <NewConversationModal
