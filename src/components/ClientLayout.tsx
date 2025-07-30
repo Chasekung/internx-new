@@ -34,16 +34,16 @@ function ClientLayout({
       <div className="relative z-10">
         {isCompanyPage ? <CompanyNavbar /> : <UserNavbar />}
         
-        <main className="mobile-safe-area">
+        <main className="mobile-safe-area pt-20">
           {children}
         </main>
         
-        <footer className="glass-effect mt-auto">
+        <footer className="glass-effect mt-auto border-t border-gray-200">
           <div className="mobile-container py-8 sm:py-12">
             <div className="mobile-grid md:grid-cols-4">
               <div className="mobile-responsive-spacing">
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">About</h3>
-                <ul className="mobile-responsive-spacing">
+                <ul className="mobile-responsive-spacing space-y-2">
                   <li>
                     <Link href="/about/step-up" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       About Us
@@ -63,7 +63,7 @@ function ClientLayout({
               </div>
               <div className="mobile-responsive-spacing">
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">For Students</h3>
-                <ul className="mobile-responsive-spacing">
+                <ul className="mobile-responsive-spacing space-y-2">
                   <li>
                     <Link href="/intern-get-started" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Create Profile
@@ -76,14 +76,14 @@ function ClientLayout({
                   </li>
                   <li>
                     <Link href="/resources" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
-                      Resources
+                      Social Media
                     </Link>
                   </li>
                 </ul>
               </div>
               <div className="mobile-responsive-spacing">
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">For Companies</h3>
-                <ul className="mobile-responsive-spacing">
+                <ul className="mobile-responsive-spacing space-y-2">
                   <li>
                     <Link href="/company" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Register Company
@@ -103,7 +103,7 @@ function ClientLayout({
               </div>
               <div className="mobile-responsive-spacing">
                 <h3 className="text-sm font-semibold text-gray-400 tracking-wider uppercase">Legal</h3>
-                <ul className="mobile-responsive-spacing">
+                <ul className="mobile-responsive-spacing space-y-2">
                   <li>
                     <Link href="/privacy" className="mobile-text text-gray-500 hover:text-gray-900 transition-colors">
                       Privacy Policy

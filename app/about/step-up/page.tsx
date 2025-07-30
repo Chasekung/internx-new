@@ -169,7 +169,7 @@ export default function AboutStepUpPage() {
               </div>
               <div className="text-center">
                 <div className="text-xl font-bold text-gray-900 mb-2">Kyungjin Oh</div>
-                <div className="text-sm text-gray-600">Chief Strategy Officer</div>
+                <div className="text-sm text-gray-600">Chief Operating Officer</div>
               </div>
             </div>
 

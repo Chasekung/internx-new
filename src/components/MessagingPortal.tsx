@@ -302,10 +302,10 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="mobile-conversation-name">
                           {getConversationName(conversation)}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="mobile-timestamp">
                           {formatDate(conversation.updated_at)}
                         </p>
                       </div>
@@ -411,8 +411,8 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                             : 'bg-white text-gray-900 border border-gray-200'
                         }`}
                       >
-                        <p className={`text-sm ${isOwnMessage ? 'text-white' : 'text-gray-900'}`}>{message.content}</p>
-                        <p className={`text-xs mt-1 ${
+                        <p className="mobile-message-content">{message.content}</p>
+                        <p className={`mobile-timestamp mt-1 ${
                           isOwnMessage ? 'text-blue-100' : 'text-gray-500'
                         }`}>
                           {formatTime(message.created_at)}

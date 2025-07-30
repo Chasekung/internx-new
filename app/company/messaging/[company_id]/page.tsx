@@ -195,8 +195,8 @@ function ChatArea({
                       ? 'bg-blue-600 text-white' 
                       : 'bg-gray-200 text-gray-900'
                   }`}>
-                    <p className="text-sm">{message.content}</p>
-                    <p className={`text-xs mt-1 ${
+                    <p className="mobile-message-content">{message.content}</p>
+                    <p className={`mobile-timestamp mt-1 ${
                       isOwnMessage ? 'text-blue-100' : 'text-gray-500'
                     }`}>
                       {formatTime(message.created_at)}
