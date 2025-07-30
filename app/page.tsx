@@ -5,11 +5,11 @@ import HomeClient from './HomeClient'
 // SEO metadata for the homepage
 export const metadata: Metadata = {
   title: 'Step Up - AI-Powered High School Internship & Opportunity Platform',
-  description: 'Breaking down barriers for high school students to connect with meaningful opportunities. AI-powered matching and mentorship for internships, volunteering, and skill-building.',
+  description: 'Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship for internships, volunteering, and skill-building experiences.',
   keywords: ['high school internships', 'student opportunities', 'teen internships', 'AI matching', 'career development', 'volunteering opportunities'],
   openGraph: {
     title: 'Step Up - AI-Powered High School Internship & Opportunity Platform',
-    description: 'Breaking down barriers for high school students to connect with meaningful opportunities. AI-powered matching and mentorship.',
+    description: 'Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship for internships, volunteering, and skill-building experiences.',
     url: 'https://joinstepup.com',
     siteName: 'Step Up',
     images: [
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Step Up - AI-Powered High School Internship & Opportunity Platform',
-    description: 'Breaking down barriers for high school students to connect with meaningful opportunities.',
+    description: 'Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship.',
     images: ['/stepup-logo.png'],
   },
   alternates: {

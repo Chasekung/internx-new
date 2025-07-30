@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     default: 'Step Up - AI-Powered High School Internship & Opportunity Platform',
     template: '%s | Step Up'
   },
-  description: 'Connect high school students with meaningful internships, volunteering, and skill-building opportunities. AI-powered matching platform for career development.',
+  description: 'Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship for internships, volunteering, and skill-building experiences.',
   keywords: ['high school internships', 'student opportunities', 'teen internships', 'career development', 'AI matching', 'volunteering opportunities', 'skill building'],
   authors: [{ name: 'Step Up Team' }],
   creator: 'Step Up',
@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://joinstepup.com',
     title: 'Step Up - AI-Powered High School Internship & Opportunity Platform',
-    description: 'Connect high school students with meaningful internships, volunteering, and skill-building opportunities. AI-powered matching platform for career development.',
+    description: 'Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship for internships, volunteering, and skill-building experiences.',
     siteName: 'Step Up',
     images: [
       {
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Step Up - AI-Powered High School Internship & Opportunity Platform',
-    description: 'Connect high school students with meaningful internships, volunteering, and skill-building opportunities.',
+    description: 'Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship.',
     images: ['/stepup-logo.png'],
   },
   robots: {
@@ -128,7 +128,7 @@ export default function RootLayout({
               "name": "Step Up",
               "url": "https://joinstepup.com",
               "logo": "https://joinstepup.com/stepup-logo.png",
-              "description": "AI-powered platform connecting high school students with meaningful internships, volunteering, and skill-building opportunities.",
+              "description": "Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship for internships, volunteering, and skill-building experiences.",
               "foundingDate": "2025",
               "sameAs": [
                 "https://www.instagram.com/stepuphs.67/",
