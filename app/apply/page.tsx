@@ -35,6 +35,15 @@ export default function ApplyLandingPage() {
     try {
       setIsCheckingStatus(true);
       
+      // Check if Supabase client is available
+      if (!supabase) {
+        console.error('Supabase client not available');
+        setIsCheckingStatus(false);
+        setExistingApplication(null);
+        setIsAuthenticated(false);
+        return;
+      }
+      
       // First check Supabase session
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -139,6 +148,13 @@ export default function ApplyLandingPage() {
   const startApplication = async () => {
     try {
       setIsLoading(true);
+
+      // Check if Supabase client is available
+      if (!supabase) {
+        console.error('Supabase client not available');
+        setError('Database connection not available');
+        return;
+      }
 
       // Check if user is authenticated using the same robust method
       const { data: { session } } = await supabase.auth.getSession();
