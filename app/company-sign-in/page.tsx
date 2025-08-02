@@ -38,11 +38,20 @@ export default function CompanySignIn() {
     const password = formData.get('password') as string;
     
     try {
-      // First, authenticate with Supabase Auth
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // First, authenticate with Supabase Auth with timeout
+      const authPromise = supabase.auth.signInWithPassword({
         email,
         password,
       });
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Authentication timeout')), 10000)
+      );
+      
+      const { data, error } = await Promise.race([
+        authPromise,
+        timeoutPromise
+      ]) as any;
 
       if (error) throw error;
 

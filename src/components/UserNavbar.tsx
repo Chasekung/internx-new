@@ -1,14 +1,17 @@
 'use client';
 
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useScrollPosition } from '@/hooks/useScrollPosition';
 import { FiChevronDown, FiSettings, FiMenu, FiX } from 'react-icons/fi';
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import supabase from '@/lib/supabaseClient';
 import { Menu } from '@headlessui/react';
 import { classNames } from '@/lib/classNames';
+
+// Create a single Supabase client instance to avoid multiple instances
+const supabase = createClientComponentClient();
 
 interface User {
   id: string;
@@ -78,8 +81,9 @@ export default function UserNavbar() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const switchDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const authCheckTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchProfileData = useCallback(async (token: string) => {
+  const fetchProfileData = async (token: string) => {
     try {
       const response = await fetch('/api/user/profile', {
         headers: {
@@ -94,63 +98,90 @@ export default function UserNavbar() {
     } catch (error) {
       console.error('Error fetching profile:', error);
     }
-  }, []);
+  };
 
   useEffect(() => {
+    let lastAuthCheck = 0;
+    let isChecking = false; // Prevent concurrent auth checks
+    
     const checkAuth = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const userStr = localStorage.getItem('user');
-        
-        if (!token || !userStr) {
-          setIsSignedIn(false);
-          setProfileData(null);
-          return;
-        }
-
+      const now = Date.now();
+      if (now - lastAuthCheck < 1000) return; // Prevent rapid auth checks
+      lastAuthCheck = now;
+      
+      if (authCheckTimeout.current) {
+        clearTimeout(authCheckTimeout.current);
+      }
+      authCheckTimeout.current = setTimeout(async () => {
+        isChecking = true;
         try {
-          const user = JSON.parse(userStr);
-          if (user.role !== 'INTERN') {
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session?.access_token) {
+            const userStr = localStorage.getItem('user');
+            if (userStr) {
+              try {
+                const user = JSON.parse(userStr);
+                if (user.role === 'INTERN') {
+                  setIsSignedIn(true);
+                  await fetchProfileData(session.access_token);
+                }
+              } catch (e) {
+                console.error('Error parsing user data:', e);
+              }
+            } else {
+              // If no user in localStorage but session exists, try to get user info
+              const { data: { user } } = await supabase.auth.getUser();
+              if (user) {
+                setIsSignedIn(true);
+                await fetchProfileData(session.access_token);
+              }
+            }
+          } else {
             setIsSignedIn(false);
             setProfileData(null);
-            return;
+            // Auto-redirect to sign in if on a protected page
+            if (typeof window !== 'undefined') {
+              const protectedPaths = ['/intern-dash', '/edit-profile', '/messaging', '/apply'];
+              const currentPath = window.location.pathname;
+              const isOnProtectedPath = protectedPaths.some(path => currentPath.startsWith(path));
+              
+              if (isOnProtectedPath) {
+                console.log('🔄 No valid session found, redirecting to sign in...');
+                window.location.href = '/intern-sign-in';
+              }
+            }
           }
-        } catch (e) {
-          console.error('Error parsing user data:', e);
-          setIsSignedIn(false);
-          setProfileData(null);
-          return;
-        }
-
-        // Verify token is still valid
-        const { data: { user }, error: authError } = await supabase.auth.getUser(token);
-        
-        if (authError || !user) {
-          console.error('Auth error:', authError);
+        } catch (error) {
+          console.error('Auth check error:', error);
           setIsSignedIn(false);
           setProfileData(null);
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          return;
+          // Auto-redirect on any auth error for protected pages
+          if (typeof window !== 'undefined') {
+            const protectedPaths = ['/intern-dash', '/edit-profile', '/messaging', '/apply'];
+            const currentPath = window.location.pathname;
+            const isOnProtectedPath = protectedPaths.some(path => currentPath.startsWith(path));
+            
+            if (isOnProtectedPath) {
+              console.log('🔄 Auth error occurred, redirecting to sign in...');
+              window.location.href = '/intern-sign-in';
+            }
+          }
+        } finally {
+          isChecking = false;
         }
-
-        setIsSignedIn(true);
-        await fetchProfileData(token);
-      } catch (error) {
-        console.error('Auth check error:', error);
-        setIsSignedIn(false);
-        setProfileData(null);
-      } finally {
-        setIsLoading(false);
-      }
+      }, 500);
     };
 
+    // Initial auth check
     checkAuth();
 
     // Listen for auth state changes from Supabase
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth state changed:', event);
-      if (event === 'SIGNED_IN') {
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         const userStr = localStorage.getItem('user');
         if (userStr) {
           try {
@@ -164,24 +195,50 @@ export default function UserNavbar() {
           } catch (e) {
             console.error('Error parsing user data:', e);
           }
+        } else if (session?.access_token) {
+          // If no user in localStorage but session exists, try to get user info
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            setIsSignedIn(true);
+            await fetchProfileData(session.access_token);
+          }
         }
       } else if (event === 'SIGNED_OUT') {
         setIsSignedIn(false);
         setProfileData(null);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        // Auto-redirect to sign in if on a protected page
+        if (typeof window !== 'undefined') {
+          const protectedPaths = ['/intern-dash', '/edit-profile', '/messaging', '/apply'];
+          const currentPath = window.location.pathname;
+          const isOnProtectedPath = protectedPaths.some(path => currentPath.startsWith(path));
+          
+          if (isOnProtectedPath) {
+            console.log('🔄 User signed out, redirecting to sign in...');
+            window.location.href = '/intern-sign-in';
+          }
+        }
       }
     });
 
-    // Listen for our custom events
+    // Listen for our custom events with debouncing
     const handleStorageChange = () => {
       console.log('Storage changed, checking auth...');
-      checkAuth();
+      // Debounce storage change events
+      if (authCheckTimeout.current) {
+        clearTimeout(authCheckTimeout.current);
+      }
+      authCheckTimeout.current = setTimeout(checkAuth, 500);
     };
 
     const handleAuthStateChange = () => {
       console.log('Auth state change event received, checking auth...');
-      checkAuth();
+      // Debounce auth state change events
+      if (authCheckTimeout.current) {
+        clearTimeout(authCheckTimeout.current);
+      }
+      authCheckTimeout.current = setTimeout(checkAuth, 500);
     };
 
     window.addEventListener('storage', handleStorageChange);
@@ -191,8 +248,11 @@ export default function UserNavbar() {
       subscription.unsubscribe();
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('authStateChange', handleAuthStateChange);
+      if (authCheckTimeout.current) {
+        clearTimeout(authCheckTimeout.current);
+      }
     };
-  }, [fetchProfileData]);
+  }, []);
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();

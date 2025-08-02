@@ -26,30 +26,178 @@ export default function CompanyNavbar() {
   const supabase = createClientComponentClient();
 
   useEffect(() => {
-    // Check if company user is signed in
+    let authCheckTimeout: NodeJS.Timeout;
+    let lastAuthCheck = 0;
+    let isChecking = false; // Prevent concurrent auth checks
+    
     const checkAuth = async () => {
-      try {
-        const { isCompany, user } = await checkCompanyAuth();
-        setIsSignedIn(isCompany);
-        if (isCompany && user) {
-          setCompanyId(user.id);
-        } else {
-          setCompanyId(null);
-        }
-      } catch (e) {
-        setIsSignedIn(false);
-        setCompanyId(null);
+      // Prevent concurrent auth checks
+      if (isChecking) {
+        console.log('Auth check already in progress, skipping...');
+        return;
       }
+      
+      // Debounce auth checks to prevent rapid successive requests
+      const now = Date.now();
+      if (now - lastAuthCheck < 2000) { // 2 second cooldown
+        console.log('Auth check too soon, skipping...');
+        return;
+      }
+      lastAuthCheck = now;
+      
+      clearTimeout(authCheckTimeout);
+      authCheckTimeout = setTimeout(async () => {
+        isChecking = true;
+        try {
+          const token = localStorage.getItem('token');
+          const userStr = localStorage.getItem('user');
+          
+          if (!token || !userStr) {
+            setIsSignedIn(false);
+            setCompanyId(null);
+            // Auto-redirect if on a protected company page
+            if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
+                !window.location.pathname.includes('/company-sign-in') && 
+                !window.location.pathname.includes('/company-get-started') &&
+                !window.location.pathname.includes('/company-forgot-password') &&
+                !window.location.pathname.includes('/company-reset-password')) {
+              console.log('🔄 No auth token found, redirecting to sign in...');
+              window.location.href = '/company-sign-in';
+            }
+            return;
+          }
+
+          try {
+            const user = JSON.parse(userStr);
+            if (user.role !== 'COMPANY') {
+              setIsSignedIn(false);
+              setCompanyId(null);
+              // Auto-redirect non-company users
+              if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
+                  !window.location.pathname.includes('/company-sign-in') && 
+                  !window.location.pathname.includes('/company-get-started')) {
+                console.log('🔄 Non-company user detected, redirecting to sign in...');
+                window.location.href = '/company-sign-in';
+              }
+              return;
+            }
+          } catch (e) {
+            console.error('Error parsing user data:', e);
+            setIsSignedIn(false);
+            setCompanyId(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Auto-redirect on parse error
+            if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
+                !window.location.pathname.includes('/company-sign-in') && 
+                !window.location.pathname.includes('/company-get-started')) {
+              console.log('🔄 User data parsing error, redirecting to sign in...');
+              window.location.href = '/company-sign-in';
+            }
+            return;
+          }
+
+          // Verify token is still valid with a timeout
+          const authPromise = supabase.auth.getUser(token);
+          const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Auth timeout')), 5000)
+          );
+          
+          const { data: { user }, error: authError } = await Promise.race([
+            authPromise,
+            timeoutPromise
+          ]) as any;
+          
+          if (authError || !user) {
+            console.error('Auth error:', authError);
+            setIsSignedIn(false);
+            setCompanyId(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Auto-redirect on auth error
+            if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
+                !window.location.pathname.includes('/company-sign-in') && 
+                !window.location.pathname.includes('/company-get-started')) {
+              console.log('🔄 Auth token invalid, redirecting to sign in...');
+              window.location.href = '/company-sign-in';
+            }
+            return;
+          }
+
+          setIsSignedIn(true);
+          setCompanyId(user.id);
+        } catch (error) {
+          console.error('Auth check error:', error);
+          setIsSignedIn(false);
+          setCompanyId(null);
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          // Auto-redirect on any unexpected error
+          if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
+              !window.location.pathname.includes('/company-sign-in') && 
+              !window.location.pathname.includes('/company-get-started')) {
+            console.log('🔄 Unexpected auth error, redirecting to sign in...');
+            window.location.href = '/company-sign-in';
+          }
+        } finally {
+          isChecking = false;
+        }
+      }, 1000); // Increased debounce to 1 second
     };
     
     checkAuth();
-    window.addEventListener('storage', checkAuth);
-    window.addEventListener('authStateChange', checkAuth);
-    window.addEventListener('login', checkAuth);
+    
+    // Listen for Supabase auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('🔄 Company navbar - Auth state changed:', event);
+      if (event === 'SIGNED_OUT') {
+        setIsSignedIn(false);
+        setCompanyId(null);
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        // Auto-redirect to sign in if on a protected company page
+        if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
+            !window.location.pathname.includes('/company-sign-in') && 
+            !window.location.pathname.includes('/company-get-started')) {
+          console.log('🔄 Company user signed out, redirecting to sign in...');
+          window.location.href = '/company-sign-in';
+        }
+      } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        // Recheck auth when signed in or token refreshed
+        clearTimeout(authCheckTimeout);
+        authCheckTimeout = setTimeout(checkAuth, 500);
+      }
+    });
+    
+    // Listen for our custom events with debouncing
+    const handleStorageChange = () => {
+      console.log('Storage changed, checking auth...');
+      clearTimeout(authCheckTimeout);
+      authCheckTimeout = setTimeout(checkAuth, 500);
+    };
+
+    const handleAuthStateChange = () => {
+      console.log('Auth state change event received, checking auth...');
+      clearTimeout(authCheckTimeout);
+      authCheckTimeout = setTimeout(checkAuth, 500);
+    };
+
+    const handleLogin = () => {
+      console.log('Login event received, checking auth...');
+      clearTimeout(authCheckTimeout);
+      authCheckTimeout = setTimeout(checkAuth, 500);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('authStateChange', handleAuthStateChange);
+    window.addEventListener('login', handleLogin);
+    
     return () => {
-      window.removeEventListener('storage', checkAuth);
-      window.removeEventListener('authStateChange', checkAuth);
-      window.removeEventListener('login', checkAuth);
+      subscription.unsubscribe();
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authStateChange', handleAuthStateChange);
+      window.removeEventListener('login', handleLogin);
+      clearTimeout(authCheckTimeout);
     };
   }, []);
 

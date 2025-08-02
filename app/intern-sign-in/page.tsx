@@ -15,6 +15,7 @@ export default function InternSignIn() {
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [lastLoginAttempt, setLastLoginAttempt] = useState<number>(0);
   const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
   const authChecked = useRef(false);
 
@@ -59,37 +60,75 @@ export default function InternSignIn() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Prevent rapid successive login attempts (debounce)
+    const now = Date.now();
+    if (now - lastLoginAttempt < 3000) { // 3 second cooldown (increased from 2s)
+      console.log('Login attempt too soon, please wait...');
+      setError('Please wait 3 seconds between login attempts');
+      return;
+    }
+    setLastLoginAttempt(now);
+    
     setIsLoading(true);
     setError('');
 
     try {
       console.log('Attempting to sign in...');
-      console.log('Form data:', formData); // Log the form data being sent
+      console.log('Form data:', formData);
 
-      // First, try to find the user by email or username
+      // Determine if identifier is email or username
+      const isEmail = formData.identifier.includes('@');
       let userEmail = formData.identifier;
-      
-      // If identifier is not an email, assume it's a username and look it up
-      if (!formData.identifier.includes('@')) {
-        console.log('Looking up username:', formData.identifier);
-        const { data: internData, error: internError } = await supabase
-          .from('interns')
-          .select('email')
-          .eq('username', formData.identifier)
-          .single();
+      let userType = 'intern'; // Track if user is intern or company
+      let profile: any = null; // Store profile data
 
-        if (internError || !internData) {
+      // If not email, check both interns and companies tables in one go
+      if (!isEmail) {
+        console.log('Looking up username:', formData.identifier);
+        
+        // Check both tables simultaneously to reduce requests
+        const [internResult, companyResult] = await Promise.all([
+          supabase
+            .from('interns')
+            .select('email, id, full_name')
+            .eq('username', formData.identifier)
+            .single(),
+          supabase
+            .from('companies')
+            .select('email, id, company_name')
+            .eq('username', formData.identifier)
+            .single()
+        ]);
+
+        // Determine which user type we found
+        if (internResult.data && !internResult.error) {
+          userEmail = internResult.data.email;
+          userType = 'intern';
+          // Store profile data for later use
+          profile = internResult.data;
+        } else if (companyResult.data && !companyResult.error) {
+          userEmail = companyResult.data.email;
+          userType = 'company';
+        } else {
           throw new Error('Invalid username or password');
         }
-
-        userEmail = internData.email;
       }
 
-      // Now sign in with the email
-      const { data, error } = await supabase.auth.signInWithPassword({
+      // Single auth sign in with timeout
+      const authPromise = supabase.auth.signInWithPassword({
         email: userEmail,
         password: formData.password,
       });
+      
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Authentication timeout')), 10000)
+      );
+      
+      const { data, error } = await Promise.race([
+        authPromise,
+        timeoutPromise
+      ]) as any;
 
       if (error) throw error;
 
@@ -97,26 +136,31 @@ export default function InternSignIn() {
         throw new Error('No session data returned');
       }
 
-      // Get the user's profile data to store their ID
-      const { data: profile, error: profileError } = await supabase
-        .from('interns')
-        .select('id, full_name')
-        .eq('id', data.user.id)
-        .single();
+      // Handle based on user type
+      if (userType === 'company') {
+        setError('COMPANY_USER');
+        await supabase.auth.signOut();
+        return;
+      }
 
-      if (profileError) {
-        // Check if this user is a company
-        const { data: companyProfile, error: companyError } = await supabase
-          .from('companies')
-          .select('id')
+      // For interns, we need to get profile data if not already retrieved
+      if (!profile && isEmail) {
+        // For email login, get profile data
+        const { data: profileData, error: profileError } = await supabase
+          .from('interns')
+          .select('id, full_name')
           .eq('id', data.user.id)
           .single();
-        if (companyProfile && !companyError) {
-          setError('COMPANY_USER');
-          await supabase.auth.signOut();
-          return;
+        
+        if (profileError) {
+          throw new Error('User profile not found');
         }
-        throw profileError;
+        profile = profileData;
+      }
+
+      // Ensure we have valid profile data
+      if (!profile) {
+        throw new Error('User profile not found');
       }
 
       // Store auth data
