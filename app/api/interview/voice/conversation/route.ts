@@ -1,13 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Check if environment variables are available
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// Only create client if environment variables are available
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     const { sessionId, message, audioData } = await request.json();
 
     if (!sessionId || !message) {
@@ -37,6 +49,10 @@ export async function POST(request: NextRequest) {
 
 async function processVoiceMessage(message: string, sessionId: string) {
   try {
+    if (!supabase) {
+      throw new Error('Supabase client not available');
+    }
+
     // Get the current interview session
     const { data: session } = await supabase
       .from('interview_sessions')
