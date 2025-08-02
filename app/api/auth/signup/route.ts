@@ -4,6 +4,14 @@ import { getRequestLocation, formatLocation } from '@/lib/locationUtils';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     console.log('=== Starting signup API route ===');
     
     const body = await request.json();

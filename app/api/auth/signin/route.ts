@@ -3,6 +3,14 @@ import supabase from '@/lib/supabaseClient';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     const body = await request.json();
     const { identifier, password, companyName, email, role } = body;
 

@@ -5,6 +5,14 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 // GET - Fetch all locations for a company
 export async function GET(request: NextRequest) {
   try {
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     console.log('🔍 API Debug - GET /api/companies/locations called');
     
     const authHeader = request.headers.get('authorization');
@@ -51,7 +59,15 @@ export async function GET(request: NextRequest) {
 // POST - Add a new location
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔍 API Debug - POST /api/companies/locations called');
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
+    console.log('�� API Debug - POST /api/companies/locations called');
     
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -138,6 +154,14 @@ export async function POST(request: NextRequest) {
 // PUT - Update locations
 export async function PUT(request: NextRequest) {
   try {
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     console.log('🔍 API Debug - PUT /api/companies/locations called');
     
     const authHeader = request.headers.get('authorization');
@@ -365,6 +389,14 @@ export async function PUT(request: NextRequest) {
 // DELETE - Remove a location
 export async function DELETE(request: NextRequest) {
   try {
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     console.log('🔍 API Debug - DELETE /api/companies/locations called');
     
     const authHeader = request.headers.get('authorization');
