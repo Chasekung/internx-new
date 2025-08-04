@@ -125,6 +125,13 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
     try {
       setIsLoading(true);
       
+      // Check if Supabase client is available
+      if (!supabase) {
+        console.error('Supabase client not available');
+        setError('Database connection not available');
+        return;
+      }
+      
       // Get current user (company)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -354,6 +361,12 @@ export default function ViewSingleResponsePage({ params }: { params: { id: strin
 
   const handleAddToTeam = async () => {
     if (!teamName.trim() || !applications[currentIndex]) return;
+    
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not available');
+      return;
+    }
     
     setIsAddingToTeam(true);
     try {
