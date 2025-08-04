@@ -3,10 +3,18 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Helper function to create OpenAI client when needed
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is missing or empty');
+  }
+  
+  return new OpenAI({
+    apiKey: apiKey,
+  });
+}
 
 // Note: OpenAI client will be initialized when package is installed
 // For now, we'll simulate AI responses for development
@@ -216,7 +224,7 @@ export async function POST(request: Request) {
 
       let analysisResponse;
       try {
-        analysisResponse = await openai.chat.completions.create({
+        analysisResponse = await getOpenAIClient().chat.completions.create({
           model: "gpt-4o-mini", // Use faster model
           messages: [
             {
@@ -620,7 +628,7 @@ export async function POST(request: Request) {
 
       let analysisResponse;
       try {
-        analysisResponse = await openai.chat.completions.create({
+        analysisResponse = await getOpenAIClient().chat.completions.create({
           model: "gpt-4o",
           messages: [
             {
