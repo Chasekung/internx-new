@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
+// Check if environment variables are available
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
+
+// Only create client if environment variables are available
+const supabase = supabaseUrl && supabaseServiceKey 
+  ? createClient(supabaseUrl, supabaseServiceKey)
+  : null;
 
 // This API route handles upserting, deleting, and reusing form questions for a specific form.
 // It will support POST (create/update), DELETE (remove), and GET (fetch) operations.
@@ -12,6 +17,14 @@ const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
 // POST: Upsert (create or update) questions for a form
 export async function POST(request: NextRequest, { params }: { params: { formId: string } }) {
   try {
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     const formId = params.formId;
     const body = await request.json();
     const { questions, deletedSectionIds, deletedQuestionIds } = body; // expects { questions: [...], deletedSectionIds: [...], deletedQuestionIds: [...] }
@@ -134,6 +147,14 @@ export async function POST(request: NextRequest, { params }: { params: { formId:
 // DELETE: Remove questions from a form
 export async function DELETE(request: NextRequest, { params }: { params: { formId: string } }) {
   try {
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     const body = await request.json();
     const { questionIds } = body; // expects { questionIds: [...] }
     if (!Array.isArray(questionIds) || questionIds.length === 0) {
@@ -156,6 +177,14 @@ export async function DELETE(request: NextRequest, { params }: { params: { formI
 // GET: Fetch all questions for a form
 export async function GET(request: NextRequest, { params }: { params: { formId: string } }) {
   try {
+    // Check if Supabase client is available
+    if (!supabase) {
+      console.error('Supabase client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     const formId = params.formId;
     // Fetch all sections for the form
     const { data: sections, error: sectionError } = await supabase
