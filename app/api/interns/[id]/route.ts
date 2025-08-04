@@ -17,6 +17,14 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Check if Supabase admin client is available
+    if (!supabaseAdmin) {
+      console.error('Supabase admin client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     console.log('🔍 API Debug - GET /api/interns/[id] called with params:', params);
 
     // The auth check is still a good security measure to ensure only logged-in users can view profiles.
