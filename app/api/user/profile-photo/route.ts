@@ -1,23 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Helper function to create Supabase client when needed
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-console.log('Profile photo API - Environment check:');
-console.log('SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing');
-console.log('SERVICE_ROLE_KEY:', supabaseServiceKey ? 'Set' : 'Missing');
+  console.log('Profile photo API - Environment check:');
+  console.log('SUPABASE_URL:', supabaseUrl ? 'Set' : 'Missing');
+  console.log('SERVICE_ROLE_KEY:', supabaseServiceKey ? 'Set' : 'Missing');
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error('Missing Supabase environment variables');
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+
+  return createClient(supabaseUrl, supabaseServiceKey);
 }
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function POST(request: NextRequest) {
   console.log('Profile photo upload request received');
   
   try {
+    const supabase = getSupabaseClient();
+
     const authHeader = request.headers.get('authorization');
     console.log('Auth header present:', !!authHeader);
     

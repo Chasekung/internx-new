@@ -2,15 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { supabaseAdmin } from '@/lib/supabaseAdmin'; // Use the admin client
 
-// This is the public client, we won't use it for fetching the profile
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Helper function to create public Supabase client when needed
+function getSupabasePublicClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase public environment variables');
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase public environment variables');
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey);
 }
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
 
 export async function GET(
   request: NextRequest,
@@ -26,6 +28,9 @@ export async function GET(
     }
 
     console.log('🔍 API Debug - GET /api/interns/[id] called with params:', params);
+
+    // Create public client when needed for auth
+    const supabase = getSupabasePublicClient();
 
     // The auth check is still a good security measure to ensure only logged-in users can view profiles.
     const authHeader = request.headers.get('authorization');
