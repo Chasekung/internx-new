@@ -162,6 +162,14 @@ export async function PUT(request: NextRequest) {
       }, { status: 500 });
     }
 
+    // Check if Supabase admin client is available
+    if (!supabaseAdmin) {
+      console.error('Supabase admin client not initialized - missing environment variables');
+      return NextResponse.json({ 
+        error: 'Database connection not available' 
+      }, { status: 500 });
+    }
+
     console.log('🔍 API Debug - PUT /api/companies/locations called');
     
     const authHeader = request.headers.get('authorization');
