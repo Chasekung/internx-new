@@ -3,11 +3,17 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client with admin privileges
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Helper function to create admin client when needed
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing Supabase environment variables');
+  }
+  
+  return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -25,6 +31,9 @@ export async function POST(request: NextRequest) {
     if (!company_name || !contact_name) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+    
+    // Create admin client when needed
+    const supabaseAdmin = getSupabaseAdmin();
     
     // Check if company profile already exists
     const { data: existing, error: existingError } = await supabaseAdmin
@@ -133,6 +142,9 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Company not found' }, { status: 404 });
     }
 
+    // Create admin client when needed
+    const supabaseAdmin = getSupabaseAdmin();
+
     // Prepare update data with all possible fields
     const updateData: any = {
       company_name: body.company_name,
@@ -162,7 +174,7 @@ export async function PUT(request: NextRequest) {
       .update(updateData)
       .eq('id', user.id)
       .select()
-      .maybeSingle();
+      .single();
 
     if (updateError) {
       console.log('❌ Error updating company:', updateError);
