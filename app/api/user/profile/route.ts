@@ -18,8 +18,8 @@ export async function GET(request: NextRequest) {
 
     const token = authHeader.substring(7);
     
-    // Get user from Supabase session
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    // Get user from Supabase session - supabaseAdmin is guaranteed to be non-null here
+    const { data: { user }, error: authError } = await supabaseAdmin!.auth.getUser(token);
     
     if (authError || !user) {
       console.error('Auth error:', authError);
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Create a Supabase client with the user's token
-    const { data: profile, error: profileError } = await supabaseAdmin
+    const { data: profile, error: profileError } = await supabaseAdmin!
       .from('interns')
       .select('*')
       .eq('id', user.id)
@@ -104,8 +104,8 @@ export async function PUT(request: NextRequest) {
     const token = authHeader.substring(7);
     const body = await request.json();
     
-    // Verify the token and get user info
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token);
+    // Verify the token and get user info - supabaseAdmin is guaranteed to be non-null here
+    const { data: { user }, error: authError } = await supabaseAdmin!.auth.getUser(token);
     
     if (authError || !user) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
@@ -141,7 +141,7 @@ export async function PUT(request: NextRequest) {
     };
 
     // Update the profile
-    const { data: updatedProfile, error: updateError } = await supabaseAdmin
+    const { data: updatedProfile, error: updateError } = await supabaseAdmin!
       .from('interns')
       .update(updateData)
       .eq('id', user.id)
