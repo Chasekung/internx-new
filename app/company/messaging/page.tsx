@@ -13,9 +13,14 @@ export default function CompanyMessagingPage() {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
 
-  const supabase = createClientComponentClient();
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   // Check for mobile view
   useEffect(() => {
@@ -29,6 +34,8 @@ export default function CompanyMessagingPage() {
   }, []);
 
   useEffect(() => {
+    if (!supabase) return;
+    
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -44,7 +51,7 @@ export default function CompanyMessagingPage() {
     };
 
     getUser();
-  }, [router]);
+  }, [supabase, router]);
 
   const handleConversationCreated = (conversationId: string) => {
     // You can add logic here to refresh the messaging portal

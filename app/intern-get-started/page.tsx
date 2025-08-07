@@ -8,7 +8,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function InternGetStarted() {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const [supabase, setSupabase] = useState<any>(null);
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
@@ -25,8 +25,15 @@ export default function InternGetStarted() {
   const [isSuccess, setIsSuccess] = useState(false);
   const authChecked = useRef(false);
 
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
+
   // Clear any expired tokens on page load
   useEffect(() => {
+    if (!supabase) return;
     const clearExpiredTokens = async () => {
       try {
         const { data: { user }, error } = await supabase.auth.getUser();
@@ -42,7 +49,7 @@ export default function InternGetStarted() {
     };
     
     clearExpiredTokens();
-  }, []);
+  }, [supabase]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

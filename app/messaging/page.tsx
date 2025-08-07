@@ -13,9 +13,14 @@ export default function MessagingPage() {
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
 
-  const supabase = createClientComponentClient();
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   // Check for mobile view
   useEffect(() => {
@@ -29,6 +34,8 @@ export default function MessagingPage() {
   }, []);
 
   useEffect(() => {
+    if (!supabase) return;
+    
     const checkAuth = async () => {
       try {
         const { data: { user }, error } = await supabase.auth.getUser();
