@@ -10,11 +10,17 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 export default function CompanySignIn() {
   console.log('Loaded company sign-in page!');
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const [supabase, setSupabase] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
   const authChecked = useRef(false);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
     if (error === 'INTERN_USER') {
@@ -32,6 +38,13 @@ export default function CompanySignIn() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    
+    if (!supabase) {
+      setError('Authentication system not ready. Please try again.');
+      setIsLoading(false);
+      return;
+    }
+    
     const form = e.currentTarget;
     const formData = new FormData(form);
     const email = formData.get('email') as string;
@@ -124,19 +137,21 @@ export default function CompanySignIn() {
     clearExpiredTokens();
   }, []);
   
-  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN') {
-      console.log('Company user signed in:', session?.user);
-    } else if (event === 'SIGNED_OUT') {
-      console.log('Company user signed out');
-    }
-  });
-  
   useEffect(() => {
+    if (!supabase) return;
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: string, session: any) => {
+      if (event === 'SIGNED_IN') {
+        console.log('Company user signed in:', session?.user);
+      } else if (event === 'SIGNED_OUT') {
+        console.log('Company user signed out');
+      }
+    });
+    
     return () => {
       subscription.unsubscribe();
     };
-  }, [subscription]);
+  }, [supabase]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">

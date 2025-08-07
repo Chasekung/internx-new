@@ -8,7 +8,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export default function InternSignIn() {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const [supabase, setSupabase] = useState<any>(null);
   const [formData, setFormData] = useState({
     identifier: '',
     password: '',
@@ -19,8 +19,15 @@ export default function InternSignIn() {
   const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
   const authChecked = useRef(false);
 
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
+
   // Clear any expired tokens on page load
   useEffect(() => {
+    if (!supabase) return;
     const clearExpiredTokens = async () => {
       try {
         const { data: { user }, error } = await supabase.auth.getUser();
@@ -36,7 +43,7 @@ export default function InternSignIn() {
     };
     
     clearExpiredTokens();
-  }, []);
+  }, [supabase]);
 
   useEffect(() => {
     if (error === 'COMPANY_USER') {
@@ -60,6 +67,11 @@ export default function InternSignIn() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!supabase) {
+      setError('Authentication system not ready. Please try again.');
+      return;
+    }
     
     // Prevent rapid successive login attempts (debounce)
     const now = Date.now();
