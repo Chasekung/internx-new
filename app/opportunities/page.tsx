@@ -97,10 +97,19 @@ const OpportunityCard: React.FC<{ internship: Internship; onClick: () => void }>
 const OpportunitiesPage: React.FC = () => {
   const [internships, setInternships] = useState<Internship[]>([]);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
   
 
   useEffect(() => {
+    if (!supabase) return;
+    
     const load = async () => {
       const { data, error } = await supabase.from('internships').select('*');
       if (!error && data) setInternships(data);
@@ -109,7 +118,7 @@ const OpportunitiesPage: React.FC = () => {
     load();
     window.addEventListener('opportunitiesUpdated', load);
     return () => window.removeEventListener('opportunitiesUpdated', load);
-  }, []);
+  }, [supabase]);
 
   const handleInternshipClick = (internshipId: string) => {
     const userStr = localStorage.getItem('user');
