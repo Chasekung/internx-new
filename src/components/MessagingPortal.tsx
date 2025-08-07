@@ -68,8 +68,15 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [activeTab, setActiveTab] = useState<'messages' | 'announcements'>('messages');
   const [isMobileView, setIsMobileView] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
 
-  const supabase = createClientComponentClient();
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
+
+  
 
   // Check for mobile view
   useEffect(() => {

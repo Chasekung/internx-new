@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface Question {
   id: string;
   type: 'short_text' | 'long_text' | 'multiple_choice' | 'checkboxes' | 'dropdown' | 'file_upload' | 'video_upload';
@@ -31,7 +34,7 @@ export default function ApplicationForm({
   params: { internshipId: string; applicationId: string } 
 }) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  
   const [formData, setFormData] = useState<FormData | null>(null);
   const [currentSection, setCurrentSection] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
@@ -39,6 +42,13 @@ export default function ApplicationForm({
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formResponseId, setFormResponseId] = useState<string | null>(null);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
     loadFormData();

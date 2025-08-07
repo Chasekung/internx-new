@@ -68,11 +68,18 @@ export default function ApplicationResponseView({
   isExpanded, 
   onToggle 
 }: ApplicationResponseViewProps) {
-  const supabase = createClientComponentClient();
+  
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [isAddingToTeam, setIsAddingToTeam] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {

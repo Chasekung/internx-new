@@ -8,6 +8,9 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import OpportunityCardView from '@/components/OpportunityCardView';
 import OpportunityListView from '@/components/OpportunityListView';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface Internship {
   id: string;
   company_id: string;
@@ -95,7 +98,7 @@ const OpportunitiesPage: React.FC = () => {
   const [internships, setInternships] = useState<Internship[]>([]);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  
 
   useEffect(() => {
     const load = async () => {

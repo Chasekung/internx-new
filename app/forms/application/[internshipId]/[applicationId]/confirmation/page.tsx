@@ -5,15 +5,25 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 export default function ApplicationConfirmation({ 
   params: { internshipId, applicationId } 
 }: { 
   params: { internshipId: string; applicationId: string } 
 }) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  
   const [internshipDetails, setInternshipDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
     const fetchInternshipDetails = async () => {

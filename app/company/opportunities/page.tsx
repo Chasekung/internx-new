@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 const CATEGORIES = [
   "Software Engineering",
   "Marketing",
@@ -119,13 +122,20 @@ interface Internship {
 
 export default function CompanyOpportunitiesPage() {
   const [internships, setInternships] = useState<Internship[]>([]);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
   const router = useRouter();
 
   // Fetch internships for this company (optional, for initial load)
   useEffect(() => {
     // TODO: Replace with actual company filter if needed
     const fetchInternships = async () => {
-      const supabase = createClientComponentClient();
+      
       const { data, error } = await supabase.from('internships').select('*');
       if (!error && data) setInternships(data);
     };

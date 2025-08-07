@@ -8,6 +8,9 @@ import { BsGrid, BsList } from 'react-icons/bs';
 import OpportunityCardView from '@/components/OpportunityCardView';
 import OpportunityListView from '@/components/OpportunityListView';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 const CATEGORIES = [
   "Software Engineering",
   "Marketing",
@@ -146,6 +149,13 @@ export default function CompanyOpportunitiesPage() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
     const userStr = typeof window !== "undefined" ? localStorage.getItem("user") : null;
@@ -164,7 +174,7 @@ export default function CompanyOpportunitiesPage() {
       return;
     }
     const fetchUser = async () => {
-      const supabase = createClientComponentClient();
+      
       const { data: { user } } = await supabase.auth.getUser();
       setUserId(user?.id || null);
     };
@@ -173,7 +183,7 @@ export default function CompanyOpportunitiesPage() {
 
   useEffect(() => {
     const fetchInternships = async () => {
-      const supabase = createClientComponentClient();
+      
       const { data, error } = await supabase.from('internships').select('*').eq('company_id', companyId);
       if (!error && data) setInternships(data);
       setLoading(false);
@@ -231,7 +241,7 @@ export default function CompanyOpportunitiesPage() {
         : form.position;
 
       // First create the internship posting without images
-      const supabase = createClientComponentClient();
+      
       const { data: internship, error: postingError } = await supabase
         .from('internships')
         .insert([{
@@ -271,7 +281,7 @@ export default function CompanyOpportunitiesPage() {
             const fileName = `${internship.id}_${fieldName}_${Date.now()}.${fileExt}`;
             
             // Upload the file
-            const supabase = createClientComponentClient();
+            
             const { error: uploadError } = await supabase.storage
               .from('internship-pictures')
               .upload(fileName, blob);
@@ -318,7 +328,7 @@ export default function CompanyOpportunitiesPage() {
       
       // Update internship with image URLs if any were uploaded
       if (Object.keys(imageUrls).length > 0) {
-        const supabase = createClientComponentClient();
+        
         const { error: updateError } = await supabase
           .from('internships')
           .update(imageUrls)
@@ -343,7 +353,7 @@ export default function CompanyOpportunitiesPage() {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this opportunity?')) return;
-    const supabase = createClientComponentClient();
+    
     const { error } = await supabase.from('internships').delete().eq('id', id);
     if (!error) {
       setInternships((prev) => prev.filter((item) => item.id !== id));

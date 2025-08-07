@@ -31,11 +31,18 @@ export default function SimpleAIInterview({ sessionId, onComplete, onExit, onSes
   const [totalQuestionsAsked, setTotalQuestionsAsked] = useState(0);
   const [categoriesCovered, setCategoriesCovered] = useState<string[]>([]);
   const [canFinishInterview, setCanFinishInterview] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
-  const supabase = createClientComponentClient();
+  
 
   // Helper function to make authenticated API calls
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {

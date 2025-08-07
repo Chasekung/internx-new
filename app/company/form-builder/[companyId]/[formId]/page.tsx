@@ -22,6 +22,9 @@ import {
 import { Toaster } from 'react-hot-toast';
 import { toast } from 'react-hot-toast';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface Question {
   id: string;
   type: 'short_text' | 'long_text' | 'multiple_choice' | 'checkboxes' | 'dropdown' | 'file_upload' | 'video_upload';
@@ -467,7 +470,7 @@ const ThemedQuestion = ({
 
 export default function FormBuilder({ params: { companyId, formId } }: { params: { companyId: string, formId: string } }) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  
   const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'build' | 'settings' | 'publish'>('build');
   const [sections, setSections] = useState<Section[]>([]);
@@ -938,6 +941,13 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     onClose: () => void;
   }) => {
     const [localQuestion, setLocalQuestion] = useState<Question>({ ...question });
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
     useEffect(() => {
       setLocalQuestion(question);

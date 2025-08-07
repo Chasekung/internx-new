@@ -18,6 +18,9 @@ import {
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import toast, { Toaster } from 'react-hot-toast';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface FormData {
   id: string;
   title: string;
@@ -57,7 +60,7 @@ interface Question {
 
 export default function FormBuilderPreview({ params: { companyId, formId } }: { params: { companyId: string, formId: string } }) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  
   const [activeTab, setActiveTab] = useState<'build' | 'settings' | 'publish'>('publish');
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<FormData | null>(null);
@@ -68,6 +71,13 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
   // Multi-step form state
   const [currentStep, setCurrentStep] = useState(0);
   const [userRole, setUserRole] = useState<'COMPANY' | 'INTERN' | null>(null);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
     // Detect user role

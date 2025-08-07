@@ -12,6 +12,9 @@ import {
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import toast, { Toaster } from 'react-hot-toast';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface FormData {
   id: string;
   title: string;
@@ -50,7 +53,7 @@ interface Question {
 
 export default function PublicForm({ params: { id, internship_id } }: { params: { id: string, internship_id: string } }) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState<FormData | null>(null);
   const [sections, setSections] = useState<Section[]>([]);
@@ -59,6 +62,13 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
   // Multi-step form state
   const [currentStep, setCurrentStep] = useState(0);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
     loadFormData();

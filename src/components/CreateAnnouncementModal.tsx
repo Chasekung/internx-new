@@ -27,8 +27,15 @@ export default function CreateAnnouncementModal({
   const [content, setContent] = useState('');
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
 
-  const supabase = createClientComponentClient();
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
+
+  
 
   useEffect(() => {
     if (isOpen) {

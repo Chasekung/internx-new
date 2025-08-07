@@ -8,6 +8,9 @@ import { type Posting, type CompanyLocation, getCompanyLocations } from '@/lib/p
 import AnimatedBackground from './AnimatedBackground';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface PostingContentProps {
   posting: Posting;
 }
@@ -17,7 +20,14 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
   const locations = getCompanyLocations(company);
   const [hasApplicationForm, setHasApplicationForm] = useState<boolean | null>(null);
   const [isCheckingForm, setIsCheckingForm] = useState(true);
-  const supabase = createClientComponentClient();
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
+  
 
   // Group locations by state
   const locationsByState = locations.reduce((acc, location) => {

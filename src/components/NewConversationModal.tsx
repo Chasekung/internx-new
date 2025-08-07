@@ -31,7 +31,7 @@ export default function NewConversationModal({
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  const supabase = createClientComponentClient();
+  
 
   useEffect(() => {
     if (isOpen) {
@@ -41,6 +41,13 @@ export default function NewConversationModal({
 
   // Helper to get intern IDs already in a conversation with this company
   const [existingInternIds, setExistingInternIds] = useState<string[]>([]);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
   useEffect(() => {
     if (isOpen && userType === 'company') {
       (async () => {
