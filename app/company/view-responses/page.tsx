@@ -14,6 +14,9 @@ import {
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface Application {
   id: string;
   status: string;
@@ -89,16 +92,21 @@ export default function ViewResponsesPage() {
   const [isAddingToTeam, setIsAddingToTeam] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [showTeamModal, setShowTeamModal] = useState(false);
+  const [supabase, setSupabase] = useState<any>(null);
 
-  const supabase = createClientComponentClient();
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   // Load applications data
   useEffect(() => {
-    if (internshipId) {
-      loadApplications();
-      loadInternshipDetails();
-    }
-  }, [internshipId]);
+    if (!supabase || !internshipId) return;
+    
+    loadApplications();
+    loadInternshipDetails();
+  }, [supabase, internshipId]);
 
   // Handle arrow key navigation
   const handleKeyDown = useCallback((event: KeyboardEvent) => {

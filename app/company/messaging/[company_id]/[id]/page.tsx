@@ -4,6 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useParams } from 'next/navigation';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface Message {
   id: string;
   conversation_id: string;
@@ -29,12 +32,20 @@ export default function ChatArea() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [supabase, setSupabase] = useState<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const params = useParams();
   const conversationId = params.id as string;
-  const supabase = createClientComponentClient();
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
+    if (!supabase) return;
+    
     const checkAuth = async () => {
       try {
         const { data: { user }, error } = await supabase.auth.getUser();

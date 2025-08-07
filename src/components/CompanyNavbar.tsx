@@ -23,7 +23,13 @@ export default function CompanyNavbar() {
   const router = useRouter();
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const supabase = createClientComponentClient();
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
     let authCheckTimeout: NodeJS.Timeout;

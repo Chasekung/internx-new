@@ -10,8 +10,7 @@ import { FiChevronDown, FiSettings, FiMenu, FiX } from 'react-icons/fi';
 import { Menu } from '@headlessui/react';
 import { classNames } from '@/lib/classNames';
 
-// Create a single Supabase client instance to avoid multiple instances
-const supabase = createClientComponentClient();
+// Supabase client will be initialized in useEffect to avoid build-time evaluation
 
 interface User {
   id: string;
@@ -75,7 +74,14 @@ export default function UserNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   const aboutUsRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -101,6 +107,8 @@ export default function UserNavbar() {
   };
 
   useEffect(() => {
+    if (!supabase) return;
+    
     let lastAuthCheck = 0;
     let isChecking = false; // Prevent concurrent auth checks
     
@@ -252,9 +260,10 @@ export default function UserNavbar() {
         clearTimeout(authCheckTimeout.current);
       }
     };
-  }, []);
+  }, [supabase]);
 
   const handleSignOut = async () => {
+    if (!supabase) return;
     await supabase.auth.signOut();
     localStorage.removeItem('user');
     window.dispatchEvent(new Event('storage'));

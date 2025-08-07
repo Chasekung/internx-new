@@ -6,6 +6,9 @@ import Image from 'next/image';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 const STATE_ABBREVIATIONS = {
   'Alabama': 'AL',
   'Alaska': 'AK',
@@ -119,7 +122,13 @@ interface Location {
 
 const EditCompanyPage = () => {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
   const [activeSection, setActiveSection] = useState('basic');
   const [companyData, setCompanyData] = useState<CompanyData>({
     companyName: '',

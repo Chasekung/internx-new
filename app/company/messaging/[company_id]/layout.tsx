@@ -6,6 +6,9 @@ import { useRouter, useParams } from "next/navigation";
 import NewConversationModal from "@/components/NewConversationModal";
 import { checkCompanyAuth } from "@/lib/companyAuth";
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface Conversation {
   id: string;
   company_id: string;
@@ -32,13 +35,21 @@ export default function MessagingLayout({ children }: { children: React.ReactNod
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
   const params = useParams();
   const companyId = params.company_id as string;
   const conversationId = params.id as string | undefined;
-  const supabase = createClientComponentClient();
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
+    if (!supabase) return;
+    
     const checkAuth = async () => {
       try {
         const { isCompany, user, error } = await checkCompanyAuth();

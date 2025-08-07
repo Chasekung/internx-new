@@ -2,14 +2,9 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-// Helper function to create Supabase client when needed
-function getSupabaseClient() {
-  return createRouteHandlerClient({ cookies });
-}
-
 export async function GET() {
   try {
-    const supabase = getSupabaseClient();
+    const supabase = createRouteHandlerClient({ cookies });
 
     // Get all active questions
     const { data: questions, error: questionsError } = await supabase
