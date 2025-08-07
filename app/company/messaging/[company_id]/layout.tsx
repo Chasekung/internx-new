@@ -102,7 +102,7 @@ export default function MessagingLayout({ children }: { children: React.ReactNod
           schema: 'public',
           table: 'conversations',
         },
-        async (payload) => {
+        async (payload: any) => {
           console.log('Conversation updated:', payload);
           // Refresh conversations when any conversation changes
           await fetchConversations();
@@ -115,7 +115,7 @@ export default function MessagingLayout({ children }: { children: React.ReactNod
           schema: 'public',
           table: 'messages',
         },
-        async (payload) => {
+        async (payload: any) => {
           console.log('Message updated:', payload);
           // Refresh conversations when messages change (for latest message preview)
           await fetchConversations();

@@ -67,7 +67,7 @@ export default function ChatArea() {
     console.log('🧪 Testing Supabase realtime connection...');
     const testChannel = supabase
       .channel('test-connection')
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         console.log('🔗 Realtime connection test status:', status);
         if (status === 'SUBSCRIBED') {
           console.log('✅ Realtime is working!');
@@ -105,7 +105,7 @@ export default function ChatArea() {
           table: 'messages',
           filter: `conversation_id=eq.${conversationId}`,
         },
-        async (payload) => {
+        async (payload: any) => {
           console.log('🎉 NEW MESSAGE RECEIVED via realtime:', payload);
           
           // Get the complete message data with sender info
@@ -135,7 +135,7 @@ export default function ChatArea() {
           window.dispatchEvent(new CustomEvent('conversation-updated'));
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         console.log('📡 Realtime subscription status:', status);
       });
 

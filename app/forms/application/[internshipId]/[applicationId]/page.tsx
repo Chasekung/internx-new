@@ -146,7 +146,7 @@ export default function ApplicationForm({
 
       if (error) throw error;
 
-      const answersMap = savedAnswers.reduce((acc: Record<string, any>, answer) => {
+      const answersMap = savedAnswers.reduce((acc: Record<string, any>, answer: any) => {
         acc[answer.question_id] = answer.answer_data || answer.answer_text;
         return acc;
       }, {});

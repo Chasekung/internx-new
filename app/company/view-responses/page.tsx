@@ -255,7 +255,7 @@ export default function ViewResponsesPage() {
       console.log('📊 Number of applications found:', applications?.length);
 
       // Debug each application in detail
-      (applications || []).forEach((app, index) => {
+      (applications || []).forEach((app: any, index: number) => {
         const formResponseData = Array.isArray(app.form_responses) ? app.form_responses[0] : app.form_responses;
         const internData = Array.isArray(app.interns) ? app.interns[0] : app.interns;
         
@@ -283,7 +283,7 @@ export default function ViewResponsesPage() {
 
       // Filter out applications without form responses and sort by submission time
       const validApplications = applications
-        .filter(app => {
+        .filter((app: any) => {
           const formResponseData = Array.isArray(app.form_responses) ? app.form_responses[0] : app.form_responses;
           const isValid = formResponseData && 
                          formResponseData.status === 'submitted' && 
@@ -300,7 +300,7 @@ export default function ViewResponsesPage() {
           
           return isValid;
         })
-        .map(app => {
+        .map((app: any) => {
           const internData = Array.isArray(app.interns) ? app.interns[0] : app.interns;
           const formResponseData = Array.isArray(app.form_responses) ? app.form_responses[0] : app.form_responses;
           const formsData = Array.isArray(formResponseData.forms) ? formResponseData.forms[0] : formResponseData.forms;
@@ -329,7 +329,7 @@ export default function ViewResponsesPage() {
             }
           };
         })
-        .sort((a, b) => {
+        .sort((a: any, b: any) => {
           // Sort by form submission time (earliest first)
           const aTime = new Date(a.form_responses.submitted_at).getTime();
           const bTime = new Date(b.form_responses.submitted_at).getTime();

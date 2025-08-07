@@ -497,6 +497,13 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   // Multi-step form state
   const [currentStep, setCurrentStep] = useState(0);
   const [userRole, setUserRole] = useState<'COMPANY' | 'INTERN' | null>(null);
+  const [supabase, setSupabase] = useState<any>(null);
+
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   const getIconSize = (type: string) => {
     switch (type) {
@@ -537,11 +544,18 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       }
     }
     
-    loadForm();
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (supabase) {
+      loadForm();
+    }
+  }, [supabase]);
+
   const loadForm = async () => {
+    if (!supabase) return;
+    
     try {
       setIsLoading(true);
       setError(null); // Clear any previous errors
