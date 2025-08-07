@@ -13,7 +13,7 @@ function getOpenAIClient() {
   
   return new OpenAI({
     apiKey: apiKey,
-  });
+});
 }
 
 // Note: OpenAI client will be initialized when package is installed

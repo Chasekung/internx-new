@@ -3,9 +3,18 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Helper function to create OpenAI client when needed
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is missing or empty');
+  }
+  
+  return new OpenAI({
+    apiKey: apiKey,
+  });
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -120,7 +129,7 @@ Respond in JSON format:
   "creative_media_recommendation": "string"
 }`;
 
-      const completion = await openai.chat.completions.create({
+      const completion = await getOpenAIClient().chat.completions.create({
         model: "gpt-4o",
         messages: [
           { 

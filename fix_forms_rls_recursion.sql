@@ -5,7 +5,7 @@
 DROP POLICY IF EXISTS "Companies can create forms" ON public.forms;
 DROP POLICY IF EXISTS "Companies can view their own forms" ON public.forms;
 DROP POLICY IF EXISTS "Companies can update their own forms" ON public.forms;
-DROP POLICY IF EXISTS "Companies can delete their own forms" ON public.forms;
+DROP POLICY IF EXISTS "Companies can delete their oAwn forms" ON public.forms;
 DROP POLICY IF EXISTS "Companies can manage their own forms" ON public.forms;
 DROP POLICY IF EXISTS "Interns can create application forms" ON public.forms;
 DROP POLICY IF EXISTS "Interns can view their application forms" ON public.forms;

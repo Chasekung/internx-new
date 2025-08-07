@@ -1,13 +1,22 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Helper function to create OpenAI client when needed
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is missing or empty');
+  }
+  
+  return new OpenAI({
+    apiKey: apiKey,
+  });
+}
 
 export async function GET() {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o", // Changed from gpt-4o-audio to gpt-4o
       messages: [
         {
