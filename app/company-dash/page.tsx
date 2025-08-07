@@ -11,7 +11,7 @@ import { checkCompanyAuth, CompanyUser } from '@/lib/companyAuth';
 
 export default function CompanyDash() {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+  const [supabase, setSupabase] = useState<any>(null);
   const [companyName, setCompanyName] = useState("");
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -32,7 +32,14 @@ export default function CompanyDash() {
   const [isLoading, setIsLoading] = useState(true);
   const [companyUser, setCompanyUser] = useState<CompanyUser | null>(null);
 
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
+
   const handleApplicationFormClick = async (postingId: string) => {
+    if (!supabase) return;
     try {
       // Get the current user's ID
       const { data: { user } } = await supabase.auth.getUser();
@@ -133,6 +140,7 @@ export default function CompanyDash() {
   };
 
   const loadPostings = async (companyId: string) => {
+    if (!supabase) return;
     try {
       const { data, error } = await supabase
         .from('internships')
@@ -184,6 +192,7 @@ export default function CompanyDash() {
   };
 
   const loadTeamMembers = async (companyId: string) => {
+    if (!supabase) return;
     try {
       setIsLoadingTeam(true);
       
@@ -230,6 +239,8 @@ export default function CompanyDash() {
   };
 
   useEffect(() => {
+    if (!supabase) return;
+    
     const checkAuth = async () => {
       try {
         setIsLoading(true);
@@ -273,7 +284,7 @@ export default function CompanyDash() {
     };
 
     checkAuth();
-  }, [router]);
+  }, [supabase, router]);
 
   const handleSignOut = () => {
     if (typeof window !== 'undefined') {

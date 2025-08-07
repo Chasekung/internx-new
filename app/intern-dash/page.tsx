@@ -108,11 +108,17 @@ export default function InternDash() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [profileUpdated, setProfileUpdated] = useState(false);
   const [lastProfileUpdate, setLastProfileUpdate] = useState<Date | null>(null);
+  const [supabase, setSupabase] = useState<any>(null);
 
-  const supabase = createClientComponentClient();
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   // Helper function to make authenticated API calls
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
+    if (!supabase) throw new Error('Supabase not initialized');
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
@@ -174,6 +180,8 @@ export default function InternDash() {
   };
   
   useEffect(() => {
+    if (!supabase) return;
+    
     const checkAuthAndFetchData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -195,7 +203,7 @@ export default function InternDash() {
     };
 
     checkAuthAndFetchData();
-  }, []);
+  }, [supabase]);
 
   // Check for profile updates
   useEffect(() => {
