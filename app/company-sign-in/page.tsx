@@ -7,6 +7,9 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 export default function CompanySignIn() {
   console.log('Loaded company sign-in page!');
   const router = useRouter();

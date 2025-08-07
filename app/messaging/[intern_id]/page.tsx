@@ -5,17 +5,27 @@ import { useRouter, useParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import MessagingPortal from '@/components/MessagingPortal';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 export default function MessagingPage() {
   const [user, setUser] = useState<any>(null);
   const [userType, setUserType] = useState<'company' | 'intern' | null>(null);
   const [loading, setLoading] = useState(true);
+  const [supabase, setSupabase] = useState<any>(null);
   const router = useRouter();
   const params = useParams();
   const { intern_id } = params;
 
-  const supabase = createClientComponentClient();
+  // Initialize Supabase client when component mounts
+  useEffect(() => {
+    const client = createClientComponentClient();
+    setSupabase(client);
+  }, []);
 
   useEffect(() => {
+    if (!supabase) return;
+    
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -56,7 +66,7 @@ export default function MessagingPage() {
     };
 
     getUser();
-  }, []);
+  }, [supabase]);
 
   if (loading) {
     return (

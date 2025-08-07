@@ -6,6 +6,9 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 export default function InternSignIn() {
   const router = useRouter();
   const [supabase, setSupabase] = useState<any>(null);

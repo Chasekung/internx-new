@@ -7,6 +7,9 @@ import Link from 'next/link';
 import MessagingPortal from '@/components/MessagingPortal';
 import NewConversationModal from '@/components/NewConversationModal';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 export default function MessagingPage() {
   const [user, setUser] = useState<any>(null);
   const [userType, setUserType] = useState<'company' | 'intern' | null>(null);

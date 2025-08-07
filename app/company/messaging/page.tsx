@@ -7,6 +7,9 @@ import MessagingPortal from '@/components/MessagingPortal';
 import NewConversationModal from '@/components/NewConversationModal';
 import CreateAnnouncementModal from '@/components/CreateAnnouncementModal';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 export default function CompanyMessagingPage() {
   const [user, setUser] = useState<any>(null);
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);

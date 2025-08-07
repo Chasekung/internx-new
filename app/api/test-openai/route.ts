@@ -1,22 +1,20 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Helper function to create OpenAI client when needed
-function getOpenAIClient() {
-  const apiKey = process.env.OPENAI_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is missing or empty');
-  }
-  
-  return new OpenAI({
-    apiKey: apiKey,
-  });
-}
-
 export async function GET() {
   try {
-    const response = await getOpenAIClient().chat.completions.create({
+    // Create OpenAI client inside the route handler
+    const apiKey = process.env.OPENAI_API_KEY;
+  
+    if (!apiKey) {
+      throw new Error('OPENAI_API_KEY environment variable is missing or empty');
+    }
+  
+    const openai = new OpenAI({
+      apiKey: apiKey,
+    });
+
+    const response = await openai.chat.completions.create({
       model: "gpt-4o", // Changed from gpt-4o-audio to gpt-4o
       messages: [
         {

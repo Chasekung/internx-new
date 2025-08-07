@@ -9,6 +9,9 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import ApplicationResponseView from '@/components/ApplicationResponseView';
 import { checkCompanyAuth, CompanyUser } from '@/lib/companyAuth';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 export default function CompanyDash() {
   const router = useRouter();
   const [supabase, setSupabase] = useState<any>(null);

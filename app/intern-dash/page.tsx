@@ -10,6 +10,9 @@ import ReferralStats from '@/components/ReferralStats';
 import AIInterviewGate from '@/components/AIInterviewGate';
 import SimpleAIInterview from '@/components/SimpleAIInterview';
 
+// Force dynamic rendering to prevent build-time evaluation
+export const dynamic = 'force-dynamic';
+
 interface InternData {
   id: string;
   full_name: string;
