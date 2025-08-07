@@ -4,77 +4,111 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
+// Custom animations for feature icons
+const iconAnimations = {
+  pulse: {
+    animate: {
+      scale: [1, 1.1, 1],
+      opacity: [0.8, 1, 0.8],
+    },
+    transition: {
+      duration: 2,
+      repeat: Infinity,
+      ease: "easeInOut" as const
+    }
+  },
+  bounce: {
+    animate: {
+      y: [0, -10, 0],
+    },
+    transition: {
+      duration: 1.5,
+      repeat: Infinity,
+      ease: "easeInOut" as const
+    }
+  },
+  spin: {
+    animate: {
+      rotate: [0, 360],
+    },
+    transition: {
+      duration: 3,
+      repeat: Infinity,
+      ease: "linear" as const
+    }
+  },
+  ping: {
+    animate: {
+      scale: [1, 1.2, 1],
+      opacity: [1, 0.5, 1],
+    },
+    transition: {
+      duration: 1.5,
+      repeat: Infinity,
+      ease: "easeInOut" as const
+    }
+  }
+}
+
 const features = [
   {
-    name: 'AI-Powered Role Analysis',
-    description: 'Our AI analyzes company roles and processes to identify hidden Opportunity opportunities, expanding the supply of available positions.',
+    name: '🎯 AI Career Pathfinder',
+    description: 'Our advanced AI analyzes your interests, skills, and goals to discover hidden career opportunities you never knew existed. Get personalized recommendations that match your unique profile.',
     icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-      </svg>
+      <motion.div 
+        className="relative"
+        {...iconAnimations.pulse}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg"></div>
+        <svg className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+      </motion.div>
     ),
   },
   {
-    name: 'Smart Skill Matching',
-    description: 'Connect with opportunities based on your skills rather than prior experience, making it easier for high school students to find relevant positions.',
+    name: '🚀 Skill-Based Matching',
+    description: 'No experience required! Our platform matches you with opportunities based on your natural talents, creativity, and willingness to learn. Your potential is your passport to amazing experiences.',
     icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-      </svg>
+      <motion.div 
+        className="relative"
+        {...iconAnimations.bounce}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-lg"></div>
+        <svg className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+        </svg>
+      </motion.div>
     ),
   },
   {
-    name: 'AI Intern Coach',
-    description: 'Get continuous guidance and feedback through our AI Intern Mentor Agents, reducing supervision time by up to 90% for companies.',
+    name: '🤖 AI Mentor Companion',
+    description: 'Get 24/7 guidance from your personal AI mentor! Learn new skills, get instant feedback, and grow your confidence with real-time coaching that adapts to your learning style.',
     icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-      </svg>
+      <motion.div 
+        className="relative"
+        {...iconAnimations.spin}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-lg"></div>
+        <svg className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      </motion.div>
     ),
   },
   {
-    name: 'Direct Company Connections',
-    description: 'Bypass traditional barriers and connect directly with companies that are open to high school interns.',
+    name: '💫 Direct Company Access',
+    description: 'Skip the traditional barriers! Connect directly with innovative companies that value fresh perspectives and creative thinking. Your youth is your superpower in the modern workplace.',
     icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Virtual Reality Career Exploration',
-    description: 'Experience different career paths through immersive VR simulations, helping you discover your passion before committing to an opportunity.',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Micro-Credential Learning Paths',
-    description: 'Earn industry-recognized micro-credentials through our integrated learning modules, building your resume while gaining real-world experience.',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Peer Mentorship Network',
-    description: 'Connect with successful high school alumni who have completed opportunities, creating a supportive community of peer mentors.',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
-  },
-  {
-    name: 'Real-Time Industry Insights',
-    description: 'Get live updates on emerging career trends and in-demand skills through our AI-powered industry analysis dashboard.',
-    icon: (
-      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-      </svg>
+      <motion.div 
+        className="relative"
+        {...iconAnimations.ping}
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-lg"></div>
+        <svg className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+      </motion.div>
     ),
   },
 ]
@@ -473,48 +507,11 @@ export default function HomeClient() {
           </div>
 
           {/* Feature Section */}
-          <div className="py-8 sm:py-12 bg-gray-50 relative overflow-hidden">
-            {/* Floating animation elements */}
-            <motion.div
-              className="absolute top-10 left-10 w-20 h-20 bg-blue-200 rounded-full opacity-20"
-              animate={{
-                y: [0, -20, 0],
-                x: [0, 10, 0],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-            <motion.div
-              className="absolute top-20 right-20 w-16 h-16 bg-purple-200 rounded-full opacity-20"
-              animate={{
-                y: [0, 15, 0],
-                x: [0, -15, 0],
-              }}
-              transition={{
-                duration: 5,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-            <motion.div
-              className="absolute bottom-10 left-1/4 w-12 h-12 bg-indigo-200 rounded-full opacity-20"
-              animate={{
-                y: [0, -10, 0],
-                x: [0, 20, 0],
-              }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            />
-            <div className="mobile-container relative z-10">
+          <div className="py-8 sm:py-12 bg-gray-50">
+            <div className="mobile-container">
               <div className="lg:text-center">
                 <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Features</h2>
-                <p className="mt-2 mobile-heading font-extrabold tracking-tight gradient-flow">
+                <p className="mt-2 mobile-heading font-extrabold tracking-tight text-gray-900">
                   Revolutionizing High School Opportunities
                 </p>
                 <p className="mt-4 max-w-2xl mobile-text text-gray-500 lg:mx-auto">
@@ -523,56 +520,35 @@ export default function HomeClient() {
               </div>
 
               <div className="mt-8 sm:mt-10">
-                <motion.div 
-                  className="mobile-responsive-spacing md:space-y-0 md:grid md:grid-cols-2 lg:grid-cols-4 md:gap-x-8 md:gap-y-10"
-                  variants={containerVariants}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true }}
-                >
+                <div className="mobile-responsive-spacing md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
                   {features.map((feature, index) => (
                     <motion.div 
                       key={feature.name} 
                       className="relative group"
-                      variants={itemVariants}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: index * 0.1 }}
                       whileHover={{ 
-                        scale: 1.05,
+                        scale: 1.02,
                         transition: { duration: 0.2 }
                       }}
                     >
-                      <div className="p-6 bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300 group-hover:border-blue-200">
+                      <div className="p-6 rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200">
                         <dt>
-                          <motion.div 
-                            className="absolute flex h-12 w-12 items-center justify-center rounded-md bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg"
-                            whileHover={{ 
-                              rotate: 360,
-                              scale: 1.1,
-                              transition: { duration: 0.3 }
-                            }}
-                          >
+                          <div className="absolute flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
                             {feature.icon}
-                          </motion.div>
-                          <p className="ml-16 text-base sm:text-lg leading-6 font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
+                          </div>
+                          <p className="ml-16 text-base sm:text-lg leading-6 font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
                             {feature.name}
                           </p>
                         </dt>
-                        <dd className="mt-2 ml-16 mobile-text text-gray-500 group-hover:text-gray-700 transition-colors">
+                        <dd className="mt-2 ml-16 mobile-text text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
                           {feature.description}
                         </dd>
-                        
-                        {/* Animated background elements */}
-                        <motion.div
-                          className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-10 transition-opacity duration-300"
-                          style={{
-                            background: 'radial-gradient(circle at 30% 20%, rgba(59, 130, 246, 0.1) 0%, transparent 50%)'
-                          }}
-                          initial={{ opacity: 0 }}
-                          whileHover={{ opacity: 0.1 }}
-                        />
                       </div>
                     </motion.div>
                   ))}
-                </motion.div>
+                </div>
               </div>
             </div>
           </div>

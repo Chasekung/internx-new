@@ -32,6 +32,8 @@ export default function CompanyNavbar() {
   }, []);
 
   useEffect(() => {
+    if (!supabase) return; // Guard clause - wait for supabase to be initialized
+    
     let authCheckTimeout: NodeJS.Timeout;
     let lastAuthCheck = 0;
     let isChecking = false; // Prevent concurrent auth checks
@@ -103,46 +105,40 @@ export default function CompanyNavbar() {
             return;
           }
 
-          // Verify token is still valid with a timeout
-          const authPromise = supabase.auth.getUser(token);
-          const timeoutPromise = new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Auth timeout')), 5000)
-          );
+          // Verify token with Supabase
+          const { data: { user: supabaseUser }, error: userError } = await supabase.auth.getUser();
           
-          const { data: { user }, error: authError } = await Promise.race([
-            authPromise,
-            timeoutPromise
-          ]) as any;
-          
-          if (authError || !user) {
-            console.error('Auth error:', authError);
+          if (userError || !supabaseUser) {
+            console.log('❌ Supabase auth check failed:', userError);
             setIsSignedIn(false);
             setCompanyId(null);
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            // Auto-redirect on auth error
+            // Auto-redirect on auth failure
             if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
                 !window.location.pathname.includes('/company-sign-in') && 
                 !window.location.pathname.includes('/company-get-started')) {
-              console.log('🔄 Auth token invalid, redirecting to sign in...');
+              console.log('🔄 Supabase auth failed, redirecting to sign in...');
               window.location.href = '/company-sign-in';
             }
             return;
           }
 
+          console.log('✅ Auth check successful, user:', supabaseUser.id);
           setIsSignedIn(true);
-          setCompanyId(user.id);
+          setCompanyId(supabaseUser.id);
+          
         } catch (error) {
-          console.error('Auth check error:', error);
+          console.error('❌ Error during auth check:', error);
           setIsSignedIn(false);
           setCompanyId(null);
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          // Auto-redirect on any unexpected error
+          // Auto-redirect on error
           if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
               !window.location.pathname.includes('/company-sign-in') && 
               !window.location.pathname.includes('/company-get-started')) {
-            console.log('🔄 Unexpected auth error, redirecting to sign in...');
+            console.log('🔄 Auth check error, redirecting to sign in...');
             window.location.href = '/company-sign-in';
           }
         } finally {
@@ -154,7 +150,7 @@ export default function CompanyNavbar() {
     checkAuth();
     
     // Listen for Supabase auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       console.log('🔄 Company navbar - Auth state changed:', event);
       if (event === 'SIGNED_OUT') {
         setIsSignedIn(false);
@@ -205,11 +201,16 @@ export default function CompanyNavbar() {
       window.removeEventListener('login', handleLogin);
       clearTimeout(authCheckTimeout);
     };
-  }, []);
+  }, [supabase]); // Added supabase as dependency
 
   const handleSignOut = async () => {
     try {
       console.log('🔄 Starting sign out process...');
+      
+      if (!supabase) {
+        console.log('❌ Supabase client not initialized');
+        return;
+      }
       
       // Check current auth state before sign out
       const { data: { user: currentUser } } = await supabase.auth.getUser();
