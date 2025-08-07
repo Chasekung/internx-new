@@ -224,8 +224,8 @@ export default function CompanyDash() {
         setTeamMembers([]);
       } else {
         // Remove duplicates (same intern might have multiple applications)
-        const uniqueInterns = data?.filter((intern, index, array) => 
-          array.findIndex(i => i.id === intern.id) === index
+        const uniqueInterns = data?.filter((intern: any, index: number, array: any[]) => 
+          array.findIndex((i: any) => i.id === intern.id) === index
         ) || [];
         
         setTeamMembers(uniqueInterns);
