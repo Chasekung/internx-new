@@ -54,61 +54,399 @@ const features = [
   {
     name: '🎯 AI Career Pathfinder',
     description: 'Our advanced AI analyzes your interests, skills, and goals to discover hidden career opportunities you never knew existed. Get personalized recommendations that match your unique profile.',
-    icon: (
-      <motion.div 
-        className="relative"
-        {...iconAnimations.pulse}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-pink-400 rounded-lg"></div>
-        <svg className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
-      </motion.div>
+    mockup: (
+      <div className="relative bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">AI Career Pathfinder</h3>
+              <p className="text-purple-100 text-sm">Discover your perfect path</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-4 space-y-4">
+          {/* Profile Section */}
+          <div className="bg-gray-50 rounded-lg p-3">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full flex items-center justify-center text-white font-semibold">
+                S
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Sarah, 16</p>
+                <p className="text-sm text-gray-600">High School Student</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Art & Design</span>
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Creative</span>
+                <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">Tech-Savvy</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* AI Analysis */}
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3 border-l-4 border-purple-400">
+            <div className="flex items-start space-x-2">
+              <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">AI Analysis Complete</p>
+                <p className="text-xs text-gray-600 mt-1">Based on your interests and skills, we found 12 perfect opportunities!</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Recommendations */}
+          <div className="space-y-2">
+            <h4 className="text-sm font-semibold text-gray-900">Recommended for you:</h4>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 p-2 bg-white border border-gray-200 rounded-lg">
+                <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-purple-400 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Graphic Design Intern</p>
+                  <p className="text-xs text-gray-600">Creative Studio • Remote</p>
+                </div>
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">95% Match</span>
+              </div>
+              
+              <div className="flex items-center space-x-2 p-2 bg-white border border-gray-200 rounded-lg">
+                <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">UI/UX Design Assistant</p>
+                  <p className="text-xs text-gray-600">Tech Startup • Hybrid</p>
+                </div>
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">92% Match</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     ),
   },
   {
     name: '🚀 Skill-Based Matching',
     description: 'No experience required! Our platform matches you with opportunities based on your natural talents, creativity, and willingness to learn. Your potential is your passport to amazing experiences.',
-    icon: (
-      <motion.div 
-        className="relative"
-        {...iconAnimations.bounce}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-lg"></div>
-        <svg className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-        </svg>
-      </motion.div>
+    mockup: (
+      <div className="relative bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 p-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">Skill-Based Matching</h3>
+              <p className="text-blue-100 text-sm">Your potential is your passport</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-4 space-y-4">
+          {/* Skills Assessment */}
+          <div className="bg-gray-50 rounded-lg p-3">
+            <h4 className="text-sm font-semibold text-gray-900 mb-3">Your Skills Profile</h4>
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-gray-600">Creativity</span>
+                  <span className="text-blue-600 font-medium">95%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-blue-400 to-cyan-400 h-2 rounded-full" style={{width: '95%'}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-gray-600">Problem Solving</span>
+                  <span className="text-blue-600 font-medium">88%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-blue-400 to-cyan-400 h-2 rounded-full" style={{width: '88%'}}></div>
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-gray-600">Communication</span>
+                  <span className="text-blue-600 font-medium">92%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-gradient-to-r from-blue-400 to-cyan-400 h-2 rounded-full" style={{width: '92%'}}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Matching Results */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-gray-900">Perfect Matches Found</h4>
+            
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-3 border-l-4 border-blue-400">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Marketing Assistant</p>
+                  <p className="text-xs text-gray-600">Perfect for your creative skills</p>
+                </div>
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">98% Match</span>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-3 border-l-4 border-blue-400">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Content Creator</p>
+                  <p className="text-xs text-gray-600">Leverages your communication skills</p>
+                </div>
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">96% Match</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* No Experience Required */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <p className="text-sm font-medium text-yellow-800">No experience required!</p>
+            </div>
+            <p className="text-xs text-yellow-700 mt-1">We focus on your potential, not your past experience.</p>
+          </div>
+        </div>
+      </div>
     ),
   },
   {
     name: '🤖 AI Mentor Companion',
     description: 'Get 24/7 guidance from your personal AI mentor! Learn new skills, get instant feedback, and grow your confidence with real-time coaching that adapts to your learning style.',
-    icon: (
-      <motion.div 
-        className="relative"
-        {...iconAnimations.spin}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-lg"></div>
-        <svg className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-        </svg>
-      </motion.div>
+    mockup: (
+      <div className="relative bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">AI Mentor Companion</h3>
+              <p className="text-green-100 text-sm">24/7 personalized guidance</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-4 space-y-4">
+          {/* Chat Interface */}
+          <div className="bg-gray-50 rounded-lg p-3 space-y-3">
+            {/* AI Message */}
+            <div className="flex items-start space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1 bg-white rounded-lg p-3 shadow-sm">
+                <p className="text-sm text-gray-900">Hi Alex! I noticed you're interested in the marketing internship. Would you like me to help you prepare for the interview? I can give you some tips based on your profile.</p>
+              </div>
+            </div>
+            
+            {/* User Message */}
+            <div className="flex items-start space-x-2 justify-end">
+              <div className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 rounded-lg p-3">
+                <p className="text-sm text-white">Yes, that would be great! I'm a bit nervous about the interview.</p>
+              </div>
+              <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                <span className="text-xs font-medium text-gray-600">A</span>
+              </div>
+            </div>
+            
+            {/* AI Response */}
+            <div className="flex items-start space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="flex-1 bg-white rounded-lg p-3 shadow-sm">
+                <p className="text-sm text-gray-900">Don't worry! Here are 3 key tips for your interview:</p>
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span className="text-xs text-gray-700">Highlight your creative projects</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span className="text-xs text-gray-700">Show enthusiasm for learning</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span className="text-xs text-gray-700">Ask thoughtful questions</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Learning Progress */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3 border-l-4 border-green-400">
+            <div className="flex items-center space-x-2 mb-2">
+              <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span className="text-sm font-medium text-gray-900">Learning Progress</span>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs">
+                <span className="text-gray-600">Interview Skills</span>
+                <span className="text-green-600 font-medium">75%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="bg-gradient-to-r from-green-400 to-emerald-400 h-2 rounded-full" style={{width: '75%'}}></div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Quick Actions */}
+          <div className="flex space-x-2">
+            <button className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs py-2 px-3 rounded-lg font-medium">
+              Practice Interview
+            </button>
+            <button className="flex-1 bg-gray-100 text-gray-700 text-xs py-2 px-3 rounded-lg font-medium">
+              View Resources
+            </button>
+          </div>
+        </div>
+      </div>
     ),
   },
   {
     name: '💫 Direct Company Access',
     description: 'Skip the traditional barriers! Connect directly with innovative companies that value fresh perspectives and creative thinking. Your youth is your superpower in the modern workplace.',
-    icon: (
-      <motion.div 
-        className="relative"
-        {...iconAnimations.ping}
-      >
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-400 rounded-lg"></div>
-        <svg className="h-6 w-6 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-      </motion.div>
+    mockup: (
+      <div className="relative bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-orange-500 to-red-500 p-4">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <svg className="w-5 h-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold">Direct Company Access</h3>
+              <p className="text-orange-100 text-sm">Connect with innovative companies</p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Content */}
+        <div className="p-4 space-y-4">
+          {/* Company Listings */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-semibold text-gray-900">Featured Companies</h4>
+            
+            <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 border border-orange-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">T</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">TechFlow Studios</p>
+                  <p className="text-xs text-gray-600">Design & Development • 15 openings</p>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">High School Friendly</span>
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Remote Available</span>
+                  </div>
+                </div>
+                <button className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs py-2 px-3 rounded-lg font-medium">
+                  Apply Now
+                </button>
+              </div>
+            </div>
+            
+            <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-lg p-3 border border-orange-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">C</span>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">CreativeMinds Inc</p>
+                  <p className="text-xs text-gray-600">Marketing & Content • 8 openings</p>
+                  <div className="flex items-center space-x-1 mt-1">
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">No Experience Required</span>
+                    <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Flexible Hours</span>
+                  </div>
+                </div>
+                <button className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs py-2 px-3 rounded-lg font-medium">
+                  Apply Now
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {/* Direct Connection Stats */}
+          <div className="bg-gray-50 rounded-lg p-3">
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Your Direct Access</h4>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-orange-600">47</p>
+                <p className="text-xs text-gray-600">Companies Available</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-green-600">12</p>
+                <p className="text-xs text-gray-600">Applications Sent</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Success Message */}
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="flex items-center space-x-2">
+              <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-sm font-medium text-green-800">No traditional barriers!</p>
+            </div>
+            <p className="text-xs text-green-700 mt-1">Connect directly with companies that value fresh perspectives.</p>
+          </div>
+        </div>
+      </div>
     ),
   },
 ]
@@ -533,18 +871,18 @@ export default function HomeClient() {
                         transition: { duration: 0.2 }
                       }}
                     >
-                      <div className="p-6 rounded-xl bg-white shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200">
-                        <dt>
-                          <div className="absolute flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg group-hover:scale-110 transition-transform duration-300">
-                            {feature.icon}
-                          </div>
-                          <p className="ml-16 text-base sm:text-lg leading-6 font-medium text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
+                      <div className="space-y-4">
+                        <div className="text-center">
+                          <h3 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
                             {feature.name}
+                          </h3>
+                          <p className="mt-2 mobile-text text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
+                            {feature.description}
                           </p>
-                        </dt>
-                        <dd className="mt-2 ml-16 mobile-text text-gray-500 group-hover:text-gray-700 transition-colors duration-300">
-                          {feature.description}
-                        </dd>
+                        </div>
+                        <div className="transform group-hover:scale-105 transition-transform duration-300">
+                          {feature.mockup}
+                        </div>
                       </div>
                     </motion.div>
                   ))}
