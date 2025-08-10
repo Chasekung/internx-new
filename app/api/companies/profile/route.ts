@@ -3,11 +3,15 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { createClient } from '@supabase/supabase-js';
 
-// Initialize Supabase client with admin privileges
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
+function getAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !supabaseServiceKey) return null;
+  return createClient(supabaseUrl, supabaseServiceKey);
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,6 +23,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     
+    const admin = getAdminClient();
+    if (!admin) {
+      return NextResponse.json({ error: 'Supabase admin not configured' }, { status: 503 });
+    }
+    
     const userId = user.id;
     const body = await request.json();
     const { company_name, contact_name } = body;
@@ -27,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Check if company profile already exists
-    const { data: existing, error: existingError } = await supabaseAdmin
+    const { data: existing, error: existingError } = await admin
       .from('companies')
       .select('id')
       .eq('id', userId)
@@ -37,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Insert company profile
-    const { error: insertError } = await supabaseAdmin
+    const { error: insertError } = await admin
       .from('companies')
       .insert({
         id: userId,
@@ -108,6 +117,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const admin = getAdminClient();
+    if (!admin) {
+      return NextResponse.json({ error: 'Supabase admin not configured' }, { status: 503 });
+    }
+
     const body = await request.json();
     console.log('📦 Request body:', body);
 
@@ -157,7 +171,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update company profile
-    const { data: updatedCompany, error: updateError } = await supabaseAdmin
+    const { data: updatedCompany, error: updateError } = await admin
       .from('companies')
       .update(updateData)
       .eq('id', user.id)
