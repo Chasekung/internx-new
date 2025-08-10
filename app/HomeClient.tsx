@@ -686,7 +686,7 @@ export default function HomeClient() {
                   {features.map((feature, index) => (
                     <motion.div 
                       key={feature.name} 
-                      className="relative group"
+                      className="relative group h-full"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -695,7 +695,7 @@ export default function HomeClient() {
                         transition: { duration: 0.2 }
                       }}
                     >
-                      <div className="space-y-4">
+                      <div className="h-full flex flex-col space-y-4">
                         <div className="text-center">
                           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
                             {feature.name}
@@ -704,8 +704,10 @@ export default function HomeClient() {
                             {feature.description}
                           </p>
                         </div>
-                        <div className="transform group-hover:scale-105 transition-transform duration-300">
-                          {feature.mockup}
+                        <div className="transform group-hover:scale-105 transition-transform duration-300 h-[360px] sm:h-[420px] overflow-hidden">
+                          <div className="h-full">
+                            {feature.mockup}
+                          </div>
                         </div>
                       </div>
                     </motion.div>
