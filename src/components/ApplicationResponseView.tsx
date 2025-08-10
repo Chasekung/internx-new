@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { 
+import { useSupabase } from '@/hooks/useSupabase';useState, useEffect } from 'react';
+import { 
+import { 
+import { useSupabase } from '@/hooks/useSupabase';
   CheckCircleIcon, 
   ClockIcon, 
   XCircleIcon, 
@@ -73,12 +75,12 @@ export default function ApplicationResponseView({
   const [showTeamModal, setShowTeamModal] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [isAddingToTeam, setIsAddingToTeam] = useState(false);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   const formatDate = (dateString: string) => {

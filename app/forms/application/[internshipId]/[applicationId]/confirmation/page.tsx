@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -17,12 +17,12 @@ export default function ApplicationConfirmation({
   
   const [internshipDetails, setInternshipDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   useEffect(() => {

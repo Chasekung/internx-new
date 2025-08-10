@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import ReferralLink from '@/components/ReferralLink';
 import ReferralStats from '@/components/ReferralStats';
 import AIInterviewGate from '@/components/AIInterviewGate';
 import SimpleAIInterview from '@/components/SimpleAIInterview';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -111,12 +111,12 @@ export default function InternDash() {
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [profileUpdated, setProfileUpdated] = useState(false);
   const [lastProfileUpdate, setLastProfileUpdate] = useState<Date | null>(null);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   // Helper function to make authenticated API calls
@@ -184,6 +184,10 @@ export default function InternDash() {
   
   useEffect(() => {
     if (!supabase) return;
+    if (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      return;
+    }
     
     const checkAuthAndFetchData = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -206,7 +210,7 @@ export default function InternDash() {
     };
 
     checkAuthAndFetchData();
-  }, [supabase]);
+  }, [supabase, supabaseError]);
 
   // Check for profile updates
   useEffect(() => {

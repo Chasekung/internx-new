@@ -1,4 +1,4 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Global auth state management
 let authCheckInProgress = false;

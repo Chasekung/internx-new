@@ -3,7 +3,6 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { 
@@ -21,6 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { Toaster } from 'react-hot-toast';
 import { toast } from 'react-hot-toast';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -497,12 +497,12 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   // Multi-step form state
   const [currentStep, setCurrentStep] = useState(0);
   const [userRole, setUserRole] = useState<'COMPANY' | 'INTERN' | null>(null);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   const getIconSize = (type: string) => {
@@ -551,7 +551,7 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     if (supabase) {
       loadForm();
     }
-  }, [supabase]);
+  }, [supabase, supabaseError]);
 
   const loadForm = async () => {
     if (!supabase) return;
@@ -955,12 +955,12 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     onClose: () => void;
   }) => {
     const [localQuestion, setLocalQuestion] = useState<Question>({ ...question });
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
     useEffect(() => {

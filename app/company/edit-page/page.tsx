@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { PlusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -122,12 +122,12 @@ interface Location {
 
 const EditCompanyPage = () => {
   const router = useRouter();
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
   const [activeSection, setActiveSection] = useState('basic');
   const [companyData, setCompanyData] = useState<CompanyData>({

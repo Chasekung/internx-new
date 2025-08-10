@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState, Fragment } from "react";
 import { useRouter } from 'next/navigation';
 import { Dialog, Transition } from '@headlessui/react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -122,12 +122,12 @@ interface Internship {
 
 export default function CompanyOpportunitiesPage() {
   const [internships, setInternships] = useState<Internship[]>([]);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
   const router = useRouter();
 

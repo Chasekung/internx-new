@@ -5,16 +5,16 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { Cog6ToothIcon, ChevronDownIcon, ChevronUpIcon, CodeBracketIcon, PresentationChartBarIcon, MegaphoneIcon, PaintBrushIcon, BriefcaseIcon, BuildingOfficeIcon, AcademicCapIcon, BeakerIcon, HeartIcon, SparklesIcon, DocumentPlusIcon, UserGroupIcon, UserCircleIcon, EnvelopeIcon, CalendarIcon, EyeIcon } from '@heroicons/react/24/outline';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import ApplicationResponseView from '@/components/ApplicationResponseView';
 import { checkCompanyAuth, CompanyUser } from '@/lib/companyAuth';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
 
 export default function CompanyDash() {
   const router = useRouter();
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
   const [companyName, setCompanyName] = useState("");
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -37,8 +37,8 @@ export default function CompanyDash() {
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   const handleApplicationFormClick = async (postingId: string) => {
@@ -243,6 +243,10 @@ export default function CompanyDash() {
 
   useEffect(() => {
     if (!supabase) return;
+    if (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      return;
+    }
     
     const checkAuth = async () => {
       try {

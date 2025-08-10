@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { useSupabase } from '@/hooks/useSupabase';
 
 interface Conversation {
   id: string;
@@ -68,12 +68,12 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [activeTab, setActiveTab] = useState<'messages' | 'announcements'>('messages');
   const [isMobileView, setIsMobileView] = useState(false);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   

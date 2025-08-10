@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabase } from '@/hooks/useSupabase';
 
 interface User {
   id: string;
@@ -41,12 +41,12 @@ export default function NewConversationModal({
 
   // Helper to get intern IDs already in a conversation with this company
   const [existingInternIds, setExistingInternIds] = useState<string[]>([]);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
   useEffect(() => {
     if (isOpen && userType === 'company') {

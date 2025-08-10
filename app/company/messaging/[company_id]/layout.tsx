@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter, useParams } from "next/navigation";
 import NewConversationModal from "@/components/NewConversationModal";
 import { checkCompanyAuth } from "@/lib/companyAuth";
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -35,7 +35,7 @@ export default function MessagingLayout({ children }: { children: React.ReactNod
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
   const router = useRouter();
   const params = useParams();
   const companyId = params.company_id as string;
@@ -43,12 +43,16 @@ export default function MessagingLayout({ children }: { children: React.ReactNod
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   useEffect(() => {
     if (!supabase) return;
+    if (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      return;
+    }
     
     const checkAuth = async () => {
       try {

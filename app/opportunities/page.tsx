@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BsGrid, BsList } from 'react-icons/bs';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabase } from '@/hooks/useSupabase';
 import OpportunityCardView from '@/components/OpportunityCardView';
 import OpportunityListView from '@/components/OpportunityListView';
 
@@ -97,18 +97,16 @@ const OpportunityCard: React.FC<{ internship: Internship; onClick: () => void }>
 const OpportunitiesPage: React.FC = () => {
   const [internships, setInternships] = useState<Internship[]>([]);
   const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
   const router = useRouter();
-
-  // Initialize Supabase client when component mounts
-  useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
-  }, []);
   
 
   useEffect(() => {
     if (!supabase) return;
+    if (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      return;
+    }
     
     const load = async () => {
       const { data, error } = await supabase.from('internships').select('*');
@@ -118,7 +116,7 @@ const OpportunitiesPage: React.FC = () => {
     load();
     window.addEventListener('opportunitiesUpdated', load);
     return () => window.removeEventListener('opportunitiesUpdated', load);
-  }, [supabase]);
+  }, [supabase, supabaseError]);
 
   const handleInternshipClick = (internshipId: string) => {
     const userStr = localStorage.getItem('user');

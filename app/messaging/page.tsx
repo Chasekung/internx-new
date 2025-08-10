@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import MessagingPortal from '@/components/MessagingPortal';
 import NewConversationModal from '@/components/NewConversationModal';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -16,13 +16,13 @@ export default function MessagingPage() {
   const [showNewConversationModal, setShowNewConversationModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
   const router = useRouter();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   // Check for mobile view
@@ -38,6 +38,10 @@ export default function MessagingPage() {
 
   useEffect(() => {
     if (!supabase) return;
+    if (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      return;
+    }
     
     const checkAuth = async () => {
       try {
@@ -86,7 +90,7 @@ export default function MessagingPage() {
       }
     };
     checkAuth();
-  }, [supabase]);
+  }, [supabase, supabaseError]);
 
   const handleConversationCreated = async (conversationId: string) => {
     // The MessagingPortal will handle refreshing conversations

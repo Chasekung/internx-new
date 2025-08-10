@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabase } from '@/hooks/useSupabase';
 
 interface TranscriptEntry {
   timestamp: string;
@@ -31,12 +31,12 @@ export default function SimpleAIInterview({ sessionId, onComplete, onExit, onSes
   const [totalQuestionsAsked, setTotalQuestionsAsked] = useState(0);
   const [categoriesCovered, setCategoriesCovered] = useState<string[]>([]);
   const [canFinishInterview, setCanFinishInterview] = useState(false);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);

@@ -11,8 +11,8 @@ import {
   UserIcon,
   UserPlusIcon
 } from '@heroicons/react/24/outline';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import Link from 'next/link';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -92,12 +92,12 @@ export default function ViewResponsesPage() {
   const [isAddingToTeam, setIsAddingToTeam] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [showTeamModal, setShowTeamModal] = useState(false);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   // Load applications data

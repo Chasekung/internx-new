@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 import { MapPinIcon, GlobeAltIcon, PhoneIcon, BuildingOfficeIcon, BriefcaseIcon, EnvelopeIcon, ClockIcon, CurrencyDollarIcon, BuildingOffice2Icon, StarIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 import { type Posting, type CompanyLocation, getCompanyLocations } from '@/lib/postingUtils';
 import AnimatedBackground from './AnimatedBackground';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -20,12 +20,12 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
   const locations = getCompanyLocations(company);
   const [hasApplicationForm, setHasApplicationForm] = useState<boolean | null>(null);
   const [isCheckingForm, setIsCheckingForm] = useState(true);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
   
 

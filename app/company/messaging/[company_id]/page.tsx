@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import NewConversationModal from '@/components/NewConversationModal';
+import { useSupabase } from '@/hooks/useSupabase';
 
 interface Conversation {
   id: string;

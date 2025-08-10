@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import MessagingPortal from '@/components/MessagingPortal';
 import NewConversationModal from '@/components/NewConversationModal';
 import CreateAnnouncementModal from '@/components/CreateAnnouncementModal';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
@@ -16,13 +16,13 @@ export default function CompanyMessagingPage() {
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isMobileView, setIsMobileView] = useState(false);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
   const router = useRouter();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   // Check for mobile view
@@ -38,6 +38,10 @@ export default function CompanyMessagingPage() {
 
   useEffect(() => {
     if (!supabase) return;
+    if (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      return;
+    }
     
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();

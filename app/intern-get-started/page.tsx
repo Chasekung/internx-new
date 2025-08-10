@@ -4,14 +4,14 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Force dynamic rendering to prevent build-time evaluation
 export const dynamic = 'force-dynamic';
 
 export default function InternGetStarted() {
   const router = useRouter();
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
@@ -30,13 +30,17 @@ export default function InternGetStarted() {
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
+    
+    
   }, []);
 
   // Clear any expired tokens on page load
   useEffect(() => {
     if (!supabase) return;
+    if (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      return;
+    }
     const clearExpiredTokens = async () => {
       try {
         const { data: { user }, error } = await supabase.auth.getUser();
@@ -52,7 +56,7 @@ export default function InternGetStarted() {
     };
     
     clearExpiredTokens();
-  }, [supabase]);
+  }, [supabase, supabaseError]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
