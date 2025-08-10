@@ -118,7 +118,7 @@ export default function NewConversationModal({
           .order('company_name');
         
         if (companies) {
-          setUsers(companies.map(company => ({
+          setUsers(companies.map((company: { id: string; company_name: string; logo_url?: string | null }) => ({
             ...company,
             name: company.company_name
           })));
