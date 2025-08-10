@@ -4,9 +4,11 @@ import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
 
   try {
+    // Create the client inside the try/catch so missing envs never crash middleware
+    const supabase = createMiddlewareClient({ req, res })
+
     // Only refresh session if it exists and is close to expiring
     const { data: { session } } = await supabase.auth.getSession()
     
@@ -22,7 +24,7 @@ export async function middleware(req: NextRequest) {
       }
     }
   } catch (error) {
-    // Silently handle auth errors in middleware to prevent excessive logging
+    // Silently handle auth errors in middleware to prevent hard failures
     console.log('Middleware auth check failed:', error)
   }
 
@@ -39,6 +41,6 @@ export const config = {
      * - public assets
      * - api routes (to prevent middleware from running on API calls)
      */
-    '/((?!_next/static|_next/image|favicon.ico|api|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 } 
