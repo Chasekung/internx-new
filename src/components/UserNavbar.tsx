@@ -187,7 +187,7 @@ export default function UserNavbar() {
     checkAuth();
 
     // Listen for auth state changes from Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: any, session: any) => {
       console.log('Auth state changed:', event);
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         const userStr = localStorage.getItem('user');
