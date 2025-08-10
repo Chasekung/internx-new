@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // Helper function to create OpenAI client when needed
-function getOpenAIClient() {
+function getOpenAIClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is missing or empty');
-  }
-  
-  return new OpenAI({
-    apiKey: apiKey,
-  });
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
 }
 
 export async function POST(request: Request) {
@@ -43,8 +40,13 @@ export async function POST(request: Request) {
     
     const file = new File([audioBuffer], 'audio.wav', { type: 'audio/wav' });
 
+    const openai = getOpenAIClient();
+    if (!openai) {
+      return NextResponse.json({ error: 'OpenAI not configured' }, { status: 503 });
+    }
+
     // Use optimized Whisper settings for faster processing
-    const transcript = await getOpenAIClient().audio.transcriptions.create({
+    const transcript = await openai.audio.transcriptions.create({
       file: file,
       model: "whisper-1",
       response_format: "text", // Faster than verbose_json

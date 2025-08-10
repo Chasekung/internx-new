@@ -3,17 +3,14 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import OpenAI from 'openai';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // Helper function to create OpenAI client when needed
-function getOpenAIClient() {
+function getOpenAIClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is missing or empty');
-  }
-  
-  return new OpenAI({
-    apiKey: apiKey,
-  });
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
 }
 
 export async function POST(request: NextRequest) {
@@ -60,6 +57,10 @@ export async function POST(request: NextRequest) {
     const strictProfileComplete = profileCompletionScore >= 80; // 80% threshold for combined scoring
 
     try {
+      const openai = getOpenAIClient();
+      if (!openai) {
+        return NextResponse.json({ error: 'OpenAI not configured' }, { status: 503 });
+      }
       // Create comprehensive analysis prompt
       const analysisPrompt = `Analyze ONLY this specific interview transcript and user profile. DO NOT reference any external information, previous conversations, or other users' data.
 
@@ -92,7 +93,6 @@ Please provide:
 4. Overall Match Score (0-100): Weighted average
 5. Interview Summary: 2-3 sentence summary based ONLY on this user's interview
 6. Interview Feedback: Specific strengths and areas for improvement based ONLY on this user's responses
-7. Interview Tags: 3-5 relevant tags based ONLY on this user's responses
 
 8. Category-Specific Match Scores (0-100) based ONLY on this user's interview and profile:
    - Business & Finance Internships: Based on business acumen, leadership, financial knowledge
@@ -129,7 +129,7 @@ Respond in JSON format:
   "creative_media_recommendation": "string"
 }`;
 
-      const completion = await getOpenAIClient().chat.completions.create({
+      const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           { 

@@ -1,17 +1,14 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // Helper function to create OpenAI client when needed
-function getOpenAIClient() {
+function getOpenAIClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is missing or empty');
-  }
-  
-  return new OpenAI({
-    apiKey: apiKey,
-  });
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
 }
 
 export async function POST(request: Request) {
@@ -27,8 +24,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Text too long (max 4096 characters)' }, { status: 400 });
     }
 
+    const openai = getOpenAIClient();
+    if (!openai) {
+      return NextResponse.json({ error: 'OpenAI not configured' }, { status: 503 });
+    }
+
     // Use faster tts-1 model for better performance
-    const response = await getOpenAIClient().audio.speech.create({
+    const response = await openai.audio.speech.create({
       model: "tts-1", // Use faster tts-1 model for speed
       voice: "alloy",
       input: text,

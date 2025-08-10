@@ -3,17 +3,14 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import OpenAI from 'openai';
 
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // Helper function to create OpenAI client when needed
-function getOpenAIClient() {
+function getOpenAIClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
-  
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY environment variable is missing or empty');
-  }
-  
-  return new OpenAI({
-    apiKey: apiKey,
-});
+  if (!apiKey) return null;
+  return new OpenAI({ apiKey });
 }
 
 // Note: OpenAI client will be initialized when package is installed
@@ -35,6 +32,9 @@ export async function POST(request: Request) {
       );
     }
 
+    const openai = getOpenAIClient();
+    // For actions that require AI, we'll check later, but ensure variable exists
+
     // Verify session belongs to user
     const { data: session, error: sessionError } = await supabase
       .from('interview_sessions')
@@ -51,6 +51,10 @@ export async function POST(request: Request) {
     }
 
     if (action === 'analyze_and_respond') {
+      if (!openai) {
+        return NextResponse.json({ error: 'OpenAI not configured' }, { status: 503 });
+      }
+      const openaiClient = openai as OpenAI;
       // Get previous responses for context (ONLY from current session)
       const { data: previousResponses } = await supabase
         .from('interview_responses')
@@ -224,7 +228,7 @@ export async function POST(request: Request) {
 
       let analysisResponse;
       try {
-        analysisResponse = await getOpenAIClient().chat.completions.create({
+        analysisResponse = await openaiClient.chat.completions.create({
           model: "gpt-4o-mini", // Use faster model
           messages: [
             {
@@ -628,7 +632,8 @@ export async function POST(request: Request) {
 
       let analysisResponse;
       try {
-        analysisResponse = await getOpenAIClient().chat.completions.create({
+        const client = openai as OpenAI;
+        analysisResponse = await client.chat.completions.create({
           model: "gpt-4o",
           messages: [
             {
@@ -715,17 +720,7 @@ export async function POST(request: Request) {
     );
 
   } catch (error) {
-    console.error('Error in AI conversation:', error);
-    
-    // Provide more specific error information
-    let errorMessage = 'Internal server error';
-    if (error instanceof Error) {
-      errorMessage = error.message;
-    }
-    
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    console.error('AI conversation route error:', error);
+    return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 } 
