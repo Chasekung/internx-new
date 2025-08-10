@@ -6,9 +6,9 @@ import { useScrollPosition } from '@/hooks/useScrollPosition';
 import { FiChevronDown, FiMenu, FiX } from 'react-icons/fi';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { checkCompanyAuth } from '@/lib/companyAuth';
+import { useSupabase } from '@/hooks/useSupabase';
 
 export default function CompanyNavbar() {
   const isVisible = useScrollPosition();
@@ -23,16 +23,14 @@ export default function CompanyNavbar() {
   const router = useRouter();
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [supabase, setSupabase] = useState<any>(null);
-
-  // Initialize Supabase client when component mounts
-  useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
-  }, []);
+  const { supabase, error: supabaseError } = useSupabase();
 
   useEffect(() => {
     if (!supabase) return; // Guard clause - wait for supabase to be initialized
+    if (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      return;
+    }
     
     let authCheckTimeout: NodeJS.Timeout;
     let lastAuthCheck = 0;

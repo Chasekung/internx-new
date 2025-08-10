@@ -4,11 +4,11 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useScrollPosition } from '@/hooks/useScrollPosition';
 import { FiChevronDown, FiSettings, FiMenu, FiX } from 'react-icons/fi';
 import { Menu } from '@headlessui/react';
 import { classNames } from '@/lib/classNames';
+import { useSupabase } from '@/hooks/useSupabase';
 
 // Supabase client will be initialized in useEffect to avoid build-time evaluation
 
@@ -74,14 +74,8 @@ export default function UserNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [supabase, setSupabase] = useState<any>(null);
+  const { supabase, error: supabaseError } = useSupabase();
   const router = useRouter();
-
-  // Initialize Supabase client when component mounts
-  useEffect(() => {
-    const client = createClientComponentClient();
-    setSupabase(client);
-  }, []);
 
   const aboutUsRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -108,6 +102,10 @@ export default function UserNavbar() {
 
   useEffect(() => {
     if (!supabase) return;
+    if (supabaseError) {
+      console.error('Supabase error:', supabaseError);
+      return;
+    }
     
     let lastAuthCheck = 0;
     let isChecking = false; // Prevent concurrent auth checks
