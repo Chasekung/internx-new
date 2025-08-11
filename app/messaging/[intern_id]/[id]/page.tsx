@@ -110,7 +110,7 @@ export default function ConversationPage() {
     };
 
     getUser();
-  }, []);
+  }, [supabase, supabaseError]);
 
   useEffect(() => {
     const fetchConversation = async () => {

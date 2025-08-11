@@ -133,7 +133,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
     };
 
     getUser();
-  }, []);
+  }, [supabase, supabaseError]);
 
   // Set selected conversation when selectedConversationId is provided
   useEffect(() => {

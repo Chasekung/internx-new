@@ -33,15 +33,15 @@ export default function NewConversationModal({
 
   
 
+  const { supabase, error: supabaseError } = useSupabase();
   useEffect(() => {
     if (isOpen) {
       fetchUsers();
     }
-  }, [isOpen]);
+  }, [isOpen, supabase]);
 
   // Helper to get intern IDs already in a conversation with this company
   const [existingInternIds, setExistingInternIds] = useState<string[]>([]);
-  const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
   useEffect(() => {
@@ -54,14 +54,12 @@ export default function NewConversationModal({
         if (!supabase) return;
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-        // Get company ID from user
         const { data: company } = await supabase
           .from('companies')
           .select('id')
           .eq('id', user.id)
           .single();
         if (!company) return;
-        // Fetch all conversations for this company
         const response = await fetch('/api/conversations');
         if (response.ok) {
           const { conversations } = await response.json();
@@ -69,7 +67,7 @@ export default function NewConversationModal({
         }
       })();
     }
-  }, [isOpen, userType]);
+  }, [isOpen, userType, supabase]);
 
   // Filter out users already in a conversation (for company)
   const filteredUsers = users.filter(user =>
