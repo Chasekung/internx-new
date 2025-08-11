@@ -126,6 +126,7 @@ export default function ViewResponsesPage() {
 
   const loadInternshipDetails = async () => {
     try {
+      if (!supabase) return;
       const { data: internship, error } = await supabase
         .from('internships')
         .select(`
@@ -152,6 +153,7 @@ export default function ViewResponsesPage() {
       setIsLoading(true);
       
       // Get current user (company)
+      if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error('🚨 No authenticated user found');
