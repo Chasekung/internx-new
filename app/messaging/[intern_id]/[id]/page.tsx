@@ -70,6 +70,7 @@ export default function ConversationPage() {
     }
     
     const getUser = async () => {
+      if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
@@ -86,7 +87,7 @@ export default function ConversationPage() {
             setUserType('company');
           } else {
             // If not a company, check if they're an intern
-            const { data: intern, error: internError } = await supabase
+              const { data: intern, error: internError } = await supabase
               .from('interns')
               .select('id')
               .eq('id', user.id)
@@ -116,6 +117,7 @@ export default function ConversationPage() {
       if (!user || !conversationId) return;
 
       try {
+        if (!supabase) return;
         const { data, error } = await supabase
           .from('conversations')
           .select(`
