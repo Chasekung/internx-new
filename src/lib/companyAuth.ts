@@ -1,4 +1,4 @@
-import { useSupabase } from '@/hooks/useSupabase';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 export interface CompanyUser {
   id: string;

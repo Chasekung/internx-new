@@ -154,6 +154,10 @@ const EditCompanyPage = () => {
   const checkSession = async () => {
     try {
       console.log('Checking session...');
+      if (!supabase) {
+        router.push('/company-sign-in');
+        return;
+      }
       const { data: { user }, error } = await supabase.auth.getUser();
       
       if (error) {
@@ -285,6 +289,9 @@ const EditCompanyPage = () => {
     if (!companyLogo) return undefined;
 
     try {
+      if (!supabase) {
+        throw new Error('Supabase client is not initialized');
+      }
       const fileExt = companyLogo.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
       const filePath = `company-logos/${fileName}`;

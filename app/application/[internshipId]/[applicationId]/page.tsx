@@ -45,6 +45,11 @@ export default function Application({ params }: { params: { internshipId: string
   useEffect(() => {
     const fetchApplicationData = async () => {
       try {
+        if (!supabase) {
+          setError('Supabase client is not initialized');
+          setLoading(false);
+          return;
+        }
         // First get the application to find the form_id
         const { data: application, error: applicationError } = await supabase
           .from('applications')
@@ -178,6 +183,10 @@ export default function Application({ params }: { params: { internshipId: string
   const handleSubmit = async () => {
     try {
       setError(null);
+      if (!supabase) {
+        setError('Supabase client is not initialized');
+        return;
+      }
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {

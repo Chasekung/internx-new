@@ -1,16 +1,14 @@
 'use client';
 
-import { 
-import { useSupabase } from '@/hooks/useSupabase';useState, useEffect } from 'react';
-import { 
-import { 
+import { useState, useEffect } from 'react';
 import { useSupabase } from '@/hooks/useSupabase';
-  CheckCircleIcon, 
-  ClockIcon, 
-  XCircleIcon, 
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  XCircleIcon,
   UserPlusIcon,
   EyeIcon,
-  EyeSlashIcon
+  EyeSlashIcon,
 } from '@heroicons/react/24/outline';
 
 interface ApplicationData {
@@ -128,6 +126,9 @@ export default function ApplicationResponseView({
     
     setIsAddingToTeam(true);
     try {
+      if (!supabase) {
+        throw new Error('Supabase client is not initialized');
+      }
       const { error } = await supabase
         .from('team_members')
         .insert({

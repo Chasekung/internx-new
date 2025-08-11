@@ -9,7 +9,7 @@ interface User {
   last_name?: string;
   name?: string;
   profile_photo_url?: string;
-  logo_url?: string;
+  logo_url?: string | null;
 }
 
 interface NewConversationModalProps {
@@ -273,7 +273,7 @@ export default function NewConversationModal({
                     <div className="flex-shrink-0">
                       {user.profile_photo_url || user.logo_url ? (
                         <img
-                          src={user.profile_photo_url || user.logo_url}
+                          src={user.profile_photo_url || user.logo_url || ''}
                           alt="Avatar"
                           className="w-8 h-8 rounded-full object-cover"
                         />

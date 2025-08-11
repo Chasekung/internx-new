@@ -125,6 +125,7 @@ export default function CompanySignIn() {
   useEffect(() => {
     const clearExpiredTokens = async () => {
       try {
+        if (!supabase) return;
         const { data: { user }, error } = await supabase.auth.getUser();
         if (user && error) {
           // If we get an error, the token is likely expired
@@ -133,7 +134,9 @@ export default function CompanySignIn() {
         }
       } catch (error) {
         console.log('Clearing invalid session');
-        await supabase.auth.signOut();
+        if (supabase) {
+          await supabase.auth.signOut();
+        }
       }
     };
     
