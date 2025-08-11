@@ -91,6 +91,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
 
   useEffect(() => {
     const getUser = async () => {
+      if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUser(user);
@@ -107,7 +108,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
             setUserType('company');
           } else {
             // If not a company, check if they're an intern
-            const { data: intern, error: internError } = await supabase
+              const { data: intern, error: internError } = await supabase
               .from('interns')
               .select('id')
               .eq('id', user.id)

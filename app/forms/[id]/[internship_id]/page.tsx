@@ -77,6 +77,11 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
   const loadFormData = async () => {
     try {
       setIsLoading(true);
+      if (!supabase) {
+        // Defer until Supabase client is available
+        setIsLoading(false);
+        return;
+      }
       
       // First, verify that the application exists and check its status
       const { data: application, error: applicationError } = await supabase
@@ -320,7 +325,8 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
       
       // Check authentication before upload
       console.log('🔐 Checking user authentication...');
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      const supa = supabase; if (!supa) throw new Error('Supabase client not initialized');
+      const { data: { user }, error: authError } = await supa.auth.getUser();
       if (authError || !user) {
         throw new Error('You must be signed in to upload files');
       }
@@ -397,7 +403,8 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
         console.log('📦 Large file detected - using optimized upload settings');
         
         // For very large files, use longer timeout and optimized settings
-        const uploadPromise = supabase.storage
+      const s = supabase; if (!s) throw new Error('Supabase client not initialized');
+      const uploadPromise = s.storage
           .from(bucketName)
           .upload(fileName, file, {
             cacheControl: '31536000', // 1 year cache for large files
@@ -413,7 +420,7 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
           console.log('⏰ Upload timeout, trying with standard approach...');
           
           // Fallback: Try with smaller cache control and shorter timeout
-          const retryPromise = supabase.storage
+          const retryPromise = s.storage
         .from(bucketName)
         .upload(fileName, file, {
           cacheControl: '3600',
@@ -426,7 +433,8 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
         }
       } else {
         // Standard upload for smaller files
-        const uploadPromise = supabase.storage
+        const s2 = supabase; if (!s2) throw new Error('Supabase client not initialized');
+        const uploadPromise = s2.storage
           .from(bucketName)
           .upload(fileName, file, {
             cacheControl: '3600',
@@ -450,7 +458,7 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
 
       // Get the public URL
       console.log('🔗 Generating public URL...');
-      const { data: { publicUrl } } = supabase.storage
+      const { data: { publicUrl } } = (supabase as any).storage
         .from(bucketName)
         .getPublicUrl(fileName);
 
@@ -486,14 +494,15 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
       }
 
       // Get the current user
-      const { data: { user } } = await supabase.auth.getUser();
+      const s3 = supabase; if (!s3) throw new Error('Supabase client not initialized');
+      const { data: { user } } = await s3.auth.getUser();
       if (!user) {
         toast.error('Please sign in to submit the form');
         return;
       }
 
       // Check if application already exists and get its status
-      const { data: existingApplication, error: appError } = await supabase
+      const { data: existingApplication, error: appError } = await (supabase as any)
         .from('applications')
         .select('id, form_response_id, status')
         .eq('intern_id', user.id)
