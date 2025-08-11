@@ -28,6 +28,7 @@ export default function ApplicationConfirmation({
   useEffect(() => {
     const fetchInternshipDetails = async () => {
       try {
+        if (!supabase) return;
         const { data: internship, error } = await supabase
           .from('internships')
           .select(`
