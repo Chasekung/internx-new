@@ -56,6 +56,7 @@ export default function ApplicationForm({
 
   const loadFormData = async () => {
     try {
+      if (!supabase) return;
       // First get the application to find the form_response_id
       const { data: application, error: applicationError } = await supabase
         .from('applications')
@@ -139,6 +140,7 @@ export default function ApplicationForm({
 
   const loadSavedAnswers = async (responseId: string) => {
     try {
+      if (!supabase) return;
       const { data: savedAnswers, error } = await supabase
         .from('response_answers')
         .select('question_id, answer_text, answer_data')
@@ -165,6 +167,7 @@ export default function ApplicationForm({
     // Auto-save the answer
     try {
       setIsSaving(true);
+      if (!supabase) return;
       const { error } = await supabase
         .from('response_answers')
         .upsert({
@@ -192,6 +195,7 @@ export default function ApplicationForm({
       const fileExt = file.name.split('.').pop();
       const fileName = `${formResponseId}/${questionId}.${fileExt}`;
       
+      if (!supabase) return;
       const { error: uploadError, data } = await supabase.storage
         .from('application-files')
         .upload(fileName, file);
@@ -218,6 +222,7 @@ export default function ApplicationForm({
       setIsSubmitting(true);
 
       // Update form response status
+      if (!supabase) return;
       const { error: statusError } = await supabase
         .from('form_responses')
         .update({ status: 'submitted', submitted_at: new Date().toISOString() })
