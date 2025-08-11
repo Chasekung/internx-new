@@ -101,7 +101,10 @@ export default function UserNavbar() {
   };
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabase) {
+      // Defer until supabase is ready
+      return;
+    }
     if (supabaseError) {
       console.error('Supabase error:', supabaseError);
       return;

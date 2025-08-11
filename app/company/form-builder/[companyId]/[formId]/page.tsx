@@ -687,6 +687,10 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     setIsSaving(true);
     try {
       // Save form theme and metadata
+      if (!supabase) {
+        toast.error('Supabase client not initialized');
+        return;
+      }
       const { error: formError } = await supabase
         .from('forms')
         .update({

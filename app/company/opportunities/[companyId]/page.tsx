@@ -174,7 +174,7 @@ export default function CompanyOpportunitiesPage() {
       return;
     }
     const fetchUser = async () => {
-      
+      if (!supabase) return;
       const { data: { user } } = await supabase.auth.getUser();
       setUserId(user?.id || null);
     };
@@ -183,7 +183,7 @@ export default function CompanyOpportunitiesPage() {
 
   useEffect(() => {
     const fetchInternships = async () => {
-      
+      if (!supabase) return;
       const { data, error } = await supabase.from('internships').select('*').eq('company_id', companyId);
       if (!error && data) setInternships(data);
       setLoading(false);
@@ -242,6 +242,7 @@ export default function CompanyOpportunitiesPage() {
 
       // First create the internship posting without images
       
+      if (!supabase) throw new Error('Supabase not initialized');
       const { data: internship, error: postingError } = await supabase
         .from('internships')
         .insert([{
@@ -282,6 +283,7 @@ export default function CompanyOpportunitiesPage() {
             
             // Upload the file
             
+            if (!supabase) throw new Error('Supabase not initialized');
             const { error: uploadError } = await supabase.storage
               .from('internship-pictures')
               .upload(fileName, blob);
@@ -292,6 +294,7 @@ export default function CompanyOpportunitiesPage() {
             }
             
             // Get the full public URL
+            if (!supabase) throw new Error('Supabase not initialized');
             const { data: urlData } = await supabase.storage
               .from('internship-pictures')
               .getPublicUrl(fileName);
@@ -329,6 +332,7 @@ export default function CompanyOpportunitiesPage() {
       // Update internship with image URLs if any were uploaded
       if (Object.keys(imageUrls).length > 0) {
         
+        if (!supabase) throw new Error('Supabase not initialized');
         const { error: updateError } = await supabase
           .from('internships')
           .update(imageUrls)
@@ -354,6 +358,7 @@ export default function CompanyOpportunitiesPage() {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this opportunity?')) return;
     
+    if (!supabase) return;
     const { error } = await supabase.from('internships').delete().eq('id', id);
     if (!error) {
       setInternships((prev) => prev.filter((item) => item.id !== id));

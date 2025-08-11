@@ -95,7 +95,7 @@ export default function MessagingLayout({ children }: { children: React.ReactNod
 
   // Add real-time subscription for conversation updates
   useEffect(() => {
-    if (!user) return;
+    if (!user || !supabase) return;
 
     const channel = supabase
       .channel('conversations-updates')

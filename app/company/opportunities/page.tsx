@@ -135,7 +135,7 @@ export default function CompanyOpportunitiesPage() {
   useEffect(() => {
     // TODO: Replace with actual company filter if needed
     const fetchInternships = async () => {
-      
+      if (!supabase) return;
       const { data, error } = await supabase.from('internships').select('*');
       if (!error && data) setInternships(data);
     };
