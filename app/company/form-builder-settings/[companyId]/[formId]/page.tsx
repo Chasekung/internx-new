@@ -79,6 +79,11 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
   const loadSettings = async () => {
     try {
       setIsLoading(true);
+      if (!supabase) {
+        console.error('Supabase client not initialized');
+        setIsLoading(false);
+        return;
+      }
       const { data: formData, error } = await supabase
         .from('forms')
         .select(`
@@ -140,6 +145,10 @@ export default function FormBuilderSettings({ params: { companyId, formId } }: {
   const saveSettings = async () => {
     const saveToast = toast.loading('Saving changes...');
     try {
+      if (!supabase) {
+        toast.error('Supabase client not initialized', { id: saveToast });
+        return;
+      }
       const submission_deadline = localSettings.submission_deadline 
         ? new Date(localSettings.submission_deadline).toISOString()
         : null;
