@@ -46,6 +46,7 @@ export default function CreateAnnouncementModal({
   const fetchInterns = async () => {
     setLoading(true);
     try {
+      if (!supabase) return;
       const { data: interns } = await supabase
         .from('interns')
         .select('id, first_name, last_name, profile_photo_url')
