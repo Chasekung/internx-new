@@ -55,6 +55,7 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
         setIsCheckingForm(true);
         
         // Check if a form exists for this internship
+        if (!supabase) return;
         const { data: form, error } = await supabase
           .from('forms')
           .select('id')
