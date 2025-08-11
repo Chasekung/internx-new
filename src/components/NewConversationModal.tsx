@@ -51,6 +51,7 @@ export default function NewConversationModal({
   useEffect(() => {
     if (isOpen && userType === 'company') {
       (async () => {
+        if (!supabase) return;
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
         // Get company ID from user
@@ -82,6 +83,7 @@ export default function NewConversationModal({
       // Fetch users based on user type
       if (userType === 'company') {
         // Companies can only message interns who have submitted applications
+        if (!supabase) return;
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           console.error('No authenticated user found');
@@ -112,6 +114,7 @@ export default function NewConversationModal({
         }
       } else {
         // Interns can message companies
+        if (!supabase) return;
         const { data: companies } = await supabase
           .from('companies')
           .select('id, company_name, logo_url')
@@ -139,6 +142,7 @@ export default function NewConversationModal({
       let companyId = null;
       let internId = null;
       if (userType === 'company') {
+        if (!supabase) return;
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           alert('No authenticated user found');
@@ -154,6 +158,7 @@ export default function NewConversationModal({
         internId = selectedUser.id;
       } else {
         // userType === 'intern'
+        if (!supabase) return;
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           alert('No authenticated user found');
