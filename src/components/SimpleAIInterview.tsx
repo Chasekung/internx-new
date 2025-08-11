@@ -46,6 +46,7 @@ export default function SimpleAIInterview({ sessionId, onComplete, onExit, onSes
 
   // Helper function to make authenticated API calls
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
+    if (!supabase) throw new Error('Supabase client not initialized');
     const { data: { session } } = await supabase.auth.getSession();
     
     if (!session) {
