@@ -99,6 +99,11 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
       setIsLoading(true);
       
       // Load form data
+      if (!supabase) {
+        toast.error('Supabase client not initialized');
+        setIsLoading(false);
+        return;
+      }
       const { data: form, error: formError } = await supabase
         .from('forms')
         .select('*')
@@ -209,6 +214,11 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
 
     setIsPublishing(true);
     try {
+      if (!supabase) {
+        toast.error('Supabase client not initialized');
+        setIsPublishing(false);
+        return;
+      }
       const { error } = await supabase
         .from('forms')
         .update({
@@ -241,6 +251,11 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
 
     setIsPublishing(true);
     try {
+      if (!supabase) {
+        toast.error('Supabase client not initialized');
+        setIsPublishing(false);
+        return;
+      }
       const { error } = await supabase
         .from('forms')
         .update({
