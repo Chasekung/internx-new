@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import supabase from '@/lib/supabaseClient';
+import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { getRequestLocation, formatLocation } from '@/lib/locationUtils';
 
 export async function POST(request: NextRequest) {
@@ -13,6 +14,20 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('=== Starting signup API route ===');
+    const envInfo = {
+      // Only include non-sensitive debug values
+      urlHost: (() => {
+        try {
+          const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+          return url ? new URL(url).host : 'undefined';
+        } catch {
+          return 'invalid-url';
+        }
+      })(),
+      anonKeyPresent: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+      serviceKeyPresent: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY)
+    };
+    console.log('Env debug:', envInfo);
     
     const body = await request.json();
     console.log('Request body received:', { ...body, password: '[REDACTED]' });
@@ -76,8 +91,8 @@ export async function POST(request: NextRequest) {
 
     console.log('Creating user in Supabase Auth...');
     
-    // Create user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Create user in Supabase Auth (client/anon path)
+    let { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -92,10 +107,55 @@ export async function POST(request: NextRequest) {
 
     if (authError) {
       console.error('Supabase auth error:', authError);
-      return NextResponse.json(
-        { error: authError.message },
-        { status: 400 }
-      );
+      // Fallback: try admin createUser to surface clearer errors and bypass edge cases
+      const isDatabaseSaveError = (authError.message || '').toLowerCase().includes('database error saving new user');
+      let adminAttempted = false;
+      let adminErrorMessage: string | null = null;
+      if (isDatabaseSaveError && supabaseAdmin) {
+        try {
+          console.log('Attempting admin.createUser fallback...');
+          const { data: adminUser, error: adminErr } = await supabaseAdmin.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: {
+              name,
+              role,
+              ...(role === 'COMPANY' && { company_name: companyName }),
+              ...(role === 'INTERN' && { username }),
+            },
+          });
+          if (adminErr) {
+            console.error('Admin createUser error:', adminErr);
+            adminErrorMessage = adminErr.message || String(adminErr);
+          } else if (adminUser?.user) {
+            // Mimic authData for downstream logic
+            authData = { user: adminUser.user, session: null } as any;
+            console.log('Admin createUser succeeded, user id:', adminUser.user.id);
+          }
+          adminAttempted = true;
+        } catch (e) {
+          console.error('Admin createUser threw:', e);
+          adminAttempted = true;
+          adminErrorMessage = e instanceof Error ? e.message : String(e);
+        }
+      }
+
+      // If we still have no user, return detailed error
+      if (!authData?.user) {
+        const debug = process.env.NODE_ENV !== 'production' ? {
+          status: (authError as any).status ?? null,
+          message: authError.message,
+          supabaseUrlHost: envInfo.urlHost,
+          provider: 'email',
+          triedAdminCreateUser: adminAttempted,
+          adminError: adminErrorMessage,
+        } : undefined;
+        return NextResponse.json(
+          { error: authError.message, debug },
+          { status: 400 }
+        );
+      }
     }
 
     if (!authData.user) {
@@ -128,15 +188,18 @@ export async function POST(request: NextRequest) {
 
       if (profileError) {
         console.error('Company profile creation error:', profileError);
-        
         // If profile creation fails, delete the auth user
-        const { error: deleteError } = await supabase.auth.admin.deleteUser(authData.user.id);
-        if (deleteError) {
-          console.error('Failed to cleanup auth user after profile creation failed:', deleteError);
+        try {
+          const { error: deleteError } = await supabase.auth.admin.deleteUser(authData.user.id);
+          if (deleteError) {
+            console.error('Failed to cleanup auth user after profile creation failed:', deleteError);
+          }
+        } catch (cleanupErr) {
+          console.error('Cleanup error after company profile failure:', cleanupErr);
         }
-        
+        const debug = process.env.NODE_ENV !== 'production' ? { profileError } : undefined;
         return NextResponse.json(
-          { error: `Failed to create company profile: ${profileError.message}` },
+          { error: `Failed to create company profile: ${profileError.message}`, debug },
           { status: 500 }
         );
       }
@@ -215,8 +278,9 @@ export async function POST(request: NextRequest) {
 
       if (profileError) {
         console.error('Intern profile creation error:', profileError);
+        const debug = process.env.NODE_ENV !== 'production' ? { profileError } : undefined;
         return NextResponse.json(
-          { error: `Failed to create intern profile: ${profileError.message}` },
+          { error: `Failed to create intern profile: ${profileError.message}`, debug },
           { status: 500 }
         );
       }

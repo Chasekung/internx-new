@@ -23,7 +23,8 @@ export async function GET(request: NextRequest) {
     
     if (authError || !user) {
       console.error('Auth error:', authError);
-      return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+      const debug = process.env.NODE_ENV !== 'production' ? { authError } : undefined;
+      return NextResponse.json({ error: 'Invalid token', debug }, { status: 401 });
     }
 
     // Create a Supabase client with the user's token
@@ -36,7 +37,8 @@ export async function GET(request: NextRequest) {
     if (profileError) {
         console.error('Profile fetch error:', profileError);
         console.error('User ID:', user.id);
-        return NextResponse.json({ error: 'Error fetching profile', details: profileError.message }, { status: 500 });
+        const debug = process.env.NODE_ENV !== 'production' ? { profileError } : undefined;
+        return NextResponse.json({ error: 'Error fetching profile', details: profileError.message, debug }, { status: 500 });
     }
 
     if (!profile) {

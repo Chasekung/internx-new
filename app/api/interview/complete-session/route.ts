@@ -145,6 +145,10 @@ Respond in JSON format:
 
       const aiAnalysis = JSON.parse(completion.choices[0].message.content || '{}');
 
+      // Track AI confidence and scores for accuracy monitoring
+      const aiConfidence = completion.choices[0]?.finish_reason === 'stop' ? 0.9 : 0.7;
+      const modelVersion = completion.model || 'gpt-4o';
+      
       // Calculate combined scores based on profile completion
       let combinedScores = {};
       
@@ -167,6 +171,32 @@ Respond in JSON format:
           healthcare_sciences_combined_score: aiAnalysis.healthcare_sciences_score,
           creative_media_combined_score: aiAnalysis.creative_media_score
         };
+      }
+
+      // Track score history for accuracy monitoring
+      try {
+        const scoreHistoryData = [
+          { score_type: 'skill', score_value: aiAnalysis.skill_score || 0 },
+          { score_type: 'experience', score_value: aiAnalysis.experience_score || 0 },
+          { score_type: 'personality', score_value: aiAnalysis.personality_score || 0 },
+          { score_type: 'overall', score_value: aiAnalysis.overall_match_score || 0 }
+        ];
+
+        for (const scoreData of scoreHistoryData) {
+          await supabase
+            .from('ai_score_history')
+            .insert({
+              intern_id: user.id,
+              interview_session_id: sessionId,
+              score_type: scoreData.score_type,
+              score_value: scoreData.score_value,
+              ai_confidence: aiConfidence,
+              model_version: modelVersion
+            });
+        }
+      } catch (historyError) {
+        console.warn('Failed to track score history:', historyError);
+        // Don't fail the interview completion for history tracking errors
       }
 
       // Update the user's profile with all scores and recommendations

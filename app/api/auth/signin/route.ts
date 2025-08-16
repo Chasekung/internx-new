@@ -34,8 +34,9 @@ export async function POST(request: NextRequest) {
 
       if (authError) {
         console.error('Company auth error:', authError);
+        const debug = process.env.NODE_ENV !== 'production' ? { authError } : undefined;
         return NextResponse.json(
-          { error: 'Invalid credentials' },
+          { error: 'Invalid credentials', debug },
           { status: 401 }
         );
       }
@@ -131,8 +132,9 @@ export async function POST(request: NextRequest) {
           );
         }
         
+        const debug = process.env.NODE_ENV !== 'production' ? { authError } : undefined;
         return NextResponse.json(
-          { error: 'Invalid credentials' },
+          { error: 'Invalid credentials', debug },
           { status: 401 }
         );
       }
