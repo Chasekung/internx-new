@@ -154,4 +154,4 @@ export default function RootLayout({
       </body>
     </html>
   )
-} 
+} // Updated: Mon Aug 18 19:23:30 KST 2025

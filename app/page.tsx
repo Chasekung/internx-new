@@ -37,3 +37,4 @@ export const metadata: Metadata = {
 export default function Home() {
   return <HomeClient />;
 }
+// Updated: Mon Aug 18 19:23:30 KST 2025
