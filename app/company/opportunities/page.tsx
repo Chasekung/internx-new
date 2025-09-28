@@ -122,25 +122,40 @@ interface Internship {
 
 export default function CompanyOpportunitiesPage() {
   const [internships, setInternships] = useState<Internship[]>([]);
+  const [loading, setLoading] = useState(true);
   const { supabase, error: supabaseError } = useSupabase();
-
-  // Initialize Supabase client when component mounts
-  useEffect(() => {
-    
-    
-  }, []);
   const router = useRouter();
 
-  // Fetch internships for this company (optional, for initial load)
+  // Fetch internships for this company
   useEffect(() => {
-    // TODO: Replace with actual company filter if needed
     const fetchInternships = async () => {
       if (!supabase) return;
-      const { data, error } = await supabase.from('internships').select('*');
-      if (!error && data) setInternships(data);
+      
+      if (supabaseError) {
+        console.error('Supabase error:', supabaseError);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.from('internships').select('*');
+        if (!error && data) {
+          setInternships(data);
+        } else {
+          console.error('Error fetching internships:', error);
+          setInternships([]);
+        }
+      } catch (err) {
+        console.error('Failed to fetch internships:', err);
+        setInternships([]);
+      } finally {
+        setLoading(false);
+      }
     };
+    
     fetchInternships();
-  }, []);
+  }, [supabase, supabaseError]);
 
   const handleInternshipClick = (internshipId: string) => {
     // Check if user is signed in as company
@@ -159,6 +174,17 @@ export default function CompanyOpportunitiesPage() {
     // Default to intern view if not signed in as company
     router.push(`/postings/${internshipId}`);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading opportunities...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 mt-20">
