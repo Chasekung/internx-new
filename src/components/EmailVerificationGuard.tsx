@@ -134,7 +134,7 @@ export default function EmailVerificationGuard({ children, requireVerification =
       // If not verified (including re-verification needed), show verification screen
       if (!finalEmailVerified) {
         console.log('User email verification required:', 
-          needsReVerification ? 'User needs re-verification' : 'Email not confirmed');
+          isLegacyUser ? 'Legacy user verification failed' : 'Email not confirmed');
         // Don't sign them out immediately, show verification screen first
       }
 
