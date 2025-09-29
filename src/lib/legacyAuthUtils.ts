@@ -69,6 +69,8 @@ export async function checkLegacyUserStatus(userId: string): Promise<LegacyUserC
 
     if (internData || companyData) {
       const userData = internData || companyData;
+      if (!userData) return { isLegacyUser: false, shouldBypassEmailVerification: false, reason: 'No user data found' };
+      
       const createdAt = new Date(userData.created_at);
       const now = new Date();
       
