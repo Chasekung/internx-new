@@ -138,11 +138,11 @@ export default function AboutStepUpPage() {
           <div className="text-center mb-12">
             <h3 className="text-3xl font-bold text-gray-900 mb-4">The Co-founders</h3>
             <p className="text-lg text-gray-700 max-w-3xl mx-auto">
-              Meet the five passionate high school students who came together to revolutionize the internship and volunteering experience for students and companies alike.
+              Meet the four passionate high school students who came together to revolutionize the internship and volunteering experience for students and companies alike.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
             {/* Chase Kung */}
             <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
               <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
@@ -203,20 +203,6 @@ export default function AboutStepUpPage() {
               </div>
             </div>
 
-            {/* Siddh Rajrishi */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
-              <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
-                <img
-                  src="/Siddh_LaunchX.jpg"
-                  alt="Siddh Rajrishi"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="text-center">
-                <div className="text-xl font-bold text-gray-900 mb-2">Siddh Rajrishi</div>
-                <div className="text-sm text-gray-600">Chief Communications Officer</div>
-              </div>
-            </div>
           </div>
         </div>
       </section>
