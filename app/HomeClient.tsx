@@ -295,103 +295,103 @@ const stats = [
 
 const testimonials = [
   {
-    name: 'Person A',
+    name: 'Sarah Chen',
     rating: 5,
     text: 'The AI-powered matching helped me find an Opportunity that perfectly aligned with my interests in computer science, even though I had no prior experience.',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Person B',
+    name: 'Marcus Rodriguez',
     rating: 5,
     text: 'I was amazed by how the platform focused on my skills and potential rather than my lack of experience. It gave me the confidence to apply for Opportunities.',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Person C',
+    name: 'Emma Thompson',
     rating: 5,
     text: 'The AI Intern Coach was incredibly helpful in guiding me through my first Opportunity experience. It felt like having a mentor available 24/7.',
-    image: 'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Person D',
+    name: 'Alex Kim',
     rating: 5,
     text: 'Thanks to Step Up, I landed an Opportunity at a tech company where I could apply my programming skills in a real-world setting.',
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Person E',
+    name: 'Jordan Williams',
     rating: 5,
     text: 'The skill-based matching system helped me discover Opportunities I never knew existed in my field of interest.',
-    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Person F',
+    name: 'Priya Patel',
     rating: 5,
     text: 'I appreciated how the platform focused on my potential and willingness to learn rather than my lack of experience.',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Person G',
+    name: 'David O\'Connor',
     rating: 5,
     text: 'The AI Intern Coach provided valuable feedback and guidance throughout my Opportunity journey.',
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Person H',
+    name: 'Zoe Anderson',
     rating: 5,
     text: 'Step Up helped me break into the tech industry by focusing on my skills and potential rather than my age or experience.',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
 ];
 
 const volunteerTestimonials = [
   {
-    name: 'Volunteer A',
+    name: 'Isabella Martinez',
     rating: 5,
     text: 'Volunteering through Step Up gave me a chance to make a real impact in my community.',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Volunteer B',
+    name: 'Tyler Johnson',
     rating: 5,
     text: 'I met so many amazing people and learned valuable skills while volunteering.',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Volunteer C',
+    name: 'Aisha Khan',
     rating: 5,
     text: 'Step Up made it easy to find volunteer opportunities that matched my interests.',
-    image: 'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Volunteer D',
+    name: 'Connor Murphy',
     rating: 5,
     text: 'Giving back has never been more rewarding. Thank you, Step Up!',
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Volunteer E',
+    name: 'Maya Singh',
     rating: 5,
     text: 'I developed leadership skills and made lifelong friends through volunteering.',
-    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Volunteer F',
+    name: 'Lucas Brown',
     rating: 5,
     text: 'Step Up connected me with organizations that truly needed my help.',
-    image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Volunteer G',
+    name: 'Nina Garcia',
     rating: 5,
     text: 'I learned so much about teamwork and responsibility.',
-    image: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
   {
-    name: 'Volunteer H',
+    name: 'Ryan Taylor',
     rating: 5,
     text: 'Volunteering gave me a sense of purpose and accomplishment.',
-    image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    image: '/stepup-logo.png',
   },
 ];
 
@@ -669,7 +669,7 @@ export default function HomeClient() {
           </div>
 
           {/* Feature Section */}
-          <div className="py-8 sm:py-12 bg-gray-50">
+          <div id="features" className="py-8 sm:py-12 bg-gray-50">
             <div className="mobile-container">
               <div className="lg:text-center">
                 <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Features</h2>
@@ -686,7 +686,7 @@ export default function HomeClient() {
                   {features.map((feature, index) => (
                     <motion.div 
                       key={feature.name} 
-                      className="relative group h-full"
+                      className="relative group h-full bg-blue-50 rounded-xl border-2 border-gray-200 shadow-lg hover:shadow-xl transition-all duration-300"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -695,7 +695,7 @@ export default function HomeClient() {
                         transition: { duration: 0.2 }
                       }}
                     >
-                      <div className="h-full flex flex-col space-y-4">
+                      <div className="h-full flex flex-col space-y-4 p-6">
                         <div className="text-center">
                           <h3 className="text-lg sm:text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors duration-300">
                             {feature.name}
@@ -720,7 +720,7 @@ export default function HomeClient() {
           {/* Testimonials Section */}
           <div className="py-8 bg-white">
             <div className="mobile-container">
-              <div className="text-center">
+              <div className="text-center mb-12">
                 <h2 className="mobile-heading font-extrabold tracking-tight text-gray-900">
                   Based on <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">skill and mindset</span>, not experience
                 </h2>
@@ -850,7 +850,7 @@ export default function HomeClient() {
       <div className="bg-white">
         <div className="mobile-container py-8 sm:py-12 lg:py-16 lg:flex lg:items-center lg:justify-between">
           <h2 className="mobile-heading font-bold tracking-tight text-gray-900">
-            <span className="block">Ready to find your next opportunity?</span>
+            <span className="block mb-4">Ready to find your next opportunity?</span>
             <span className="block text-blue-600">Join Step Up today.</span>
           </h2>
           <div className="mt-6 lg:mt-0 lg:flex-shrink-0">
