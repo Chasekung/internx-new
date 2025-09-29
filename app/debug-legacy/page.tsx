@@ -41,7 +41,7 @@ export default function DebugLegacy() {
             emailConfirmed: session?.user?.email_confirmed_at
           };
         } catch (e) {
-          debugData.supabaseSession = { error: e.message };
+          debugData.supabaseSession = { error: e instanceof Error ? e.message : 'Unknown error' };
         }
 
         // Check user
@@ -62,17 +62,17 @@ export default function DebugLegacy() {
               const legacyResult = await checkLegacyUserStatus(user.id);
               debugData.legacyCheck = legacyResult;
             } catch (legacyError) {
-              debugData.legacyCheck = { error: legacyError.message };
+              debugData.legacyCheck = { error: legacyError instanceof Error ? legacyError.message : 'Unknown error' };
             }
           }
         } catch (e) {
-          debugData.supabaseUser = { error: e.message };
+          debugData.supabaseUser = { error: e instanceof Error ? e.message : 'Unknown error' };
         }
       }
 
       setDebugInfo(debugData);
     } catch (error) {
-      setDebugInfo({ error: error.message });
+      setDebugInfo({ error: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setLoading(false);
     }
