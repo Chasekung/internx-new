@@ -16,6 +16,12 @@ export default function DebugUsers() {
 
   const fetchUsers = async () => {
     try {
+      if (!supabase) {
+        console.error('Supabase client not available');
+        setIsLoading(false);
+        return;
+      }
+
       // Get the current user (admin) session
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -71,6 +77,11 @@ export default function DebugUsers() {
 
   const testCreateUnverifiedUser = async () => {
     try {
+      if (!supabase) {
+        console.error('Supabase client not available');
+        return;
+      }
+
       // Create a test user without email verification
       const testEmail = `test-unverified-${Date.now()}@example.com`;
       
