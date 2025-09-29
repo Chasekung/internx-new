@@ -21,7 +21,7 @@ export default function TestLegacyAuth() {
       const result = await checkLegacyUserStatus(userId.trim());
       setTestResults(result);
     } catch (error) {
-      setTestResults({ error: error.message });
+      setTestResults({ error: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,7 @@ export default function TestLegacyAuth() {
         setTestResults({ message: 'No user currently signed in' });
       }
     } catch (error) {
-      setTestResults({ error: error.message });
+      setTestResults({ error: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setLoading(false);
     }
