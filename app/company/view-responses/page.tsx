@@ -92,6 +92,9 @@ export default function ViewResponsesPage() {
   const [isAddingToTeam, setIsAddingToTeam] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [showTeamModal, setShowTeamModal] = useState(false);
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isDeclining, setIsDeclining] = useState(false);
+  const [showDeclineConfirm, setShowDeclineConfirm] = useState(false);
   const { supabase, error: supabaseError } = useSupabase();
 
   // Initialize Supabase client when component mounts
@@ -395,6 +398,138 @@ export default function ViewResponsesPage() {
     }
   };
 
+  const extractTeamNameFromInternship = (title: string): string => {
+    // Remove common suffixes and clean up the title
+    const cleanTitle = title
+      .replace(/\s*-\s*.*$/, '') // Remove everything after dash (e.g., "Finance Intern - Finance" -> "Finance Intern")
+      .trim();
+    
+    // Common patterns to extract team name
+    const patterns = [
+      /^(.+?)\s+Intern$/i,           // "Finance Intern" -> "Finance"
+      /^(.+?)\s+Internship$/i,       // "Finance Internship" -> "Finance"
+      /^(.+?)\s+Position$/i,         // "Finance Position" -> "Finance"
+      /^(.+?)\s+Role$/i,             // "Finance Role" -> "Finance"
+      /^(.+?)\s+Opportunity$/i,      // "Finance Opportunity" -> "Finance"
+    ];
+    
+    for (const pattern of patterns) {
+      const match = cleanTitle.match(pattern);
+      if (match) {
+        return match[1].trim();
+      }
+    }
+    
+    // If no pattern matches, return the cleaned title
+    return cleanTitle;
+  };
+
+  const handleAcceptApplication = async () => {
+    if (!currentApplication) {
+      alert('No application selected');
+      return;
+    }
+    
+    if (!supabase) {
+      console.error('Supabase client not available');
+      return;
+    }
+    
+    // Automatically extract team name from internship title
+    const autoTeamName = extractTeamNameFromInternship(internshipDetails?.title || '');
+    
+    if (!autoTeamName) {
+      alert('Could not determine team name from internship title');
+      return;
+    }
+    
+    setIsAccepting(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('You must be logged in to accept applications');
+        return;
+      }
+
+      const response = await fetch('/api/companies/applications/accept', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          applicationId: currentApplication.id,
+          internId: currentApplication.intern.id,
+          teamName: autoTeamName
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to accept application');
+      }
+      
+      // Reload the applications to get updated status
+      await loadApplications();
+      
+      alert(`Application accepted successfully! ${currentApplication.intern.name} has been added to the ${autoTeamName} team.`);
+    } catch (error) {
+      console.error('Error accepting application:', error);
+      alert('Failed to accept application. Please try again.');
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  const handleDeclineApplication = async () => {
+    if (!currentApplication) return;
+    
+    if (!supabase) {
+      console.error('Supabase client not available');
+      return;
+    }
+    
+    setIsDeclining(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('You must be logged in to decline applications');
+        return;
+      }
+
+      const response = await fetch('/api/companies/applications/decline', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          applicationId: currentApplication.id
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to decline application');
+      }
+
+      // Close confirm modal
+      setShowDeclineConfirm(false);
+      
+      // Reload the applications to get updated status
+      await loadApplications();
+      
+      alert('Application declined successfully.');
+    } catch (error) {
+      console.error('Error declining application:', error);
+      alert('Failed to decline application. Please try again.');
+    } finally {
+      setIsDeclining(false);
+    }
+  };
+
   const getQuestionOptions = (question: Question): string[] => {
     if (question.type === 'multiple_choice' || question.type === 'checkboxes') {
       return Array.from({ length: 15 }, (_, i) => question[`choice_${i + 1}` as keyof Question] as string).filter(Boolean);
@@ -686,14 +821,36 @@ export default function ViewResponsesPage() {
             </div>
             
             <div className="flex items-center space-x-3">
-              {/* Connect to Team Button */}
-              <button
-                onClick={() => setShowTeamModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-green-300 rounded-md shadow-sm text-sm font-medium text-green-700 bg-white hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-              >
-                <UserPlusIcon className="w-4 h-4 mr-2" />
-                Connect to your team
-              </button>
+              {currentApplication.status === 'pending' || currentApplication.status === 'submitted' ? (
+                <>
+                  <button
+                    onClick={() => setShowTeamModal(true)}
+                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => setShowDeclineConfirm(true)}
+                    className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Decline
+                  </button>
+                </>
+              ) : (
+                <div className={`inline-flex items-center px-4 py-2 rounded-md font-medium ${
+                  currentApplication.status === 'accepted' 
+                    ? 'bg-green-100 text-green-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {currentApplication.status === 'accepted' ? 'Accepted' : 'Declined'}
+                </div>
+              )}
               
               {/* View Profile Button */}
               <Link
@@ -756,47 +913,58 @@ export default function ViewResponsesPage() {
         </div>
       </div>
 
-      {/* Team Modal */}
+      {/* Accept Application Modal */}
       {showTeamModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              Add {currentApplication.intern.name} to your team
+              Accept Application
             </h3>
-            <div className="mb-4">
-              <label htmlFor="teamName" className="block text-sm font-medium text-gray-700 mb-2">
-                Team Name
-              </label>
-              <input
-                type="text"
-                id="teamName"
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                placeholder="e.g., Engineering, Marketing, Sales"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAddToTeam();
-                  }
-                }}
-              />
-            </div>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to accept {currentApplication.intern.name}'s application? They will be automatically added to the <span className="font-semibold text-green-600">{extractTeamNameFromInternship(internshipDetails?.title || '')}</span> team.
+            </p>
             <div className="flex space-x-3">
               <button
-                onClick={handleAddToTeam}
-                disabled={isAddingToTeam || !teamName.trim()}
-                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isAddingToTeam ? 'Adding...' : 'Add to Team'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowTeamModal(false);
-                  setTeamName('');
-                }}
-                className="flex-1 bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+                onClick={() => setShowTeamModal(false)}
+                className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
               >
                 Cancel
+              </button>
+              <button
+                onClick={handleAcceptApplication}
+                disabled={isAccepting}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isAccepting ? 'Accepting...' : 'Accept Application'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Decline Application Confirmation Modal */}
+      {showDeclineConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-96 max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Decline Application
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to decline the application from {currentApplication.intern.name}? This action cannot be undone.
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setShowDeclineConfirm(false)}
+                className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeclineApplication}
+                disabled={isDeclining}
+                className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isDeclining ? 'Declining...' : 'Decline Application'}
               </button>
             </div>
           </div>

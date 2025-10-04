@@ -45,8 +45,26 @@ export async function GET(request: NextRequest) {
     const hasValidScores = !!(internData.skill_score && internData.experience_score && internData.personality_score);
     const interviewTrulyCompleted = internData.interview_completed && hasValidScores;
 
+    console.log('📊 Interview Status Check:', {
+      userId: user.id,
+      raw_interview_completed: internData.interview_completed,
+      hasValidScores,
+      interviewTrulyCompleted,
+      scores: {
+        skill: internData.skill_score,
+        experience: internData.experience_score,
+        personality: internData.personality_score,
+        overall: internData.overall_match_score
+      },
+      completionDate: internData.interview_completed_at
+    });
+
+    // FIXED LOGIC: If user has completion date, they completed the interview
+    // Even if scores are missing, they should be considered completed
+    const finalInterviewCompleted = internData.interview_completed || !!internData.interview_completed_at;
+
     return NextResponse.json({
-      interview_completed: interviewTrulyCompleted,
+      interview_completed: finalInterviewCompleted,
       interview_completed_at: internData.interview_completed_at,
       has_scores: hasValidScores,
       scores: {

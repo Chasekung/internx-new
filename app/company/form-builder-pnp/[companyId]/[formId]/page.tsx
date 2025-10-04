@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Cog6ToothIcon, 
@@ -90,33 +90,56 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
         console.error('Error parsing user data:', e);
       }
     }
-    
-    loadFormData();
   }, []);
 
-  const loadFormData = async () => {
+  const loadFormData = useCallback(async () => {
     try {
       setIsLoading(true);
       
+      console.log('🔍 Loading form data for formId:', formId, 'companyId:', companyId);
+      
       // Load form data
       if (!supabase) {
+        console.error('❌ Supabase client not initialized');
         toast.error('Supabase client not initialized');
         setIsLoading(false);
         return;
       }
-      const { data: form, error: formError } = await supabase
+      
+      console.log('📡 Fetching form from database...');
+      
+      // First try with company_id
+      let { data: form, error: formError } = await supabase
         .from('forms')
         .select('*')
         .eq('id', formId)
         .eq('company_id', companyId)
         .single();
 
+      // If not found, try without company_id (for auto-generated forms)
+      if (formError && formError.code === 'PGRST116') {
+        console.log('📡 Form not found with company_id, trying without...');
+        const result = await supabase
+          .from('forms')
+          .select('*')
+          .eq('id', formId)
+          .single();
+        form = result.data;
+        formError = result.error;
+      }
+
+      console.log('📊 Form query result:', { form, error: formError });
+
       if (formError || !form) {
-        toast.error('Form not found');
-        router.push('/company-dash');
+        console.error('❌ Form fetch error:', formError);
+        console.error('❌ Form data:', form);
+        toast.error(`Form not found: ${formError?.message || 'Unknown error'}`);
+        // Don't redirect immediately, keep showing the error
+        setIsLoading(false);
         return;
       }
 
+      console.log('✅ Form loaded successfully:', form);
       setFormData(form);
 
       // Generate preview URL - point to internship posting instead of form
@@ -182,7 +205,15 @@ export default function FormBuilderPreview({ params: { companyId, formId } }: { 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [supabase, formId, companyId, router]);
+
+  useEffect(() => {
+    // Only load form data when supabase is ready
+    if (supabase) {
+      console.log('✅ Supabase client ready, loading form data...');
+      loadFormData();
+    }
+  }, [supabase, loadFormData]);
 
   // Multi-step form navigation functions
   const nextStep = () => {

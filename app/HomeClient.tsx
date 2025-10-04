@@ -730,70 +730,76 @@ export default function HomeClient() {
               </div>
 
               <div className="mt-8 relative">
-                <div className="flex items-center justify-between">
-                  <button
-                    onClick={handlePrevious}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 transform bg-white w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                    aria-label="Previous reviews"
-                    disabled={currentIndex === 0}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={handleNext}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 transform bg-white w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                    aria-label="Next reviews"
-                    disabled={currentIndex >= testimonials.length - 3}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                    </svg>
-                  </button>
-                </div>
+                {/* Blurred testimonials content */}
+                <div className="blur-sm pointer-events-none">
+                  <div className="flex items-center justify-between">
+                    <button
+                      className="absolute left-0 top-1/2 -translate-y-1/2 transform bg-white w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                      aria-label="Previous reviews"
+                      disabled={true}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                    </button>
+                    <button
+                      className="absolute right-0 top-1/2 -translate-y-1/2 transform bg-white w-10 h-10 sm:w-14 sm:h-14 flex items-center justify-center rounded-full border-2 border-gray-300 shadow-lg z-10 disabled:opacity-50 hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                      aria-label="Next reviews"
+                      disabled={true}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                  </div>
 
-                <div
-                  className="flex overflow-hidden"
-                  onWheel={handleWheel}
-                  onMouseDown={handleMouseDown}
-                  onMouseMove={handleMouseMove}
-                  onMouseUp={handleMouseUp}
-                  onMouseLeave={handleMouseUp}
-                >
-                  <div
-                    className="flex transition-transform duration-300 ease-in-out"
-                    style={{ transform: `translateX(-${currentIndex * 400}px)` }}
-                  >
-                    {testimonials.map((testimonial, index) => (
-                      <div key={index} className="w-[300px] sm:w-[400px] px-2">
-                        <div className="mobile-card h-[280px] flex flex-col">
-                          <div className="flex items-center">
-                            <img
-                              className="h-10 w-10 sm:h-12 sm:w-12 rounded-full"
-                              src={testimonial.image}
-                              alt={testimonial.name}
-                            />
-                            <div className="ml-3 sm:ml-4">
-                              <h3 className="text-base sm:text-lg font-medium text-gray-900">{testimonial.name}</h3>
-                              <div className="flex items-center mt-1">
-                                {[...Array(testimonial.rating)].map((_, i) => (
-                                  <svg
-                                    key={i}
-                                    className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400"
-                                    fill="currentColor"
-                                    viewBox="0 0 20 20"
-                                  >
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                  </svg>
-                                ))}
+                  <div className="flex overflow-hidden">
+                    <div className="flex transition-transform duration-300 ease-in-out">
+                      {testimonials.map((testimonial, index) => (
+                        <div key={index} className="w-[300px] sm:w-[400px] px-2">
+                          <div className="mobile-card h-[280px] flex flex-col">
+                            <div className="flex items-center">
+                              <img
+                                className="h-10 w-10 sm:h-12 sm:w-12 rounded-full"
+                                src={testimonial.image}
+                                alt={testimonial.name}
+                              />
+                              <div className="ml-3 sm:ml-4">
+                                <h3 className="text-base sm:text-lg font-medium text-gray-900">{testimonial.name}</h3>
+                                <div className="flex items-center mt-1">
+                                  {[...Array(testimonial.rating)].map((_, i) => (
+                                    <svg
+                                      key={i}
+                                      className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.363 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.363-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                  ))}
+                                </div>
                               </div>
                             </div>
+                            <p className="mt-4 mobile-text text-gray-600 flex-grow">{testimonial.text}</p>
                           </div>
-                          <p className="mt-4 mobile-text text-gray-600 flex-grow">{testimonial.text}</p>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Coming Soon Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+                  <div className="text-center">
+                    <div className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full text-lg font-semibold shadow-lg">
+                      <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Coming Soon
+                    </div>
+                    <p className="mt-3 text-gray-600 text-sm">
+                      User testimonials will be available soon
+                    </p>
                   </div>
                 </div>
               </div>

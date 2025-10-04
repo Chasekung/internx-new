@@ -170,7 +170,15 @@ Respond in JSON format:
       }
 
       // Update the user's profile with all scores and recommendations
-      const { error: updateError } = await supabase
+      console.log('✅ Updating intern profile with interview completion...');
+      console.log('📊 Scores to save:', {
+        skill: aiAnalysis.skill_score,
+        experience: aiAnalysis.experience_score,
+        personality: aiAnalysis.personality_score,
+        overall: aiAnalysis.overall_match_score
+      });
+
+      const { data: updateData, error: updateError } = await supabase
         .from('interns')
         .update({
           interview_completed: true,
@@ -196,15 +204,18 @@ Respond in JSON format:
           is_profile_complete: strictProfileComplete,
           ...combinedScores
         })
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .select();
 
       if (updateError) {
-        console.error('Error updating intern profile:', updateError);
+        console.error('❌ Error updating intern profile:', updateError);
         return NextResponse.json(
           { error: 'Failed to update profile' },
           { status: 500 }
         );
       }
+
+      console.log('✅ Interview completion saved successfully!', updateData);
 
       return NextResponse.json({
         success: true,

@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
 
     console.log('✅ Auth successful, user ID:', user.id);
 
-    // Fetch applications for this intern
+    // Fetch applications for this intern (all statuses)
     const { data: applications, error: applicationsError } = await supabase
       .from('applications')
       .select(`
@@ -70,7 +70,6 @@ export async function GET(request: NextRequest) {
         )
       `)
       .eq('intern_id', user.id)
-      .eq('status', 'submitted')
       .order('applied_at', { ascending: false });
 
     console.log('📊 Applications query result:', applications);
