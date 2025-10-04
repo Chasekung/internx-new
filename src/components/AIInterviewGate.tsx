@@ -57,9 +57,10 @@ export default function AIInterviewGate({ children, onStartInterview }: AIInterv
       }
 
       const data = await response.json();
+      console.log('✅ Interview status loaded:', data);
       setInterviewStatus(data);
     } catch (error) {
-      console.error('Error checking interview status:', error);
+      console.error('❌ Error checking interview status:', error);
       setError('Failed to load interview status');
     } finally {
       setLoading(false);
@@ -97,10 +98,12 @@ export default function AIInterviewGate({ children, onStartInterview }: AIInterv
 
   // If interview is completed, show dashboard
   if (interviewStatus?.interview_completed) {
+    console.log('✅ Interview completed, showing dashboard');
     return <>{children}</>;
   }
 
   // Show interview requirement screen
+  console.log('⚠️ Interview not completed, showing gate. Status:', interviewStatus);
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>

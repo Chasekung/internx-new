@@ -10,7 +10,7 @@ export default function B2BPricingPage() {
         <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      <div className="relative z-10 max-w-3xl mx-auto py-24 px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 max-w-3xl mx-auto py-32 px-4 sm:px-6 lg:px-8">
         <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-12 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">For Businesses</h1>
         {/* Pricing Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">

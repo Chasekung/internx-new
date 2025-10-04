@@ -87,6 +87,13 @@ export default function CompanyDash() {
         if (internshipError) throw internshipError;
 
         // Create a new form with the generated ID
+        console.log('📝 Creating new form with:', {
+          id: formId,
+          internship_id: postingId,
+          company_id: companyId,
+          title: `${internship.title} Application Form`
+        });
+        
         const { data: newForm, error: createError } = await supabase
           .from('forms')
           .insert({
@@ -102,7 +109,12 @@ export default function CompanyDash() {
           .select()
           .single();
 
-        if (createError) throw createError;
+        if (createError) {
+          console.error('❌ Error creating form:', createError);
+          throw createError;
+        }
+        
+        console.log('✅ Form created successfully:', newForm);
 
         // Update existingApplicationForms state to show "Edit Application"
         setExistingApplicationForms(prev => ({

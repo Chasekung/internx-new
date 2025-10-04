@@ -71,8 +71,14 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
   }, []);
 
   useEffect(() => {
-    loadFormData();
-  }, []);
+    // Only load when supabase is ready
+    if (supabase) {
+      console.log('✅ Supabase ready, loading form data...');
+      loadFormData();
+    } else {
+      console.log('⏳ Waiting for Supabase client...');
+    }
+  }, [supabase]);
 
   const loadFormData = async () => {
     try {
@@ -112,6 +118,8 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
       }
 
       // Now find the form associated with this internship
+      console.log('🔍 Looking for form for internship:', application.internship_id);
+      
       const { data: form, error: formError } = await supabase
         .from('forms')
         .select('*')
@@ -119,10 +127,16 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
         .eq('published', true)
         .single();
 
+      console.log('📊 Form query result:', { form, error: formError });
+
       if (formError || !form) {
-        toast.error('Form not found or not published');
+        console.error('❌ Form not found. Error:', formError);
+        console.error('❌ Internship ID:', application.internship_id);
+        toast.error(`Form not found or not published. Error: ${formError?.message || 'No form data'}`);
         return;
       }
+      
+      console.log('✅ Form found:', form);
 
       setFormData(form);
 

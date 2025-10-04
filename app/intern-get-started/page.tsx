@@ -174,7 +174,7 @@ export default function InternGetStarted() {
       {/* Decorative grid pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
 
-      <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="relative min-h-screen flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

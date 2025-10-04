@@ -570,13 +570,29 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
         .single();
       if (companyError || !company) notFound();
 
-      const { data: form, error: formError } = await supabase
+      // First try with company_id
+      let { data: form, error: formError } = await supabase
         .from('forms')
         .select('title, description, primary_color, background_color, font_family, border_radius, spacing, published')
         .eq('id', formId)
         .eq('company_id', companyId)
         .single();
-      if (formError || !form) notFound();
+      
+      // If not found, try without company_id (for auto-generated forms)
+      if (formError && formError.code === 'PGRST116') {
+        const result = await supabase
+          .from('forms')
+          .select('title, description, primary_color, background_color, font_family, border_radius, spacing, published')
+          .eq('id', formId)
+          .single();
+        form = result.data;
+        formError = result.error;
+      }
+      
+      if (formError || !form) {
+        console.error('Form fetch error:', formError);
+        notFound();
+      }
 
       setFormTitle(form.title || '');
       setFormDescription(form.description || '');

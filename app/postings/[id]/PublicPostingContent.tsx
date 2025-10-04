@@ -54,30 +54,47 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
       try {
         setIsCheckingForm(true);
         
+        console.log('🔍 Checking for application form...');
+        console.log('📋 Internship ID:', posting.id);
+        console.log('📋 Internship Title:', posting.title);
+        
         // Check if a form exists for this internship
-        if (!supabase) return;
+        if (!supabase) {
+          console.log('❌ Supabase client not initialized yet');
+          return;
+        }
+        
+        console.log('✅ Supabase client ready');
+        
         const { data: form, error } = await supabase
           .from('forms')
-          .select('id')
+          .select('id, title, internship_id, company_id, published')
           .eq('internship_id', posting.id)
           .maybeSingle();
 
+        console.log('📊 Form query result:', { form, error });
+
         if (error && error.code !== 'PGRST116') {
-          console.error('Error checking for application form:', error);
+          console.error('❌ Error checking for application form:', error);
           setHasApplicationForm(false);
         } else {
-          setHasApplicationForm(!!form);
+          const hasForm = !!form;
+          console.log(hasForm ? '✅ Form found!' : '❌ No form found for this internship');
+          setHasApplicationForm(hasForm);
         }
       } catch (error) {
-        console.error('Error checking for application form:', error);
+        console.error('❌ Exception checking for application form:', error);
         setHasApplicationForm(false);
       } finally {
         setIsCheckingForm(false);
       }
     };
 
-    checkApplicationForm();
-  }, [posting.id, supabase]);
+    // Only check when supabase is ready
+    if (supabase) {
+      checkApplicationForm();
+    }
+  }, [posting.id, posting.title, supabase]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">

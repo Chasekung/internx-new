@@ -165,42 +165,97 @@ export default function CompanyHome() {
         </motion.div>
       </div>
 
-      {/* Stats Section */}
+      {/* Partnered Companies Section */}
       <div className="bg-white py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Company Benefits</h2>
+          <div className="text-center mb-12">
+            <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Partnerships</h2>
             <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
-              Why Choose Step Up?
+              Partnered with:
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600">2,500+</div>
-              <div className="mt-2 text-lg font-semibold text-gray-900">Active Students</div>
-              <div className="mt-1 text-sm text-gray-500">Ready to intern</div>
+          
+          <div className="relative overflow-hidden min-h-[200px] py-8">
+            {/* Blurred company logos carousel */}
+            <div className="blur-sm pointer-events-none select-none">
+              <div className="flex animate-scroll-left">
+                {/* First set of companies */}
+                <div className="flex items-center space-x-12 whitespace-nowrap">
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Google</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Microsoft</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Apple</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Meta</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Tesla</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Netflix</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Amazon</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Spotify</span>
+                  </div>
+                </div>
+                {/* Duplicate set for seamless loop */}
+                <div className="flex items-center space-x-12 whitespace-nowrap ml-12">
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Google</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Microsoft</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Apple</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Meta</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Tesla</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Netflix</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Amazon</span>
+                  </div>
+                  <div className="flex items-center justify-center w-32 h-16 bg-gray-100 rounded-lg">
+                    <span className="text-lg font-semibold text-gray-600">Spotify</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600">500+</div>
-              <div className="mt-2 text-lg font-semibold text-gray-900">Posted Internships</div>
-              <div className="mt-1 text-sm text-gray-500">Available positions</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600">95%</div>
-              <div className="mt-2 text-lg font-semibold text-gray-900">Success Rate</div>
-              <div className="mt-1 text-sm text-gray-500">Of successful placements</div>
-            </div>
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600">100+</div>
-              <div className="mt-2 text-lg font-semibold text-gray-900">Partner Companies</div>
-              <div className="mt-1 text-sm text-gray-500">Trust our platform</div>
+
+            {/* Coming Soon Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm">
+              <div className="text-center px-4">
+                <div className="inline-flex items-center px-6 py-4 bg-blue-600 text-white rounded-full text-lg font-semibold shadow-lg mb-4">
+                  <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Coming Soon
+                </div>
+                <p className="text-gray-600 text-sm">
+                  Company partnerships will be announced soon
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Feature Section */}
-      <div className="py-12 bg-gray-50">
+      <div id="features" className="py-12 bg-gray-50">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="lg:text-center">
             <h2 className="text-base text-blue-600 font-semibold tracking-wide uppercase">Features</h2>
@@ -214,7 +269,7 @@ export default function CompanyHome() {
 
           <div className="mt-10">
             <div className="space-y-10 md:space-y-0 md:grid md:grid-cols-2 md:gap-x-8 md:gap-y-10">
-              <div className="relative">
+              <div className="relative bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                 <dt>
                   <div className="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -228,7 +283,7 @@ export default function CompanyHome() {
                 </dd>
               </div>
 
-              <div className="relative">
+              <div className="relative bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                 <dt>
                   <div className="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -242,7 +297,7 @@ export default function CompanyHome() {
                 </dd>
               </div>
 
-              <div className="relative">
+              <div className="relative bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                 <dt>
                   <div className="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -256,7 +311,7 @@ export default function CompanyHome() {
                 </dd>
               </div>
 
-              <div className="relative">
+              <div className="relative bg-white rounded-xl border-2 border-gray-200 shadow-lg p-6 hover:shadow-xl transition-all duration-300">
                 <dt>
                   <div className="absolute flex h-12 w-12 items-center justify-center rounded-md bg-blue-500 text-white">
                     <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -303,8 +358,17 @@ export default function CompanyHome() {
           100% { transform: translate(0px, 0px) scale(1); }
         }
 
+        @keyframes scroll-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
         .animate-blob {
           animation: blob 7s infinite;
+        }
+
+        .animate-scroll-left {
+          animation: scroll-left 20s linear infinite;
         }
 
         .animation-delay-2000 {

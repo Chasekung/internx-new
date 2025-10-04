@@ -68,6 +68,7 @@ interface Internship {
   for_profit: 'for-profit' | 'non-profit';
   category: string;
   position: string;
+  work_location_type: 'online' | 'in_person';
   address: string;
   city: string;
   state: string;
@@ -98,6 +99,7 @@ interface FormState {
   for_profit: string;
   category: string;
   position: string;
+  work_location_type: string;
   address: string;
   city: string;
   state: string;
@@ -132,6 +134,7 @@ export default function CompanyOpportunitiesPage() {
     for_profit: '',
     category: '',
     position: '',
+    work_location_type: 'in_person',
     address: '',
     city: '',
     state: '',
@@ -271,9 +274,10 @@ export default function CompanyOpportunitiesPage() {
           for_profit: form.for_profit === 'true' ? 'for-profit' : 'non-profit',
         category: form.category,
         position: form.position,
-        address: form.address,
-        city: form.city,
-        state: form.state,
+        work_location_type: form.work_location_type as 'online' | 'in_person',
+        address: form.work_location_type === 'in_person' ? form.address : null,
+        city: form.work_location_type === 'in_person' ? form.city : null,
+        state: form.work_location_type === 'in_person' ? form.state : null,
           hours_per_week: parseInt(form.hours_per_week),
           pay: form.pay,
         business_email: form.business_email,
@@ -640,20 +644,31 @@ export default function CompanyOpportunitiesPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-black">Address</label>
-                        <input name="address" value={form.address} onChange={handleChange} required className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-black">City</label>
-                        <input name="city" value={form.city} onChange={handleChange} required className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-black">State</label>
-                        <select name="state" value={form.state} onChange={handleChange} required className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black">
-                          <option value="">Select</option>
-                          {Object.values(STATE_ABBREVIATIONS).map((abbr) => <option key={abbr} value={abbr} className="text-black">{abbr}</option>)}
+                        <label className="block text-sm font-medium text-black">Work Location Type</label>
+                        <select name="work_location_type" value={form.work_location_type} onChange={handleChange} required className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black">
+                          <option value="in_person">In-Person</option>
+                          <option value="online">Online</option>
                         </select>
                       </div>
+                      {form.work_location_type === 'in_person' && (
+                        <>
+                          <div>
+                            <label className="block text-sm font-medium text-black">Address</label>
+                            <input name="address" value={form.address} onChange={handleChange} required className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-black">City</label>
+                            <input name="city" value={form.city} onChange={handleChange} required className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-black">State</label>
+                            <select name="state" value={form.state} onChange={handleChange} required className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black">
+                              <option value="">Select</option>
+                              {Object.values(STATE_ABBREVIATIONS).map((abbr) => <option key={abbr} value={abbr} className="text-black">{abbr}</option>)}
+                            </select>
+                          </div>
+                        </>
+                      )}
                       <div>
                         <label className="block text-sm font-medium text-black">Hours per Week</label>
                         <input type="number" name="hours_per_week" value={form.hours_per_week} onChange={handleChange} required className="mt-1 block w-full border border-gray-300 rounded-md p-2 text-black" />

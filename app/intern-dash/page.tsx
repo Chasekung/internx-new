@@ -635,16 +635,24 @@ export default function InternDash() {
                     </div>
                     <span
                       className={`px-6 py-3 rounded-2xl text-sm font-semibold ${
-                        application.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                          : application.status === 'accepted'
+                        application.status === 'accepted'
                           ? 'bg-green-100 text-green-800 border border-green-200'
                           : application.status === 'rejected'
                           ? 'bg-red-100 text-red-800 border border-red-200'
-                          : 'bg-slate-100 text-slate-800 border border-slate-200'
+                          : application.status === 'in_progress'
+                          ? 'bg-purple-100 text-purple-800 border border-purple-200'
+                          : application.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                          : 'bg-blue-100 text-blue-800 border border-blue-200'
                       }`}
                     >
-                      {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                      {
+                        application.status === 'in_progress'
+                          ? 'In Progress'
+                          : application.status === 'submitted' || application.status === 'pending'
+                          ? 'Submitted'
+                          : application.status.charAt(0).toUpperCase() + application.status.slice(1)
+                      }
                     </span>
                   </div>
 
