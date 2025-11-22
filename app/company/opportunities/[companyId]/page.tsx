@@ -585,7 +585,7 @@ export default function CompanyOpportunitiesPage() {
         </motion.div>
 
         <Transition appear show={isModalOpen} as={Fragment}>
-          <Dialog as="div" className="relative z-50" onClose={() => setIsModalOpen(false)}>
+          <Dialog as="div" style={{ position: 'relative', zIndex: 200 }} onClose={() => setIsModalOpen(false)}>
             <Transition.Child
               as={Fragment}
               enter="ease-out duration-300"
@@ -595,10 +595,13 @@ export default function CompanyOpportunitiesPage() {
               leaveFrom="opacity-100"
               leaveTo="opacity-0"
             >
-              <div className="fixed inset-0 bg-black bg-opacity-25 backdrop-blur-sm" />
+              <div 
+                className="fixed inset-0 bg-black bg-opacity-25"
+                style={{ zIndex: 200 }}
+              />
             </Transition.Child>
 
-            <div className="fixed inset-0 overflow-y-auto">
+            <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 201, pointerEvents: 'auto' }}>
               <div className="flex min-h-full items-center justify-center p-4 text-center">
                 <Transition.Child
                   as={Fragment}
@@ -609,7 +612,10 @@ export default function CompanyOpportunitiesPage() {
                   leaveFrom="opacity-100 scale-100"
                   leaveTo="opacity-0 scale-95"
                 >
-                  <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Panel 
+                    className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                    style={{ pointerEvents: 'auto', zIndex: 201 }}
+                  >
                     <Dialog.Title
                       as="h3"
                       className="text-2xl font-bold leading-6 text-gray-900 mb-8"

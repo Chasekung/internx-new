@@ -1,4 +1,11 @@
 {
-  "/page": "app/page.js",
-  "/not-found": "app/not-found.js"
+  "/intern-sign-in/page": "app/intern-sign-in/page.js",
+  "/intern-dash/page": "app/intern-dash/page.js",
+  "/not-found": "app/not-found.js",
+  "/api/companies/applications/route": "app/api/companies/applications/route.js",
+  "/api/interns/search/route": "app/api/interns/search/route.js",
+  "/company-dash/page": "app/company-dash/page.js",
+  "/company/opportunities/[companyId]/page": "app/company/opportunities/[companyId]/page.js",
+  "/company-sign-in/page": "app/company-sign-in/page.js",
+  "/company/search/page": "app/company/search/page.js"
 }
