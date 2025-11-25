@@ -13,9 +13,10 @@ import { useSupabase } from '@/hooks/useSupabase';
 export default function CompanyNavbar() {
   const isVisible = useScrollPosition();
   const [isAboutUsOpen, setIsAboutUsOpen] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false); // Always start false to prevent hydration mismatch
   const [isSwitchDropdownOpen, setIsSwitchDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false); // Track if component is mounted
   const aboutUsRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
   const switchDropdownRef = useRef<HTMLDivElement>(null);
@@ -25,8 +26,13 @@ export default function CompanyNavbar() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { supabase, error: supabaseError } = useSupabase();
 
+  // Set mounted flag after first render to prevent hydration mismatch
   useEffect(() => {
-    if (!supabase) return; // Guard clause - wait for supabase to be initialized
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!supabase || !isMounted) return; // Wait for mount and supabase to prevent hydration mismatch
     if (supabaseError) {
       console.error('Supabase error:', supabaseError);
       return;
@@ -55,76 +61,74 @@ export default function CompanyNavbar() {
       authCheckTimeout = setTimeout(async () => {
         isChecking = true;
         try {
-          const token = localStorage.getItem('token');
-          const userStr = localStorage.getItem('user');
+          // First check Supabase session (source of truth)
+          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
           
-          if (!token || !userStr) {
+          if (sessionError || !session) {
+            console.log('❌ No valid Supabase session');
             setIsSignedIn(false);
             setCompanyId(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             // Auto-redirect if on a protected company page
             if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
                 !window.location.pathname.includes('/company-sign-in') && 
                 !window.location.pathname.includes('/company-get-started') &&
                 !window.location.pathname.includes('/company-forgot-password') &&
-                !window.location.pathname.includes('/company-reset-password')) {
-              console.log('🔄 No auth token found, redirecting to sign in...');
+                !window.location.pathname.includes('/company-reset-password') &&
+                !window.location.pathname.includes('/company/public-profile') &&
+                !window.location.pathname.includes('/company/edit-page')) {
+              console.log('🔄 No session, redirecting to sign in...');
               window.location.href = '/company-sign-in';
             }
             return;
           }
 
-          try {
-            const user = JSON.parse(userStr);
-            if (user.role !== 'COMPANY') {
-              setIsSignedIn(false);
-              setCompanyId(null);
-              // Auto-redirect non-company users
+          // Session exists, update localStorage with fresh token
+          localStorage.setItem('token', session.access_token);
+
+          // Verify user exists in companies table
+          const { data: companyData, error: companyError } = await supabase
+            .from('companies')
+            .select('id, company_name, contact_name, email')
+            .eq('id', session.user.id)
+            .single();
+
+          if (companyError || !companyData) {
+            console.log('❌ User not found in companies table');
+            setIsSignedIn(false);
+            setCompanyId(null);
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            // Check if they're an intern user
+            const { data: internProfile } = await supabase
+              .from('interns')
+              .select('id')
+              .eq('id', session.user.id)
+              .single();
+            
+            if (internProfile) {
+              console.log('🔄 Intern user trying to access company pages, redirecting...');
               if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
-                  !window.location.pathname.includes('/company-sign-in') && 
-                  !window.location.pathname.includes('/company-get-started')) {
-                console.log('🔄 Non-company user detected, redirecting to sign in...');
+                  !window.location.pathname.includes('/company-sign-in')) {
                 window.location.href = '/company-sign-in';
               }
-              return;
-            }
-          } catch (e) {
-            console.error('Error parsing user data:', e);
-            setIsSignedIn(false);
-            setCompanyId(null);
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            // Auto-redirect on parse error
-            if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
-                !window.location.pathname.includes('/company-sign-in') && 
-                !window.location.pathname.includes('/company-get-started')) {
-              console.log('🔄 User data parsing error, redirecting to sign in...');
-              window.location.href = '/company-sign-in';
             }
             return;
           }
 
-          // Verify token with Supabase
-          const { data: { user: supabaseUser }, error: userError } = await supabase.auth.getUser();
-          
-          if (userError || !supabaseUser) {
-            console.log('❌ Supabase auth check failed:', userError);
-            setIsSignedIn(false);
-            setCompanyId(null);
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            // Auto-redirect on auth failure
-            if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
-                !window.location.pathname.includes('/company-sign-in') && 
-                !window.location.pathname.includes('/company-get-started')) {
-              console.log('🔄 Supabase auth failed, redirecting to sign in...');
-              window.location.href = '/company-sign-in';
-            }
-            return;
-          }
+          // Update localStorage with fresh user data
+          localStorage.setItem('user', JSON.stringify({
+            id: session.user.id,
+            email: session.user.email,
+            role: 'COMPANY',
+            companyName: companyData.company_name,
+            contactName: companyData.contact_name
+          }));
 
-          console.log('✅ Auth check successful, user:', supabaseUser.id);
+          console.log('✅ Auth check successful, company:', companyData.company_name);
           setIsSignedIn(true);
-          setCompanyId(supabaseUser.id);
+          setCompanyId(session.user.id);
           
         } catch (error) {
           console.error('❌ Error during auth check:', error);
@@ -132,10 +136,12 @@ export default function CompanyNavbar() {
           setCompanyId(null);
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          // Auto-redirect on error
+          // Only redirect on protected pages
           if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
               !window.location.pathname.includes('/company-sign-in') && 
-              !window.location.pathname.includes('/company-get-started')) {
+              !window.location.pathname.includes('/company-get-started') &&
+              !window.location.pathname.includes('/company/public-profile') &&
+              !window.location.pathname.includes('/company/edit-page')) {
             console.log('🔄 Auth check error, redirecting to sign in...');
             window.location.href = '/company-sign-in';
           }
@@ -199,7 +205,7 @@ export default function CompanyNavbar() {
       window.removeEventListener('login', handleLogin);
       clearTimeout(authCheckTimeout);
     };
-  }, [supabase]); // Added supabase as dependency
+  }, [supabase, isMounted]); // Wait for mount to prevent hydration mismatch
 
   const handleSignOut = async () => {
     try {

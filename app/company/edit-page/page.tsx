@@ -123,12 +123,8 @@ interface Location {
 const EditCompanyPage = () => {
   const router = useRouter();
   const { supabase, error: supabaseError } = useSupabase();
-
-  // Initialize Supabase client when component mounts
-  useEffect(() => {
-    
-    
-  }, []);
+  
+  // ALL HOOKS MUST BE DECLARED BEFORE ANY EARLY RETURNS (Rules of Hooks)
   const [activeSection, setActiveSection] = useState('basic');
   const [companyData, setCompanyData] = useState<CompanyData>({
     companyName: '',
@@ -146,41 +142,15 @@ const EditCompanyPage = () => {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [companyLogo, setCompanyLogo] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-
+  
+  // ALL useEffect hooks MUST be declared before any returns
   useEffect(() => {
-    checkSession();
-  }, [router]);
-
-  const checkSession = async () => {
-    try {
-      console.log('Checking session...');
-      if (!supabase) {
-        router.push('/company-sign-in');
-        return;
-      }
-      const { data: { user }, error } = await supabase.auth.getUser();
-      
-      if (error) {
-        console.error('Session error:', error);
-        router.push('/company-sign-in');
-        return;
-      }
-
-      if (!user) {
-        console.log('No session found');
-        router.push('/company-sign-in');
-        return;
-      }
-
-      console.log('Session found, user:', user.id);
-      
-      fetchCompanyData();
-    } catch (error) {
-      console.error('Error checking session:', error);
-      router.push('/company-sign-in');
+    console.log('🔍 [DEBUG] useEffect triggered, supabase:', !!supabase);
+    if (supabase) {
+      checkSession();
     }
-  };
-
+  }, [supabase, router]);
+  
   useEffect(() => {
     if (!companyLogo) {
       if (companyData.companyLogo) {
@@ -196,8 +166,103 @@ const EditCompanyPage = () => {
     };
     reader.readAsDataURL(companyLogo);
   }, [companyLogo, companyData.companyLogo]);
+  
+  console.log('🔍 [DEBUG] EditCompanyPage render, supabase:', !!supabase, 'error:', supabaseError);
+  
+  // NOW safe to do early returns AFTER all hooks are declared
+  // Show loading while Supabase initializes
+  if (!supabase && !supabaseError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Initializing Supabase client...</p>
+          <p className="text-xs text-gray-400 mt-2">Check console for debug logs</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if Supabase failed to initialize
+  if (supabaseError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <p className="text-red-600 font-semibold mb-2">Supabase initialization failed</p>
+          <p className="text-gray-600 text-sm mb-4">{supabaseError}</p>
+          <p className="text-xs text-gray-400">Check console for debug logs</p>
+        </div>
+      </div>
+    );
+  }
+
+  const checkSession = async () => {
+    try {
+      console.log('🔍 [DEBUG] Checking session...');
+      console.log('🔍 [DEBUG] Supabase client exists?', !!supabase);
+      
+      if (!supabase) {
+        console.log('❌ [DEBUG] Supabase client not initialized');
+        console.log('🔍 [DEBUG] NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL);
+        console.log('🔍 [DEBUG] NEXT_PUBLIC_SUPABASE_ANON_KEY exists?', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
+        // TEMPORARILY DISABLED: router.push('/company-sign-in');
+        alert('ERROR: Supabase client not initialized. Check console for details.');
+        return;
+      }
+
+      // Check for valid Supabase session
+      console.log('🔍 [DEBUG] Getting Supabase session...');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      console.log('🔍 [DEBUG] Session exists?', !!session);
+      console.log('🔍 [DEBUG] Session error?', sessionError?.message);
+      
+      if (sessionError || !session) {
+        console.error('❌ [DEBUG] No valid session:', sessionError?.message);
+        console.log('🔍 [DEBUG] localStorage token:', localStorage.getItem('token')?.substring(0, 20) + '...');
+        console.log('🔍 [DEBUG] localStorage user:', localStorage.getItem('user'));
+        // TEMPORARILY DISABLED: router.push('/company-sign-in');
+        alert('ERROR: No valid session. Check console for details.');
+        return;
+      }
+
+      // Verify user is a company
+      console.log('🔍 [DEBUG] Checking if user is in companies table...');
+      const { data: companyData, error: companyError } = await supabase
+        .from('companies')
+        .select('id, company_name')
+        .eq('id', session.user.id)
+        .single();
+      
+      console.log('🔍 [DEBUG] Company data:', companyData);
+      console.log('🔍 [DEBUG] Company error?', companyError?.message);
+
+      if (companyError || !companyData) {
+        console.error('❌ [DEBUG] User not found in companies table');
+        // TEMPORARILY DISABLED: router.push('/company-sign-in');
+        alert('ERROR: User not found in companies table. Check console for details.');
+        return;
+      }
+
+      console.log('✅ [DEBUG] Session valid, user:', session.user.id);
+      console.log('✅ [DEBUG] Company name:', companyData.company_name);
+      
+      // Update localStorage with fresh token
+      localStorage.setItem('token', session.access_token);
+      console.log('✅ [DEBUG] localStorage token updated');
+      
+      fetchCompanyData();
+    } catch (error) {
+      console.error('❌ [DEBUG] Error checking session:', error);
+      alert('ERROR: ' + (error as Error).message + '. Check console for details.');
+      // TEMPORARILY DISABLED: router.push('/company-sign-in');
+    }
+  };
 
   const fetchCompanyData = async () => {
+    if (!supabase) {
+      console.error('❌ [DEBUG] Cannot fetch company data - no supabase client');
+      return;
+    }
     try {
       console.log('Fetching company data...');
       

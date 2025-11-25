@@ -16,14 +16,74 @@ export default function CompanySignIn() {
   const { supabase, error: supabaseError } = useSupabase();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(false); // Start false to prevent hydration mismatch
+  const [isMounted, setIsMounted] = useState(false);
   const redirectTimeout = useRef<NodeJS.Timeout | null>(null);
   const authChecked = useRef(false);
 
-  // Initialize Supabase client when component mounts
+  // Set mounted flag to prevent hydration mismatch
   useEffect(() => {
-    
-    
+    setIsMounted(true);
   }, []);
+
+  // Check if user is already signed in and redirect
+  useEffect(() => {
+    if (!isMounted) return; // Wait for mount
+    
+    const checkExistingAuth = async () => {
+      if (!supabase || authChecked.current) {
+        return;
+      }
+      
+      setIsCheckingAuth(true);
+      authChecked.current = true;
+      
+      try {
+        // Check localStorage first for quick check
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          try {
+            const user = JSON.parse(userStr);
+            if (user.role === 'COMPANY') {
+              // Also verify with Supabase session
+              const { data: { session } } = await supabase.auth.getSession();
+              if (session?.user) {
+                // User is signed in, redirect to dashboard
+                console.log('User already signed in, redirecting to dashboard...');
+                router.push('/company-dash');
+                return;
+              }
+            }
+          } catch (e) {
+            // Invalid user data, continue to sign-in form
+          }
+        }
+        
+        // Also check Supabase session directly
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          // Check if this user is a company
+          const { data: companyData } = await supabase
+            .from('companies')
+            .select('id')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (companyData) {
+            console.log('Active company session found, redirecting to dashboard...');
+            router.push('/company-dash');
+            return;
+          }
+        }
+      } catch (e) {
+        console.log('No active session, showing sign-in form');
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    
+    checkExistingAuth();
+  }, [supabase, router, isMounted]);
 
   useEffect(() => {
     if (error === 'INTERN_USER') {
@@ -162,6 +222,18 @@ export default function CompanySignIn() {
       subscription.unsubscribe();
     };
   }, [supabase, supabaseError]);
+
+  // Show loading state while checking auth
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-gray-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
