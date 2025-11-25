@@ -1,25 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openaiApiKey = process.env.OPENAI_API_KEY!;
-const openai = new OpenAI({ apiKey: openaiApiKey });
-
 export async function POST(request: NextRequest) {
   try {
+    // Check if OpenAI API key is configured
+    const openaiApiKey = process.env.OPENAI_API_KEY;
+    if (!openaiApiKey) {
+      console.error('OPENAI_API_KEY not found in environment variables');
+      return NextResponse.json(
+        { error: 'OpenAI API key not configured. Please add OPENAI_API_KEY to your .env.local file.' },
+        { status: 500 }
+      );
+    }
+
+    const openai = new OpenAI({ apiKey: openaiApiKey });
+
     // Verify authorization
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.error('Missing or invalid authorization header');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       );
     }
 
-    const { companyWebsite, requirements, conversationHistory, opportunityContext } = await request.json();
+    const { query, conversationHistory, formContext } = await request.json();
+    console.log('API called with:', { query, hasFormContext: !!formContext, historyLength: conversationHistory?.length || 0 });
 
-    if (!companyWebsite && !requirements) {
+    if (!query) {
       return NextResponse.json(
-        { error: 'At least company website or requirements must be provided' },
+        { error: 'Query is required' },
         { status: 400 }
       );
     }
@@ -34,16 +45,41 @@ export async function POST(request: NextRequest) {
 
     // Build additional context from opportunity form fields if provided
     let contextDetails = '';
-    if (opportunityContext) {
-      contextDetails = `\n\nOpportunity Details Already Selected:
-- Category: ${opportunityContext.category}
-- Position: ${opportunityContext.position}
-- Type: ${opportunityContext.profitType === 'for-profit' ? 'For-Profit' : 'Non-Profit'}
-- Location: ${opportunityContext.location}
-- Hours per Week: ${opportunityContext.hoursPerWeek}
-- Pay: $${opportunityContext.pay}/hr
+    let websiteInstruction = '';
+    
+    if (formContext) {
+      const details = [];
+      
+      // Prioritize company website as primary information source
+      if (formContext.company_website) {
+        websiteInstruction = `\n\n🌐 IMPORTANT - Company Website Provided: ${formContext.company_website}
 
-Please tailor the description specifically for this ${opportunityContext.position} role in ${opportunityContext.category}.`;
+You MUST reference this company website as your PRIMARY source of information about the company. Use the website to:
+- Understand the company's mission, values, and culture
+- Match the company's tone and voice in the description
+- Identify the company's actual products, services, and focus areas
+- Ensure accuracy by using real company information instead of assumptions
+
+DO NOT generate generic descriptions. Use the company website to create a description that is specific and authentic to THIS company.`;
+      }
+      
+      if (formContext.company_name) details.push(`Company: ${formContext.company_name}`);
+      if (formContext.category) details.push(`Category: ${formContext.category}`);
+      if (formContext.position) details.push(`Position: ${formContext.position}`);
+      if (formContext.for_profit) details.push(`Type: ${formContext.for_profit === 'true' ? 'For-Profit' : 'Non-Profit'}`);
+      if (formContext.work_location_type) details.push(`Location Type: ${formContext.work_location_type}`);
+      if (formContext.hours_per_week) details.push(`Hours per Week: ${formContext.hours_per_week}`);
+      if (formContext.pay) details.push(`Pay: $${formContext.pay}/hr`);
+      if (formContext.address && formContext.city && formContext.state) {
+        details.push(`Work Location: ${formContext.city}, ${formContext.state}`);
+      }
+      if (formContext.current_description) details.push(`Current Description: ${formContext.current_description}`);
+      
+      if (details.length > 0) {
+        contextDetails = `\n\nOpportunity Details Already Selected:\n${details.map(d => `- ${d}`).join('\n')}
+
+Please tailor the description specifically for this ${formContext.position || 'internship'} role${formContext.category ? ` in ${formContext.category}` : ''}.`;
+      }
     }
 
     // System prompt for job description generation
@@ -74,23 +110,22 @@ Your task is to generate clear, professional, and engaging internship descriptio
 • [Quality/skill 3]
 • [Quality/skill 4]
 
-IMPORTANT RULES:
-1. Write for high school students (clear, approachable language)
-2. Be realistic about expectations for high school interns
-3. NO gradients, NO emojis, NO fancy formatting
-4. Use clean, professional tone similar to YC job posts
-5. If company website is provided, research the company and match their voice
-6. If requirements are vague, make reasonable assumptions
-7. Skip sections if there's insufficient information
-8. Keep it concise but informative (400-600 words total)`;
+CRITICAL RULES:
+1. **COMPANY WEBSITE IS PRIMARY SOURCE**: When a company website URL is provided, you MUST use it as your main reference. Research the actual company, understand their mission, products, services, culture, and tone. Generate company-specific content, NOT generic descriptions.
+2. Write for high school students (clear, approachable language)
+3. Be realistic about expectations for high school interns
+4. NO gradients, NO emojis, NO fancy formatting
+5. Use clean, professional tone similar to YC job posts
+6. Match the company's authentic voice and values from their website
+7. Include specific details about the company's work, products, or services
+8. If requirements are vague, make reasonable assumptions based on the company website
+9. Skip sections gracefully if there's insufficient information
+10. Keep it concise but informative (400-600 words total)
+11. DO NOT confuse companies with similar names - use the website URL to identify the correct company`;
 
-    const userPrompt = `Generate an internship job description with the following information:
+    const userPrompt = `${query}${websiteInstruction}${contextDetails}
 
-${companyWebsite ? `Company Website: ${companyWebsite}` : ''}
-${requirements ? `Requirements/Details: ${requirements}` : ''}
-${contextDetails}
-
-Please generate a complete, structured job description following the format exactly. Make sure the description aligns with the opportunity details provided above.`;
+Please generate a complete, structured job description following the format exactly. Make sure the description aligns with the opportunity details provided above and is tailored specifically to this company based on their website information.`;
 
     const messages: any[] = [
       { role: 'system', content: systemPrompt },
@@ -98,24 +133,58 @@ Please generate a complete, structured job description following the format exac
       { role: 'user', content: userPrompt }
     ];
 
+    console.log('Calling OpenAI API...');
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini', // Faster and cheaper model
       messages: messages,
       temperature: 0.7,
-      max_tokens: 1500
+      max_tokens: 1000, // Reduced for faster response
+      top_p: 0.9,
+      frequency_penalty: 0.3,
+      presence_penalty: 0.3
     });
 
     const generatedDescription = completion.choices[0].message.content;
+    
+    if (!generatedDescription) {
+      console.error('OpenAI returned empty response');
+      return NextResponse.json(
+        { error: 'AI generated empty response. Please try again.' },
+        { status: 500 }
+      );
+    }
+
+    console.log('Successfully generated description, length:', generatedDescription.length);
 
     return NextResponse.json({
-      response: "I've generated a job description for you. Would you like me to paste this into your Opportunity Description field?",
-      description: generatedDescription
+      success: true,
+      response: "I've generated a professional job description for you! Click 'Insert into Form' to add it to your posting.",
+      generatedDescription: generatedDescription
     });
 
   } catch (error: any) {
-    console.error('Job description generation error:', error);
+    console.error('Job description generation error:', {
+      message: error.message,
+      type: error.constructor.name,
+      status: error.status,
+      code: error.code
+    });
+    
+    // Provide user-friendly error messages
+    let userMessage = 'Failed to generate job description. ';
+    
+    if (error.code === 'insufficient_quota') {
+      userMessage += 'OpenAI API quota exceeded. Please check your API key billing.';
+    } else if (error.code === 'invalid_api_key') {
+      userMessage += 'Invalid OpenAI API key. Please check your .env.local configuration.';
+    } else if (error.message?.includes('timeout')) {
+      userMessage += 'Request timed out. Please try again.';
+    } else {
+      userMessage += error.message || 'Unknown error occurred.';
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to generate job description', details: error.message },
+      { error: userMessage, details: error.message },
       { status: 500 }
     );
   }

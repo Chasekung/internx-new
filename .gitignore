@@ -2,3 +2,18 @@ node_modules/
 .env.local
 .env
 .next/
+
+# TypeScript build cache
+tsconfig.tsbuildinfo
+
+# AI/Cursor session notes and summaries
+*_SUMMARY.md
+*_PLAN.md
+*_FIX.md
+*_TEST.md
+*_GUIDE.md
+*_SETUP.md
+*_UPDATE.md
+TEST_*.md
+AI_*.md
+COFOUNDER_CURSOR_PROMPT.md

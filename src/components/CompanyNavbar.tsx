@@ -13,9 +13,10 @@ import { useSupabase } from '@/hooks/useSupabase';
 export default function CompanyNavbar() {
   const isVisible = useScrollPosition();
   const [isAboutUsOpen, setIsAboutUsOpen] = useState(false);
-  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false); // Always start false to prevent hydration mismatch
   const [isSwitchDropdownOpen, setIsSwitchDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false); // Track if component is mounted
   const aboutUsRef = useRef<HTMLDivElement>(null);
   const settingsRef = useRef<HTMLDivElement>(null);
   const switchDropdownRef = useRef<HTMLDivElement>(null);
@@ -25,8 +26,13 @@ export default function CompanyNavbar() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const { supabase, error: supabaseError } = useSupabase();
 
+  // Set mounted flag after first render to prevent hydration mismatch
   useEffect(() => {
-    if (!supabase) return; // Guard clause - wait for supabase to be initialized
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!supabase || !isMounted) return; // Wait for mount and supabase to prevent hydration mismatch
     if (supabaseError) {
       console.error('Supabase error:', supabaseError);
       return;
@@ -199,7 +205,7 @@ export default function CompanyNavbar() {
       window.removeEventListener('login', handleLogin);
       clearTimeout(authCheckTimeout);
     };
-  }, [supabase]); // Added supabase as dependency
+  }, [supabase, isMounted]); // Wait for mount to prevent hydration mismatch
 
   const handleSignOut = async () => {
     try {

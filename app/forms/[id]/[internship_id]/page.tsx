@@ -109,6 +109,22 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
         return;
       }
 
+      // Check if the internship still exists (it might have been deleted)
+      const { data: internship, error: internshipError } = await supabase
+        .from('internships')
+        .select('id, title, is_active')
+        .eq('id', application.internship_id)
+        .maybeSingle();
+
+      if (internshipError || !internship) {
+        console.error('❌ Internship not found or deleted:', internshipError);
+        toast.error('This opportunity has been removed by the company');
+        setFormData(null);
+        setSections([]);
+        setIsLoading(false);
+        return;
+      }
+
       // If application is already submitted, redirect to a submitted page or show message
       if (application.status === 'submitted') {
         toast.success('This application has already been submitted!');
@@ -776,11 +792,48 @@ export default function PublicForm({ params: { id, internship_id } }: { params: 
 
   if (!formData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900">Form not found</h2>
-          <p className="text-gray-600 mt-2">This form is not available or has been unpublished.</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="max-w-md mx-auto text-center px-6">
+          <div className="bg-white rounded-2xl shadow-lg p-8 border-2 border-red-100">
+            <div className="mb-6">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100">
+                <ExclamationTriangleIcon className="h-10 w-10 text-red-600" />
+              </div>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Application No Longer Available
+            </h2>
+            
+            <div className="space-y-3 text-left bg-red-50 rounded-lg p-4 mb-6">
+              <p className="text-sm text-gray-800 font-medium">
+                This application has been deleted by the company.
+              </p>
+              <p className="text-sm text-gray-700">
+                The opportunity you were applying for is no longer available. This may have happened if:
+              </p>
+              <ul className="text-sm text-gray-700 list-disc list-inside space-y-1 ml-2">
+                <li>The position was filled</li>
+                <li>The company removed the listing</li>
+                <li>The opportunity was cancelled</li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => window.location.href = '/opportunities'}
+                className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                Browse Other Opportunities
+              </button>
+              <button
+                onClick={() => window.history.back()}
+                className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                Go Back
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
