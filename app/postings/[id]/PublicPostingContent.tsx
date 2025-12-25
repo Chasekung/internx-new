@@ -97,18 +97,18 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
   }, [posting.id, posting.title, supabase]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 relative overflow-hidden">
       <AnimatedBackground />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12 relative z-10">
         {/* Media Section Title */}
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Media</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-6">Media</h1>
 
         {/* Images Section */}
         {images.length > 0 && (
-          <div className="bg-white rounded-xl shadow-sm mb-8">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm mb-8 border border-white/20 dark:border-slate-700/50">
             <div className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Images</h2>
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Images</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {images.map((picture, index) => (
                   <div key={index} className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300">
@@ -127,7 +127,7 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
         )}
 
         {/* Company Header */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8 transform hover:scale-[1.02] transition-transform duration-300">
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 transform hover:scale-[1.02] transition-transform duration-300 border border-white/20 dark:border-slate-700/50">
           <div className="flex items-center space-x-6">
             <div className="relative w-20 h-20">
               {company.company_logo ? (
@@ -135,7 +135,7 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
                   src={company.company_logo}
                   alt={`${company.company_name} logo`}
                   fill
-                  className="rounded-2xl object-cover ring-2 ring-indigo-100"
+                  className="rounded-2xl object-cover ring-2 ring-indigo-100 dark:ring-slate-600"
                   sizes="(max-width: 640px) 80px, 80px"
                 />
               ) : (
@@ -147,51 +147,51 @@ export default function PublicPostingContent({ posting }: PostingContentProps) {
               )}
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-1">{company.company_name}</h1>
-              <p className="text-lg text-indigo-600 font-medium">{posting.position}</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{company.company_name}</h1>
+              <p className="text-lg text-indigo-600 dark:text-indigo-400 font-medium">{posting.position}</p>
             </div>
           </div>
         </div>
 
         {/* Company Details */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-8">Company Information</h2>
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg p-8 mb-8 border border-white/20 dark:border-slate-700/50">
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-8">Company Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-4 flex items-center space-x-4 transform hover:scale-[1.02] transition-transform duration-300">
-              <div className="bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 rounded-lg p-2">
-                <PhoneIcon className="h-6 w-6 text-indigo-600" />
+            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-700 dark:via-slate-700 dark:to-slate-700 rounded-xl p-4 flex items-center space-x-4 transform hover:scale-[1.02] transition-transform duration-300">
+              <div className="bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 dark:from-slate-600 dark:via-slate-600 dark:to-slate-600 rounded-lg p-2">
+                <PhoneIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">Phone</p>
-                <span className="text-gray-900">{company.phone || 'Not provided'}</span>
+                <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">Phone</p>
+                <span className="text-gray-900 dark:text-white">{company.phone || 'Not provided'}</span>
               </div>
             </div>
-            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-4 flex items-center space-x-4 transform hover:scale-[1.02] transition-transform duration-300">
-              <div className="bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 rounded-lg p-2">
-                <GlobeAltIcon className="h-6 w-6 text-indigo-600" />
+            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-700 dark:via-slate-700 dark:to-slate-700 rounded-xl p-4 flex items-center space-x-4 transform hover:scale-[1.02] transition-transform duration-300">
+              <div className="bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 dark:from-slate-600 dark:via-slate-600 dark:to-slate-600 rounded-lg p-2">
+                <GlobeAltIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">Website</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">Website</p>
                 {company.website ? (
                   <Link 
                     href={company.website.startsWith('http') ? company.website : `https://${company.website}`}
                     target="_blank"
-                    className="text-indigo-600 hover:text-indigo-700 transition-colors"
+                    className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
                   >
                     {company.website.replace(/^https?:\/\//, '')}
                   </Link>
                 ) : (
-                  <span className="text-gray-900">Not provided</span>
+                  <span className="text-gray-900 dark:text-white">Not provided</span>
                 )}
               </div>
             </div>
-            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-4 flex items-center space-x-4 transform hover:scale-[1.02] transition-transform duration-300">
-              <div className="bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 rounded-lg p-2">
-                <BuildingOfficeIcon className="h-6 w-6 text-indigo-600" />
+            <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-700 dark:via-slate-700 dark:to-slate-700 rounded-xl p-4 flex items-center space-x-4 transform hover:scale-[1.02] transition-transform duration-300">
+              <div className="bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 dark:from-slate-600 dark:via-slate-600 dark:to-slate-600 rounded-lg p-2">
+                <BuildingOfficeIcon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">Company Size</p>
-                <span className="text-gray-900">{company.company_size ? `${company.company_size} employees` : 'Size not specified'}</span>
+                <p className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1">Company Size</p>
+                <span className="text-gray-900 dark:text-white">{company.company_size ? `${company.company_size} employees` : 'Size not specified'}</span>
               </div>
             </div>
             <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-4 flex items-center space-x-4 transform hover:scale-[1.02] transition-transform duration-300">

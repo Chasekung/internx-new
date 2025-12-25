@@ -383,16 +383,16 @@ export default function InternDash() {
   const dashboardContent = (
     <div className="min-h-screen relative overflow-hidden">
       {/* Beautiful Animated Gradient Blobs Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-        {/* Animated gradient blobs */}
-        <div className="gradient-blob gradient-blob-1"></div>
-        <div className="gradient-blob gradient-blob-2"></div>
-        <div className="gradient-blob gradient-blob-3"></div>
-        <div className="gradient-blob gradient-blob-4"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
+        {/* Animated gradient blobs - hidden in dark mode */}
+        <div className="gradient-blob gradient-blob-1 dark:hidden"></div>
+        <div className="gradient-blob gradient-blob-2 dark:hidden"></div>
+        <div className="gradient-blob gradient-blob-3 dark:hidden"></div>
+        <div className="gradient-blob gradient-blob-4 dark:hidden"></div>
       </div>
       
       {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-[0.02]"></div>
       
       {/* Content Container */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12">
@@ -403,10 +403,10 @@ export default function InternDash() {
           className="mb-12"
         >
           <div>
-            <h1 className="text-5xl font-bold text-slate-900">
+            <h1 className="text-5xl font-bold text-slate-900 dark:text-white">
               Welcome, {internData?.full_name?.split(' ')[0] || 'there'}!
             </h1>
-            <p className="text-slate-600 mt-3 text-xl">
+            <p className="text-slate-600 dark:text-slate-300 mt-3 text-xl">
               This is your personal dashboard where you can manage your internship applications and profile.
             </p>
           </div>
@@ -417,21 +417,21 @@ export default function InternDash() {
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/90 backdrop-blur-lg border border-slate-200 rounded-3xl p-8 mb-12 shadow-xl"
+            className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-slate-200 dark:border-slate-700 rounded-3xl p-8 mb-12 shadow-xl"
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
                 <div className="flex items-center mb-6">
-                  <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mr-6 shadow-lg">
-                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-2xl flex items-center justify-center mr-6 shadow-lg">
+                    <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-3xl font-bold text-slate-900 mb-2">
+                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
                       Interview Complete
                     </h3>
-                    <p className="text-slate-600 text-lg">
+                    <p className="text-slate-600 dark:text-slate-300 text-lg">
                       Your personalized match scores are now being calculated for all internships.
                     </p>
                   </div>
@@ -439,9 +439,9 @@ export default function InternDash() {
                 
                 {internData?.overall_match_score && (
                   <div className="flex items-center space-x-8">
-                    <div className="bg-blue-100 rounded-3xl p-6 shadow-lg border border-blue-200">
-                      <div className="text-sm text-slate-500 mb-2">Overall Score</div>
-                      <div className="text-4xl font-bold text-black">
+                    <div className="bg-blue-100 dark:bg-blue-900/50 rounded-3xl p-6 shadow-lg border border-blue-200 dark:border-blue-700">
+                      <div className="text-sm text-slate-500 dark:text-slate-400 mb-2">Overall Score</div>
+                      <div className="text-4xl font-bold text-black dark:text-white">
                         {internData.overall_match_score}/100
                       </div>
                       <div className="text-xs text-slate-400 mt-1">Rated out of 100</div>
@@ -452,7 +452,7 @@ export default function InternDash() {
                         {internData.interview_tags.slice(0, 3).map((tag, index) => (
                           <span
                             key={index}
-                            className="px-4 py-2 bg-blue-50 text-black text-sm rounded-2xl font-medium border border-blue-200"
+                            className="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-black dark:text-slate-200 text-sm rounded-2xl font-medium border border-blue-200 dark:border-blue-700"
                           >
                             {tag}
                           </span>
@@ -490,7 +490,7 @@ export default function InternDash() {
                         });
                     }
                   }}
-                  className="bg-white text-slate-700 px-8 py-4 rounded-2xl font-semibold hover:bg-blue-50 transition-all border border-blue-200 shadow-lg hover:shadow-xl"
+                  className="bg-white dark:bg-slate-700 text-slate-700 dark:text-white px-8 py-4 rounded-2xl font-semibold hover:bg-blue-50 dark:hover:bg-slate-600 transition-all border border-blue-200 dark:border-slate-600 shadow-lg hover:shadow-xl"
                 >
                   View Detailed Report
                 </button>
@@ -536,51 +536,51 @@ export default function InternDash() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
+            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-900">Total Applications</h3>
-                          <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center shadow-lg">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Total Applications</h3>
+                          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-2xl flex items-center justify-center shadow-lg">
               <img src="/penandpaperemoji.webp" alt="Pen and Paper" className="w-8 h-8" />
             </div>
             </div>
-            <p className="text-5xl font-bold text-black mb-3">{totalApplications}</p>
-            <p className="text-slate-500 text-lg">All time applications</p>
+            <p className="text-5xl font-bold text-black dark:text-white mb-3">{totalApplications}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-lg">All time applications</p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
+            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-900">This Month</h3>
-                          <div className="w-16 h-16 bg-indigo-100 rounded-2xl flex items-center justify-center shadow-lg">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">This Month</h3>
+                          <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center shadow-lg">
               <img src="/calendaremoji.webp" alt="Calendar" className="w-8 h-8" />
             </div>
             </div>
-            <p className="text-5xl font-bold text-black mb-3">{applicationsThisMonth}</p>
-            <p className="text-slate-500 text-lg">Applications submitted</p>
+            <p className="text-5xl font-bold text-black dark:text-white mb-3">{applicationsThisMonth}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-lg">Applications submitted</p>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
+            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
           >
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-900">Profile Score</h3>
-                          <div className="w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center shadow-lg">
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Profile Score</h3>
+                          <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/50 rounded-2xl flex items-center justify-center shadow-lg">
               <img src="/targetemoji.webp" alt="Target" className="w-8 h-8" />
             </div>
             </div>
-            <p className="text-5xl font-bold text-black mb-3">
+            <p className="text-5xl font-bold text-black dark:text-white mb-3">
               {internData?.overall_match_score || 'N/A'}
               {internData?.overall_match_score && '/100'}
             </p>
-            <p className="text-slate-500 text-lg">
+            <p className="text-slate-500 dark:text-slate-400 text-lg">
               {internData?.interview_completed ? 'Based on AI interview (0-100 scale)' : 'Complete interview to unlock'}
             </p>
           </motion.div>
@@ -591,23 +591,23 @@ export default function InternDash() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300 mb-12"
+          className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300 mb-12"
         >
-          <h3 className="text-3xl font-bold text-slate-900 mb-8">Recent Applications</h3>
+          <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Recent Applications</h3>
           
           {isLoading ? (
             <div className="text-center py-16">
               <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto mb-6"></div>
-              <p className="text-slate-600 text-xl">Loading applications...</p>
+              <p className="text-slate-600 dark:text-slate-300 text-xl">Loading applications...</p>
             </div>
           ) : !Array.isArray(applications) || applications.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-20 h-20 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p className="text-slate-600 mb-8 text-xl">No applications yet</p>
+              <p className="text-slate-600 dark:text-slate-300 mb-8 text-xl">No applications yet</p>
               <button
                 onClick={() => router.push('/opportunities')}
                 className="bg-blue-500 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-blue-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
@@ -620,30 +620,30 @@ export default function InternDash() {
               {Array.isArray(applications) && applications.slice(0, 5).map((application) => (
                 <div
                   key={application.id}
-                  className="bg-white/60 backdrop-blur-sm border border-white/20 rounded-2xl p-6 hover:bg-white/80 transition-all cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
+                  className="bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm border border-white/20 dark:border-slate-600/50 rounded-2xl p-6 hover:bg-white/80 dark:hover:bg-slate-700/80 transition-all cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
                   onClick={() => setExpanded(expanded === application.id ? null : application.id)}
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1">
-                      <h4 className="font-bold text-slate-900 text-xl">
+                      <h4 className="font-bold text-slate-900 dark:text-white text-xl">
                         {application.internships.companies?.company_name || 'Unknown Company'}
                       </h4>
-                      <p className="text-blue-600 font-semibold text-lg">{application.internships.position}</p>
-                      <p className="text-slate-500 text-base">
+                      <p className="text-blue-600 dark:text-blue-400 font-semibold text-lg">{application.internships.position}</p>
+                      <p className="text-slate-500 dark:text-slate-400 text-base">
                         Applied: {new Date(application.applied_at).toLocaleDateString()}
                       </p>
                     </div>
                     <span
                       className={`px-6 py-3 rounded-2xl text-sm font-semibold ${
                         application.status === 'accepted'
-                          ? 'bg-green-100 text-green-800 border border-green-200'
+                          ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700'
                           : application.status === 'rejected'
-                          ? 'bg-red-100 text-red-800 border border-red-200'
+                          ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700'
                           : application.status === 'in_progress'
-                          ? 'bg-purple-100 text-purple-800 border border-purple-200'
+                          ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-700'
                           : application.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
-                          : 'bg-blue-100 text-blue-800 border border-blue-200'
+                          ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700'
+                          : 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700'
                       }`}
                     >
                       {
@@ -727,27 +727,27 @@ export default function InternDash() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
-            className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300"
+            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300"
           >
-            <h3 className="text-3xl font-bold text-slate-900 mb-8">Your Referral Link</h3>
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Your Referral Link</h3>
             {internData?.referral_code ? (
               <div className="space-y-6">
                 <ReferralLink referralCode={internData.referral_code} />
               </div>
             ) : (
               <div className="text-center">
-                <div className="w-20 h-20 bg-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <svg className="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-20 h-20 bg-purple-100 dark:bg-purple-900/50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <svg className="w-10 h-10 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
                   </svg>
                 </div>
-                <p className="text-slate-600 mb-8 text-xl">
+                <p className="text-slate-600 dark:text-slate-300 mb-8 text-xl">
                   Generate your unique referral code to invite friends and earn rewards.
                 </p>
                 <button
                   onClick={generateReferralCode}
                   disabled={isGeneratingCode}
-                  className="bg-purple-500 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-purple-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50"
+                  className="bg-purple-500 dark:bg-purple-600 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-purple-600 dark:hover:bg-purple-500 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50"
                 >
                   {isGeneratingCode ? 'Generating...' : 'Generate Referral Code'}
                 </button>
@@ -759,19 +759,19 @@ export default function InternDash() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 hover:shadow-3xl transition-all duration-300"
+            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300"
           >
-            <h3 className="text-3xl font-bold text-slate-900 mb-8">Referral Performance</h3>
+            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Referral Performance</h3>
             {internData?.referral_code ? (
               <ReferralStats userId={internData.id} />
             ) : (
               <div className="text-center py-12">
-                <div className="w-20 h-20 bg-indigo-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                  <svg className="w-10 h-10 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
-                <p className="text-slate-600 text-xl">
+                <p className="text-slate-600 dark:text-slate-300 text-xl">
                   Generate your referral code to see your performance stats.
                 </p>
               </div>
@@ -780,7 +780,7 @@ export default function InternDash() {
         </div>
 
         {error && (
-          <div className="fixed bottom-4 right-4 bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-2xl shadow-lg">
+          <div className="fixed bottom-4 right-4 bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-6 py-4 rounded-2xl shadow-lg">
             {error}
           </div>
         )}

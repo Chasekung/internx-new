@@ -103,6 +103,7 @@ export const authUtils = {
     if (userType === 'COMPANY') {
       // Company user protection
       const isOnProtectedCompanyPage = currentPath.startsWith('/company') && 
+        currentPath !== '/company' && // Exclude public landing page
         !currentPath.includes('/company-sign-in') && 
         !currentPath.includes('/company-get-started') &&
         !currentPath.includes('/company-forgot-password') &&

@@ -208,49 +208,49 @@ export default function InternSignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 relative overflow-hidden">
+      {/* Animated background elements - hidden in dark mode */}
+      <div className="absolute inset-0 overflow-hidden dark:hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full filter blur-xl opacity-50 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full filter blur-xl opacity-50 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full filter blur-xl opacity-50 animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Decorative grid pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 dark:opacity-[0.02]"></div>
 
       <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl"
+          className="max-w-md w-full space-y-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/50"
         >
           <div>
             <Link href="/" className="flex justify-center">
               <img src="/stepupnologo.png" alt="Step Up Logo" className="h-12 w-auto mx-auto" />
             </Link>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
               Sign in to your account
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
+            <p className="mt-2 text-center text-sm text-gray-600 dark:text-slate-400">
               Or{' '}
-              <Link href="/intern-get-started" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link href="/intern-get-started" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
                 create a new account
               </Link>
             </p>
           </div>
           <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="rounded-md bg-red-50 p-4">
+              <div className="rounded-md bg-red-50 dark:bg-red-900/30 p-4">
                 <div className="flex">
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
+                    <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
                       {error === 'COMPANY_USER' ? (
                         <>
                           This account is registered as a company.<br />
-                          Please <Link href="/company-sign-in" className="underline text-blue-700">sign in through the company portal</Link>.<br />
-                          <span className="text-xs text-gray-500">Redirecting...</span>
+                          Please <Link href="/company-sign-in" className="underline text-blue-700 dark:text-blue-400">sign in through the company portal</Link>.<br />
+                          <span className="text-xs text-gray-500 dark:text-slate-400">Redirecting...</span>
                         </>
                       ) : error}
                     </h3>
@@ -271,7 +271,7 @@ export default function InternSignIn() {
                   required
                   value={formData.identifier}
                   onChange={handleChange}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 placeholder-gray-500 dark:placeholder-slate-400 text-gray-900 dark:text-white bg-white dark:bg-slate-700 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Email or Username"
                 />
               </div>
@@ -287,7 +287,7 @@ export default function InternSignIn() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 dark:border-slate-600 placeholder-gray-500 dark:placeholder-slate-400 text-gray-900 dark:text-white bg-white dark:bg-slate-700 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                   placeholder="Password"
                 />
               </div>
@@ -299,15 +299,15 @@ export default function InternSignIn() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-slate-600 rounded bg-white dark:bg-slate-700"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-slate-300">
                   Remember me
                 </label>
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                <a href="#" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
                   Forgot your password?
                 </a>
               </div>
@@ -317,7 +317,7 @@ export default function InternSignIn() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? 'Signing in...' : 'Sign in'}
               </button>

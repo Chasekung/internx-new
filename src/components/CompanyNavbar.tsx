@@ -71,13 +71,19 @@ export default function CompanyNavbar() {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             // Auto-redirect if on a protected company page
-            if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
-                !window.location.pathname.includes('/company-sign-in') && 
-                !window.location.pathname.includes('/company-get-started') &&
-                !window.location.pathname.includes('/company-forgot-password') &&
-                !window.location.pathname.includes('/company-reset-password') &&
-                !window.location.pathname.includes('/company/public-profile') &&
-                !window.location.pathname.includes('/company/edit-page')) {
+            // IMPORTANT: Do NOT redirect from the public /company landing page
+            const currentPath = window.location.pathname;
+            const isPublicCompanyPage = 
+              currentPath === '/company' || 
+              currentPath === '/company/' ||
+              currentPath.includes('/company-sign-in') || 
+              currentPath.includes('/company-get-started') ||
+              currentPath.includes('/company-forgot-password') ||
+              currentPath.includes('/company-reset-password') ||
+              currentPath.includes('/company/public-profile') ||
+              currentPath.includes('/company/edit-page');
+            
+            if (typeof window !== 'undefined' && currentPath.startsWith('/company') && !isPublicCompanyPage) {
               console.log('🔄 No session, redirecting to sign in...');
               window.location.href = '/company-sign-in';
             }
@@ -108,9 +114,17 @@ export default function CompanyNavbar() {
               .single();
             
             if (internProfile) {
-              console.log('🔄 Intern user trying to access company pages, redirecting...');
-              if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
-                  !window.location.pathname.includes('/company-sign-in')) {
+              console.log('🔄 Intern user trying to access company pages');
+              // Only redirect from protected company pages, not the public landing page
+              const currentPath = window.location.pathname;
+              const isPublicCompanyPage = 
+                currentPath === '/company' || 
+                currentPath === '/company/' ||
+                currentPath.includes('/company-sign-in') ||
+                currentPath.includes('/company-get-started');
+              
+              if (typeof window !== 'undefined' && currentPath.startsWith('/company') && !isPublicCompanyPage) {
+                console.log('🔄 Redirecting intern to company sign in...');
                 window.location.href = '/company-sign-in';
               }
             }
@@ -136,12 +150,17 @@ export default function CompanyNavbar() {
           setCompanyId(null);
           localStorage.removeItem('token');
           localStorage.removeItem('user');
-          // Only redirect on protected pages
-          if (typeof window !== 'undefined' && window.location.pathname.startsWith('/company') && 
-              !window.location.pathname.includes('/company-sign-in') && 
-              !window.location.pathname.includes('/company-get-started') &&
-              !window.location.pathname.includes('/company/public-profile') &&
-              !window.location.pathname.includes('/company/edit-page')) {
+          // Only redirect on protected pages, not public landing page
+          const currentPath = window.location.pathname;
+          const isPublicCompanyPage = 
+            currentPath === '/company' || 
+            currentPath === '/company/' ||
+            currentPath.includes('/company-sign-in') || 
+            currentPath.includes('/company-get-started') ||
+            currentPath.includes('/company/public-profile') ||
+            currentPath.includes('/company/edit-page');
+          
+          if (typeof window !== 'undefined' && currentPath.startsWith('/company') && !isPublicCompanyPage) {
             console.log('🔄 Auth check error, redirecting to sign in...');
             window.location.href = '/company-sign-in';
           }

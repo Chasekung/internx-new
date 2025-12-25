@@ -325,15 +325,15 @@ const EditPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 pt-32 pb-12">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 pt-32 pb-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Reminder Message */}
         {showReminder && (
-          <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded flex items-center justify-between">
+          <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-400 dark:border-yellow-600 text-yellow-800 dark:text-yellow-300 rounded flex items-center justify-between">
             <span><span className="font-semibold">Reminder:</span> If you don't want certain information to be visible on your public profile, simply leave those fields blank.</span>
             <button
               onClick={() => setShowReminder(false)}
-              className="ml-4 text-yellow-700 hover:text-yellow-900 text-lg font-bold focus:outline-none"
+              className="ml-4 text-yellow-700 dark:text-yellow-400 hover:text-yellow-900 dark:hover:text-yellow-200 text-lg font-bold focus:outline-none"
               aria-label="Dismiss reminder"
             >
               ×
@@ -345,15 +345,15 @@ const EditPage = () => {
           <div className={`fixed bottom-20 left-4 p-4 rounded-md shadow-lg ${
             message.type === 'success' 
               ? 'bg-green-500 bg-opacity-90' 
-              : 'bg-red-100 border border-red-400 text-red-700'
+              : 'bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-600 text-red-700 dark:text-red-300'
           }`}>
             {message.text}
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-white/20 dark:border-slate-700/50">
           {/* Navigation */}
-          <div className="border-b border-gray-200">
+          <div className="border-b border-gray-200 dark:border-slate-700">
             <nav className="flex -mb-px">
               {['contact', 'education', 'bio', 'skills', 'links'].map((section) => (
                 <button
@@ -361,8 +361,8 @@ const EditPage = () => {
                   onClick={() => setActiveSection(section)}
                   className={`py-4 px-6 text-sm font-medium transition-colors duration-200
                     ${activeSection === section
-                      ? 'border-b-2 border-blue-500 text-blue-700 bg-gradient-to-r from-blue-100 via-indigo-50 to-purple-100'
-                      : 'text-gray-700 hover:text-gray-900 hover:border-gray-300 bg-transparent hover:bg-gradient-to-r hover:from-blue-50 hover:via-indigo-50 hover:to-purple-50 hover:shadow-md hover:brightness-110'}
+                      ? 'border-b-2 border-blue-500 text-blue-700 dark:text-blue-400 bg-gradient-to-r from-blue-100 via-indigo-50 to-purple-100 dark:from-slate-700 dark:via-slate-700 dark:to-slate-700'
+                      : 'text-gray-700 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 bg-transparent hover:bg-gradient-to-r hover:from-blue-50 hover:via-indigo-50 hover:to-purple-50 dark:hover:from-slate-700 dark:hover:via-slate-700 dark:hover:to-slate-700 hover:shadow-md hover:brightness-110'}
                   `}
                 >
                   {section.charAt(0).toUpperCase() + section.slice(1)}

@@ -74,7 +74,7 @@ export default function MessagingPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -82,13 +82,13 @@ export default function MessagingPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Please Sign In</h2>
-          <p className="text-gray-600 mb-6">You need to be signed in to access messaging.</p>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Please Sign In</h2>
+          <p className="text-gray-600 dark:text-slate-400 mb-6">You need to be signed in to access messaging.</p>
           <button
             onClick={() => router.push('/intern-sign-in')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
           >
             Sign In
           </button>
@@ -100,13 +100,13 @@ export default function MessagingPage() {
   // Check if the current user is authorized to view this intern's conversations
   if (userType === 'intern' && user.id !== intern_id) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-semibold text-gray-900 mb-4">Access Denied</h2>
-          <p className="text-gray-600 mb-6">You can only view your own conversations.</p>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">Access Denied</h2>
+          <p className="text-gray-600 dark:text-slate-400 mb-6">You can only view your own conversations.</p>
           <button
             onClick={() => router.push(`/messaging/${user.id}`)}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
           >
             Go to My Messages
           </button>
@@ -116,11 +116,11 @@ export default function MessagingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-20">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 pt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Messages</h1>
-          <p className="text-gray-600 mt-2">Connect with companies and other interns</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Messages</h1>
+          <p className="text-gray-600 dark:text-slate-400 mt-2">Connect with companies and other interns</p>
         </div>
         
         <MessagingPortal />

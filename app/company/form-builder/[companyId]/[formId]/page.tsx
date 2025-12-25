@@ -16,8 +16,16 @@ import {
   ArrowPathIcon,
   XMarkIcon,
   ChevronRightIcon,
-  ChevronLeftIcon
+  ChevronLeftIcon,
+  SparklesIcon,
+  StopIcon,
+  CheckIcon,
+  PlayIcon
 } from '@heroicons/react/24/outline';
+import { 
+  LockClosedIcon as LockSolid,
+  LockOpenIcon as UnlockSolid 
+} from '@heroicons/react/24/solid';
 import { Toaster } from 'react-hot-toast';
 import { toast } from 'react-hot-toast';
 import { useSupabase } from '@/hooks/useSupabase';
@@ -56,6 +64,43 @@ interface Theme {
   fontFamily: string;
   borderRadius: number;
   spacing: number;
+}
+
+// AIGeneratedQuestion: Complete structure matching what saveForm() expects
+// All optional fields have defaults applied during transformation
+interface AIGeneratedQuestion {
+  type: Question['type'];
+  question_text: string;
+  description?: string;
+  required: boolean;
+  placeholder?: string;
+  hint?: string;
+  options?: string[];  // Required for multiple_choice, checkboxes, dropdown
+  maxLength?: number;  // For text fields
+  fileTypes?: string[];  // For file_upload
+  maxFileSize?: number;  // For file_upload
+  maxDuration?: number;  // For video_upload
+}
+
+interface AIGeneratedSection {
+  title: string;
+  description?: string;
+  questions: AIGeneratedQuestion[];
+}
+
+interface AIFormPreview {
+  summary: string;
+  matchedOpportunityId: string | null;
+  sections: AIGeneratedSection[];
+  sourcesUsed: string[];
+  companyName: string;
+}
+
+interface FormCheckpoint {
+  sections: Section[];
+  formTitle: string;
+  formDescription: string;
+  timestamp: number;
 }
 
 const ThemeContext = createContext<Theme>({
@@ -499,6 +544,18 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
   const [userRole, setUserRole] = useState<'COMPANY' | 'INTERN' | null>(null);
   const { supabase, error: supabaseError } = useSupabase();
 
+  // AI Assistant Panel State
+  const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [panelWidth, setPanelWidth] = useState(400);
+  const [isWidthLocked, setIsWidthLocked] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [aiFormPreview, setAiFormPreview] = useState<AIFormPreview | null>(null);
+  const [isAiGenerating, setIsAiGenerating] = useState(false);
+  const [isAiApplying, setIsAiApplying] = useState(false);
+  const [aiProgress, setAiProgress] = useState('');
+  const [formCheckpoint, setFormCheckpoint] = useState<FormCheckpoint | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
   // Initialize Supabase client when component mounts
   useEffect(() => {
     
@@ -552,6 +609,55 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       loadForm();
     }
   }, [supabase, supabaseError]);
+
+  // Panel resize functionality
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing || isWidthLocked) return;
+      
+      e.preventDefault();
+      
+      const newWidth = e.clientX;
+      if (newWidth >= 320 && newWidth <= 700) {
+        setPanelWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (isResizing) {
+        setIsResizing(false);
+        document.body.style.userSelect = '';
+        document.body.style.cursor = '';
+      }
+    };
+
+    if (isResizing) {
+      document.body.style.userSelect = 'none';
+      document.body.style.cursor = 'col-resize';
+      
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+    };
+  }, [isResizing, isWidthLocked]);
+
+  // Handle ESC key to stop AI
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isAiApplying) {
+        stopAiExecution();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAiApplying]);
 
   const loadForm = async () => {
     if (!supabase) return;
@@ -693,34 +799,101 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
     }
   };
 
-  const saveForm = async () => {
+  const saveForm = async (skipToastOrEvent?: boolean | React.MouseEvent) => {
+    const startTimestamp = new Date().toISOString();
+    
+    // Handle both direct calls with boolean and button click events
+    const skipToast = typeof skipToastOrEvent === 'boolean' ? skipToastOrEvent : false;
+    
+    console.debug(`[${startTimestamp}] [FORM-SAVE] 🔧 saveForm() CALLED`);
+    console.debug(`[${startTimestamp}] [FORM-SAVE] 📥 saveForm() INPUT:`, { skipToast });
+    
     if (isPublished) {
-      toast.error('Cannot edit a published form. Please unpublish it first.');
-      return;
+      console.warn(`[${startTimestamp}] [FORM-SAVE] ⚠️ Cannot save published form`);
+      if (!skipToast) {
+        toast.error('Cannot edit a published form. Please unpublish it first.');
+      }
+      throw new Error('Cannot save published form');
     }
     
-    const saveToast = toast.loading('Saving form...');
+    console.debug(`[${startTimestamp}] [FORM-SAVE] 💾 Starting form save...`);
+    console.debug(`[${startTimestamp}] [FORM-SAVE] 📊 REACT STATE BEFORE SAVE:`, {
+      formTitle,
+      formDescription,
+      sectionCount: sections.length,
+      questionCount: sections.reduce((acc, s) => acc + s.questions.length, 0),
+      sections: sections.map(s => ({
+        id: s.id,
+        title: s.title,
+        description: s.description,
+        order_index: s.order_index,
+        questionCount: s.questions.length,
+        questions: s.questions.map(q => ({
+          id: q.id,
+          type: q.type,
+          question_text: q.question_text,
+          required: q.required,
+          hasOptions: !!q.options,
+          optionCount: q.options?.length
+        }))
+      })),
+      theme,
+      deletedSectionIds,
+      deletedQuestionIds
+    });
+
+    const saveToast = skipToast ? null : toast.loading('Saving form...');
     setIsSaving(true);
     try {
+      const timestamp1 = new Date().toISOString();
+      
       // Save form theme and metadata
       if (!supabase) {
-        toast.error('Supabase client not initialized');
-        return;
+        console.error(`[${timestamp1}] [FORM-SAVE] ❌ Supabase client not initialized`);
+        console.error(`[${timestamp1}] [FORM-SAVE] 📋 Supabase instance:`, supabase);
+        if (!skipToast) {
+          toast.error('Supabase client not initialized');
+        }
+        throw new Error('Supabase client not initialized');
       }
-      const { error: formError } = await supabase
-        .from('forms')
-        .update({
-          title: formTitle,
-          description: formDescription,
-          primary_color: parseInt(theme.primaryColor.replace('#', ''), 16),
-          background_color: parseInt(theme.backgroundColor.replace('#', ''), 16),
-          font_family: theme.fontFamily,
-          border_radius: theme.borderRadius,
-          spacing: theme.spacing
-        })
-        .eq('id', formId);
-      if (formError) throw formError;
 
+      console.debug(`[${timestamp1}] [FORM-SAVE] 📝 Step 1: Updating form metadata...`);
+      const formUpdate = {
+        title: formTitle,
+        description: formDescription,
+        primary_color: parseInt(theme.primaryColor.replace('#', ''), 16),
+        background_color: parseInt(theme.backgroundColor.replace('#', ''), 16),
+        font_family: theme.fontFamily,
+        border_radius: theme.borderRadius,
+        spacing: theme.spacing
+      };
+      console.debug(`[${timestamp1}] [FORM-SAVE] 📤 Form update payload:`, formUpdate);
+      console.debug(`[${timestamp1}] [FORM-SAVE] 🎯 Updating form with ID: ${formId}`);
+
+      const { data: formData, error: formError } = await supabase
+        .from('forms')
+        .update(formUpdate)
+        .eq('id', formId)
+        .select();
+      
+      const timestamp2 = new Date().toISOString();
+      
+      if (formError) {
+        console.error(`[${timestamp2}] [FORM-SAVE] ❌ Form metadata update error:`, formError);
+        console.error(`[${timestamp2}] [FORM-SAVE] 📋 Error details:`, {
+          message: formError.message,
+          details: formError.details,
+          hint: formError.hint,
+          code: formError.code
+        });
+        throw formError;
+      }
+      
+      console.debug(`[${timestamp2}] [FORM-SAVE] ✅ Form metadata updated`);
+      console.debug(`[${timestamp2}] [FORM-SAVE] 📥 Supabase response:`, formData);
+
+      const timestamp3 = new Date().toISOString();
+      
       // Upsert all sections
       const sectionsToSave = sections.map((section, idx) => ({
         id: section.id,
@@ -729,11 +902,34 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
         description: section.description || '',
         order_index: idx
       }));
-      const { error: sectionError } = await supabase
-        .from('form_sections')
-        .upsert(sectionsToSave, { onConflict: 'id' });
-      if (sectionError) throw sectionError;
+      
+      console.debug(`[${timestamp3}] [FORM-SAVE] 📝 Step 2: Upserting sections...`);
+      console.debug(`[${timestamp3}] [FORM-SAVE] 📊 Sections count: ${sectionsToSave.length}`);
+      console.debug(`[${timestamp3}] [FORM-SAVE] 📤 Sections payload:`, sectionsToSave);
 
+      const { data: sectionData, error: sectionError } = await supabase
+        .from('form_sections')
+        .upsert(sectionsToSave, { onConflict: 'id' })
+        .select();
+      
+      const timestamp4 = new Date().toISOString();
+      
+      if (sectionError) {
+        console.error(`[${timestamp4}] [FORM-SAVE] ❌ Sections upsert error:`, sectionError);
+        console.error(`[${timestamp4}] [FORM-SAVE] 📋 Error details:`, {
+          message: sectionError.message,
+          details: sectionError.details,
+          hint: sectionError.hint,
+          code: sectionError.code
+        });
+        throw sectionError;
+      }
+      
+      console.debug(`[${timestamp4}] [FORM-SAVE] ✅ Sections upserted successfully`);
+      console.debug(`[${timestamp4}] [FORM-SAVE] 📥 Supabase response:`, sectionData);
+
+      const timestamp5 = new Date().toISOString();
+      
       // Gather and format all questions
       const allQuestions = sections.flatMap((section, sectionIdx) =>
         section.questions.map((q, qIdx) => {
@@ -768,72 +964,210 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
         })
       );
 
+      console.debug(`[${timestamp5}] [FORM-SAVE] 📝 Step 3: Saving questions via API...`);
+      console.debug(`[${timestamp5}] [FORM-SAVE] 📊 Questions count: ${allQuestions.length}`);
+      console.debug(`[${timestamp5}] [FORM-SAVE] 📤 Questions payload (FULL - for manual review):`, JSON.stringify(allQuestions, null, 2));
+
       // Save questions to backend API (now with deleted IDs)
+      const requestBody = {
+        questions: allQuestions,
+        deletedSectionIds,
+        deletedQuestionIds
+      };
+      console.debug(`[${timestamp5}] [FORM-SAVE] 📤 API request body summary:`, {
+        questionCount: allQuestions.length,
+        deletedSections: deletedSectionIds.length,
+        deletedQuestions: deletedQuestionIds.length,
+        endpoint: `/api/companies/forms/${formId}/questions`
+      });
+
       const res = await fetch(`/api/companies/forms/${formId}/questions`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          questions: allQuestions,
-          deletedSectionIds,
-          deletedQuestionIds
-        })
+        body: JSON.stringify(requestBody)
       });
+
+      const timestamp6 = new Date().toISOString();
+      console.debug(`[${timestamp6}] [FORM-SAVE] 📥 API response status: ${res.status} ${res.statusText}`);
+      console.debug(`[${timestamp6}] [FORM-SAVE] 📥 API response headers:`, Object.fromEntries(res.headers.entries()));
+
       if (!res.ok) {
         const err = await res.json();
+        console.error(`[${timestamp6}] [FORM-SAVE] ❌ API error (status ${res.status}):`, err);
+        console.error(`[${timestamp6}] [FORM-SAVE] 📋 API error details:`, {
+          status: res.status,
+          statusText: res.statusText,
+          error: err.error,
+          details: err.details,
+          fullResponse: err
+        });
         throw new Error(err.error || 'Failed to save questions');
       }
 
+      const apiResponse = await res.json();
+      console.debug(`[${timestamp6}] [FORM-SAVE] ✅ API response received:`, apiResponse);
+      console.debug(`[${timestamp6}] [FORM-SAVE] 📊 API success details:`, {
+        success: apiResponse.success,
+        savedQuestions: apiResponse.questions?.length,
+        responseKeys: Object.keys(apiResponse)
+      });
+
+      const timestamp7 = new Date().toISOString();
+      
       // Clear deleted IDs after successful save
       setDeletedSectionIds([]);
       setDeletedQuestionIds([]);
 
-      toast.success('Form saved successfully', {
-        id: saveToast,
-        duration: 2000,
-        icon: '✅',
+      console.debug(`[${timestamp7}] [FORM-SAVE] 🧹 Cleared deleted IDs`);
+      console.debug(`[${timestamp7}] [FORM-SAVE] ✅ Form saved successfully`);
+      console.debug(`[${timestamp7}] [FORM-SAVE] 📊 REACT STATE AFTER SAVE:`, {
+        sectionCount: sections.length,
+        questionCount: sections.reduce((acc, s) => acc + s.questions.length, 0),
+        deletedSectionIds: [],
+        deletedQuestionIds: []
       });
+      console.debug(`[${timestamp7}] [FORM-SAVE] ⏱️ Total save duration: ${new Date().getTime() - new Date(startTimestamp).getTime()}ms`);
+      
+      if (!skipToast && saveToast) {
+        toast.success('Form saved successfully', {
+          id: saveToast,
+          duration: 2000,
+          icon: '✅',
+        });
+      }
     } catch (error) {
-      console.error('Error saving form:', error);
-      toast.error('Failed to save form. Please try again.', {
-        id: saveToast,
-        duration: 3000,
-        icon: '❌',
+      const errorTimestamp = new Date().toISOString();
+      
+      console.error(`[${errorTimestamp}] [FORM-SAVE] ❌ Error saving form:`, error);
+      console.error(`[${errorTimestamp}] [FORM-SAVE] 📋 Full error object:`, {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
       });
+      console.error(`[${errorTimestamp}] [FORM-SAVE] 📊 Form state at error:`, {
+        sectionCount: sections.length,
+        questionCount: sections.reduce((acc, s) => acc + s.questions.length, 0),
+        formTitle,
+        formId
+      });
+      console.error(`[${errorTimestamp}] [FORM-SAVE] 📋 Checkpoint state:`, formCheckpoint);
+      
+      if (!skipToast && saveToast) {
+        toast.error('Failed to save form. Please try again.', {
+          id: saveToast,
+          duration: 3000,
+          icon: '❌',
+        });
+      }
+      
+      // Re-throw the error so caller can handle it
+      throw error;
     } finally {
+      const finalTimestamp = new Date().toISOString();
       setIsSaving(false);
+      console.debug(`[${finalTimestamp}] [FORM-SAVE] 🏁 Save operation finished`);
     }
   };
 
-  const addSection = () => {
+  const addSection = (titleOrEvent?: string | React.MouseEvent, description?: string): string => {
+    const timestamp = new Date().toISOString();
+    
+    // Handle both direct calls and button click events
+    const title = typeof titleOrEvent === 'string' ? titleOrEvent : undefined;
+    
+    console.debug(`[${timestamp}] [FORM-BUILDER] 🔧 addSection() CALLED`);
+    console.debug(`[${timestamp}] [FORM-BUILDER] 📥 addSection() INPUT:`, {
+      title: title || '(default)',
+      description: description || '(default)',
+      currentSectionCount: sections.length
+    });
+    
     const newSection: Section = {
       id: crypto.randomUUID(),
-      title: 'New Section',
-      description: '',
+      title: title || 'New Section',
+      description: description || '',
       order_index: sections.length,
       questions: []
     };
+    
+    console.debug(`[${timestamp}] [FORM-BUILDER] 📝 addSection() NEW SECTION OBJECT:`, {
+      id: newSection.id,
+      title: newSection.title,
+      description: newSection.description,
+      order_index: newSection.order_index,
+      questionCount: newSection.questions.length
+    });
+    
     const newSections = [...sections, newSection];
     setSections(newSections);
+    
     // Automatically go to the new section
     setCurrentStep(newSections.length - 1);
+    
+    console.debug(`[${timestamp}] [FORM-BUILDER] ✅ addSection() SUCCESS`);
+    console.debug(`[${timestamp}] [FORM-BUILDER] 📤 addSection() RETURN:`, {
+      sectionId: newSection.id,
+      newTotalSections: newSections.length
+    });
+    
+    return newSection.id;
   };
 
-  const addQuestion = (sectionId: string, type: Question['type'] = 'short_text'): string => {
+  const addQuestion = (sectionId: string, type: Question['type'] = 'short_text', questionData?: Partial<Question>): string => {
+    const timestamp = new Date().toISOString();
+    
+    console.debug(`[${timestamp}] [FORM-BUILDER] 🔧 addQuestion() CALLED`);
+    console.debug(`[${timestamp}] [FORM-BUILDER] 📥 addQuestion() INPUT:`, {
+      sectionId,
+      type,
+      hasQuestionData: !!questionData,
+      questionData: questionData ? {
+        question_text: questionData.question_text,
+        required: questionData.required,
+        hasOptions: !!questionData.options,
+        optionCount: questionData.options?.length
+      } : null
+    });
+    
     const sectionIndex = sections.findIndex(s => s.id === sectionId);
-    if (sectionIndex === -1) return '';
+    if (sectionIndex === -1) {
+      console.error(`[${timestamp}] [FORM-BUILDER] ❌ addQuestion() FAILED: Section not found`);
+      console.error(`[${timestamp}] [FORM-BUILDER] 📋 Available sections:`, 
+        sections.map(s => ({ id: s.id, title: s.title }))
+      );
+      return '';
+    }
+
+    console.debug(`[${timestamp}] [FORM-BUILDER] ✅ Section found at index ${sectionIndex}`);
+    console.debug(`[${timestamp}] [FORM-BUILDER] 📊 Section state:`, {
+      sectionTitle: sections[sectionIndex].title,
+      currentQuestionCount: sections[sectionIndex].questions.length
+    });
 
     const newQuestion: Question = {
       id: crypto.randomUUID(),
       type,
-      question_text: 'New Question',
-      required: false,
+      question_text: questionData?.question_text || 'New Question',
+      required: questionData?.required ?? false,
       order_index: sections[sectionIndex].questions.length,
-      description: '',
-      options: type === 'multiple_choice' || type === 'checkboxes' || type === 'dropdown' ? ['Option 1'] : undefined,
-      placeholder: '',
-      hint: '',
-      isConfigured: false
+      description: questionData?.description || '',
+      options: questionData?.options || (type === 'multiple_choice' || type === 'checkboxes' || type === 'dropdown' ? ['Option 1'] : undefined),
+      placeholder: questionData?.placeholder || '',
+      hint: questionData?.hint || '',
+      isConfigured: !!questionData
     };
+
+    console.debug(`[${timestamp}] [FORM-BUILDER] 📝 addQuestion() NEW QUESTION OBJECT:`, {
+      id: newQuestion.id,
+      type: newQuestion.type,
+      question_text: newQuestion.question_text,
+      required: newQuestion.required,
+      order_index: newQuestion.order_index,
+      hasOptions: !!newQuestion.options,
+      optionCount: newQuestion.options?.length,
+      isConfigured: newQuestion.isConfigured
+    });
 
     const newSections = [...sections];
     newSections[sectionIndex] = {
@@ -841,6 +1175,13 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
       questions: [...newSections[sectionIndex].questions, newQuestion]
     };
     setSections([...newSections]);
+    
+    console.debug(`[${timestamp}] [FORM-BUILDER] ✅ addQuestion() SUCCESS`);
+    console.debug(`[${timestamp}] [FORM-BUILDER] 📤 addQuestion() RETURN:`, {
+      questionId: newQuestion.id,
+      sectionNowHasQuestions: newSections[sectionIndex].questions.length
+    });
+    
     return newQuestion.id;
   };
 
@@ -965,6 +1306,888 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
           hasMaxFileSize: false,
           hasMaxDuration: false,
         };
+    }
+  };
+
+  // ========== AI ASSISTANT FUNCTIONS ==========
+
+  // Create checkpoint before AI actions
+  const createCheckpoint = () => {
+    console.debug('[AI-FORM] 💾 Creating checkpoint...');
+    const checkpoint: FormCheckpoint = {
+      sections: JSON.parse(JSON.stringify(sections)), // Deep copy
+      formTitle,
+      formDescription,
+      timestamp: Date.now(),
+    };
+    setFormCheckpoint(checkpoint);
+    console.debug('[AI-FORM] ✅ Checkpoint created:', {
+      sectionCount: checkpoint.sections.length,
+      questionCount: checkpoint.sections.reduce((acc, s) => acc + s.questions.length, 0),
+      timestamp: new Date(checkpoint.timestamp).toISOString()
+    });
+  };
+
+  // Restore from checkpoint
+  const restoreCheckpoint = () => {
+    console.debug('[AI-FORM] ⏮️ Restoring from checkpoint...');
+    
+    if (!formCheckpoint) {
+      console.warn('[AI-FORM] ⚠️ No checkpoint available');
+      toast.error('No checkpoint available');
+      return;
+    }
+    
+    console.debug('[AI-FORM] 📋 Checkpoint data:', {
+      sectionCount: formCheckpoint.sections.length,
+      questionCount: formCheckpoint.sections.reduce((acc, s) => acc + s.questions.length, 0),
+      timestamp: new Date(formCheckpoint.timestamp).toISOString()
+    });
+    
+    setSections(formCheckpoint.sections);
+    setFormTitle(formCheckpoint.formTitle);
+    setFormDescription(formCheckpoint.formDescription);
+    setFormCheckpoint(null);
+    setAiFormPreview(null);
+    
+    console.debug('[AI-FORM] ✅ Restored to checkpoint state');
+    toast.success('Reverted to before AI changes');
+  };
+
+  // Generate AI form preview
+  const generateAiForm = async () => {
+    if (isAiGenerating) {
+      console.warn('[AI-FORM] ⚠️ AI generation already in progress');
+      return;
+    }
+    
+    console.debug('[AI-FORM] 🤖 Starting AI form generation...');
+    console.debug('[AI-FORM] 📤 Request params:', { companyId, formId });
+    
+    setIsAiGenerating(true);
+    setAiProgress('Analyzing company profile and website...');
+
+    try {
+      const response = await fetch('/api/companies/forms/ai-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companyId, formId }),
+      });
+
+      console.debug('[AI-FORM] 📥 API response status:', response.status);
+
+      const data = await response.json();
+      console.debug('[AI-FORM] 📥 API response data:', data);
+
+      if (!response.ok || !data.success) {
+        console.error('[AI-FORM] ❌ API error:', data.error || data.details);
+        throw new Error(data.error || 'Failed to generate form');
+      }
+
+      console.debug('[AI-FORM] ✅ Form generated successfully:', {
+        sections: data.sections.length,
+        totalQuestions: data.sections.reduce((acc: number, s: any) => acc + s.questions.length, 0),
+        sourcesUsed: data.sourcesUsed
+      });
+
+      setAiFormPreview(data);
+      setAiProgress('');
+      toast.success('Form preview generated! Review and click "Apply to Form" to proceed.');
+
+    } catch (error) {
+      console.error('[AI-FORM] ❌ AI generation error:', error);
+      setAiProgress('');
+      toast.error(error instanceof Error ? error.message : 'Failed to generate form');
+    } finally {
+      setIsAiGenerating(false);
+      console.debug('[AI-FORM] 🏁 AI generation finished');
+    }
+  };
+
+  // Stop AI execution
+  const stopAiExecution = () => {
+    console.debug('[AI-FORM] ⏹️ Stop requested');
+    if (isAiApplying) {
+      setIsAiApplying(false);
+      setAiProgress('');
+      console.warn('[AI-FORM] ⚠️ AI execution stopped by user');
+      toast.error('AI execution stopped by user');
+    }
+  };
+
+  // Apply AI-generated form using the proven memory-build approach
+  // CRITICAL: This uses the EXACT SAME pattern as testApplyAiFormWithSave() which works
+  const applyAiForm = async () => {
+    const startTimestamp = new Date().toISOString();
+    
+    console.debug(`[${startTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    console.debug(`[${startTimestamp}] [AI-FORM] 🔧 applyAiForm() CALLED`);
+    console.debug(`[${startTimestamp}] [AI-FORM] 💡 Using PROVEN memory-build approach (same as working debug test)`);
+    console.debug(`[${startTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    
+    // VALIDATION: Ensure aiFormPreview exists and is valid
+    if (!aiFormPreview) {
+      console.error(`[${startTimestamp}] [AI-FORM] ❌ VALIDATION FAILED: aiFormPreview is null/undefined`);
+      console.error(`[${startTimestamp}] [AI-FORM] 💡 User must first click "Generate Form" to create preview`);
+      toast.error('No AI form preview available. Please generate a form first.');
+      return;
+    }
+    
+    if (isAiApplying) {
+      console.warn(`[${startTimestamp}] [AI-FORM] ⚠️ Already applying - ignoring duplicate call`);
+      return;
+    }
+    
+    // VALIDATION: Ensure aiFormPreview has required structure
+    if (!aiFormPreview.sections || !Array.isArray(aiFormPreview.sections) || aiFormPreview.sections.length === 0) {
+      console.error(`[${startTimestamp}] [AI-FORM] ❌ VALIDATION FAILED: aiFormPreview.sections is invalid`);
+      console.error(`[${startTimestamp}] [AI-FORM] 📋 Received:`, aiFormPreview);
+      toast.error('AI form preview is invalid. Please try generating again.');
+      return;
+    }
+    
+    console.debug(`[${startTimestamp}] [AI-FORM] ✅ VALIDATION PASSED: aiFormPreview is valid`);
+    console.debug(`[${startTimestamp}] [AI-FORM] 📋 AI preview data (FULL):`, JSON.stringify(aiFormPreview, null, 2));
+    console.debug(`[${startTimestamp}] [AI-FORM] 📊 Current form state BEFORE applying:`, {
+      existingSections: sections.length,
+      existingQuestions: sections.reduce((acc, s) => acc + s.questions.length, 0)
+    });
+
+    // STEP 0: Set form title and description from AI preview (SAME AS TEST FORM)
+    // This is what testApplyAiFormWithSave does and we need to match it exactly
+    const aiFormTitle = aiFormPreview.companyName 
+      ? `${aiFormPreview.companyName} Application Form`
+      : 'AI-Generated Application Form';
+    const aiFormDescription = aiFormPreview.summary || 'This form was generated by AI based on company profile.';
+    
+    console.debug(`[${startTimestamp}] [AI-FORM] 📝 STEP 0: Setting form title and description (SAME AS TEST FORM)`);
+    console.debug(`[${startTimestamp}] [AI-FORM] 📝 Form title: "${aiFormTitle}"`);
+    console.debug(`[${startTimestamp}] [AI-FORM] 📝 Form description: "${aiFormDescription}"`);
+    
+    setFormTitle(aiFormTitle);
+    setFormDescription(aiFormDescription);
+
+    // Create checkpoint before applying
+    console.debug(`[${startTimestamp}] [AI-FORM] 💾 Creating checkpoint for undo capability...`);
+    createCheckpoint();
+    console.debug(`[${startTimestamp}] [AI-FORM] ✅ Checkpoint created`);
+    
+    setIsAiApplying(true);
+    setShowConfirmDialog(false);
+    setAiProgress('Validating AI form data...');
+    
+    // Wait for form title/description state to update (SAME AS TEST FORM)
+    await delay(150);
+
+    // Initialize at function scope for catch block access
+    let newSections: Section[] = [];
+    let totalQuestions = 0;
+    
+    // CRITICAL FIX: Use a local variable instead of the state for stop detection
+    // The isAiApplying state is captured in the closure as FALSE even after setIsAiApplying(true)
+    // This caused the loop to break immediately on first iteration
+    let shouldContinue = true;
+
+    try {
+      console.debug(`[${startTimestamp}] [AI-FORM] 🚀 STEP 1: Building AI-generated form structure IN MEMORY...`);
+      console.debug(`[${startTimestamp}] [AI-FORM] 💡 This is the SAME approach as testApplyAiFormWithSave() which works`);
+      console.debug(`[${startTimestamp}] [AI-FORM] 📊 Will create ${aiFormPreview.sections.length} sections`);
+      console.debug(`[${startTimestamp}] [AI-FORM] ✅ Building complete objects first, then updating state ONCE`);
+      console.debug(`[${startTimestamp}] [AI-FORM] ✅ CLOSURE FIX: Using local variable for stop detection`);
+
+      // BUILD ENTIRE AI-GENERATED FORM STRUCTURE IN MEMORY
+      // This is the EXACT approach used by testApplyAiFormWithSave() which works
+      for (let sIdx = 0; sIdx < aiFormPreview.sections.length; sIdx++) {
+        const aiSection = aiFormPreview.sections[sIdx];
+        const sectionTimestamp = new Date().toISOString();
+        
+        // FIXED: Use local variable instead of state (closure issue)
+        if (!shouldContinue) {
+          console.debug(`[${sectionTimestamp}] [AI-FORM] ⏸️ AI execution stopped by user at section ${sIdx + 1}`);
+          break;
+        }
+
+        setAiProgress(`Building section ${sIdx + 1}/${aiFormPreview.sections.length}: ${aiSection.title}...`);
+        
+        console.debug(`[${sectionTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+        console.debug(`[${sectionTimestamp}] [AI-FORM] 📝 Building section ${sIdx + 1}/${aiFormPreview.sections.length} in memory`);
+        console.debug(`[${sectionTimestamp}] [AI-FORM] 📋 Section title: "${aiSection.title}"`);
+        console.debug(`[${sectionTimestamp}] [AI-FORM] 📋 Section description: "${aiSection.description || '(none)'}"`);
+        console.debug(`[${sectionTimestamp}] [AI-FORM] 📋 Questions count: ${aiSection.questions?.length || 0}`);
+        
+        // Validate section has questions
+        if (!aiSection.questions || !Array.isArray(aiSection.questions)) {
+          console.warn(`[${sectionTimestamp}] [AI-FORM] ⚠️ Section "${aiSection.title}" has no valid questions array, defaulting to empty`);
+        }
+        
+        // Create section object EXACTLY like testApplyAiFormWithSave does
+        // NOTE: Using sIdx as order_index (not sections.length + sIdx) to match test form
+        const newSection: Section = {
+          id: crypto.randomUUID(),
+          title: aiSection.title || `Section ${sIdx + 1}`,
+          description: aiSection.description || '',
+          order_index: sIdx,  // SAME AS TEST FORM: uses sIdx directly
+          questions: []
+        };
+        
+        console.debug(`[${sectionTimestamp}] [AI-FORM] ✅ Section object created (SAME FORMAT AS TEST FORM):`, {
+          id: newSection.id,
+          title: newSection.title,
+          description: newSection.description,
+          order_index: newSection.order_index
+        });
+        
+        // Build all questions for this section in memory
+        const questionsToAdd = aiSection.questions || [];
+        for (let qIdx = 0; qIdx < questionsToAdd.length; qIdx++) {
+          const aiQuestion = questionsToAdd[qIdx];
+          
+          // Skip if user stopped (using local variable, not state - closure fix)
+          if (!shouldContinue) {
+            console.debug(`[${sectionTimestamp}] [AI-FORM] ⏸️ AI stopped during question ${qIdx + 1}`);
+            break;
+          }
+          
+          // Log the raw AI question data for debugging
+          console.debug(`[${sectionTimestamp}] [AI-FORM] 📝 Raw AI question ${qIdx + 1}/${questionsToAdd.length}:`, JSON.stringify(aiQuestion));
+          
+          // Create question object EXACTLY like testApplyAiFormWithSave does
+          // CRITICAL: Match the exact same structure the test form uses
+          const newQuestion: Question = {
+            id: crypto.randomUUID(),
+            type: aiQuestion.type,  // Direct assignment like test form
+            question_text: aiQuestion.question_text,  // Direct assignment like test form
+            required: aiQuestion.required,  // Direct assignment like test form
+            order_index: qIdx,
+            description: aiQuestion.description || '',
+            options: aiQuestion.options,  // Direct assignment like test form (no conditional)
+            placeholder: aiQuestion.placeholder || '',
+            hint: aiQuestion.hint || '',
+            // These match the test form exactly
+            maxLength: aiQuestion.type === 'short_text' || aiQuestion.type === 'long_text' ? undefined : undefined,
+            fileTypes: aiQuestion.type === 'file_upload' ? undefined : undefined,
+            maxFileSize: aiQuestion.type === 'file_upload' ? undefined : undefined,
+            maxDuration: aiQuestion.type === 'video_upload' ? undefined : undefined,
+            isConfigured: true
+          };
+          
+          newSection.questions.push(newQuestion);
+          totalQuestions++;
+          
+          // Log the complete question object for comparison with test form
+          console.debug(`[${sectionTimestamp}] [AI-FORM] ✅ Question ${qIdx + 1} created (SAME FORMAT AS TEST FORM):`, {
+            id: newQuestion.id,
+            type: newQuestion.type,
+            question_text: newQuestion.question_text,
+            required: newQuestion.required,
+            order_index: newQuestion.order_index,
+            description: newQuestion.description,
+            options: newQuestion.options,
+            placeholder: newQuestion.placeholder,
+            hint: newQuestion.hint,
+            isConfigured: newQuestion.isConfigured
+          });
+        }
+        
+        newSections.push(newSection);
+        console.debug(`[${sectionTimestamp}] [AI-FORM] ✅ Section "${newSection.title}" complete: ${newSection.questions.length} questions`);
+        console.debug(`[${sectionTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+        await delay(100); // Small delay for visual feedback
+      }
+
+      // FIXED: Use local variable shouldContinue instead of isAiApplying state
+      if (shouldContinue && newSections.length > 0) {
+        const completionTimestamp = new Date().toISOString();
+        
+        console.debug(`[${completionTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+        console.debug(`[${completionTimestamp}] [AI-FORM] ✅✅✅ STEP 2: AI FORM STRUCTURE BUILT IN MEMORY! ✅✅✅`);
+        console.debug(`[${completionTimestamp}] [AI-FORM] 📊 AI-generated structure ready:`, {
+          totalSections: newSections.length,
+          totalQuestions: totalQuestions,
+          sectionsDetail: newSections.map(s => ({
+            id: s.id,
+            title: s.title,
+            questionCount: s.questions.length,
+            questionIds: s.questions.map(q => q.id)
+          }))
+        });
+        console.debug(`[${completionTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+
+        // STEP 3: UPDATE STATE ALL AT ONCE (ATOMIC) - EXACTLY like testApplyAiFormWithSave
+        console.debug(`[${completionTimestamp}] [AI-FORM] 🔧 STEP 3: Updating React state with complete form structure...`);
+        console.debug(`[${completionTimestamp}] [AI-FORM] 💡 Calling setSections() ONCE with ${newSections.length} sections and ${totalQuestions} questions`);
+        console.debug(`[${completionTimestamp}] [AI-FORM] 💡 Using setSections(newSections) - SAME as test form (replaces, not appends)`);
+        
+        setAiProgress('Updating form builder state...');
+        
+        // CRITICAL: Use setSections(newSections) - SAME AS TEST FORM
+        // The test form uses setSections(newSections) which replaces all sections
+        // NOT [...sections, ...newSections] which would append
+        setSections(newSections);
+        
+        console.debug(`[${completionTimestamp}] [AI-FORM] ✅ setSections() called with ${newSections.length} sections (REPLACED, not appended)`);
+        console.debug(`[${completionTimestamp}] [AI-FORM] 💡 This is EXACTLY what testApplyAiFormWithSave does`);
+        
+        // Log the complete sections array for verification
+        console.debug(`[${completionTimestamp}] [AI-FORM] 📊 Complete sections structure being saved:`, 
+          JSON.stringify(newSections.map(s => ({
+            id: s.id,
+            title: s.title,
+            description: s.description,
+            order_index: s.order_index,
+            questions: s.questions.map(q => ({
+              id: q.id,
+              type: q.type,
+              question_text: q.question_text,
+              required: q.required,
+              options: q.options
+            }))
+          })), null, 2)
+        );
+
+        // STEP 4: Wait for React state to process - Same timing as testApplyAiFormWithSave
+        setAiProgress('Waiting for React state to stabilize...');
+        const waitMs = 1500;  // Same delay as working test
+        console.debug(`[${new Date().toISOString()}] [AI-FORM] ⏳ STEP 4: Waiting ${waitMs}ms for React to process state update...`);
+        console.debug(`[${new Date().toISOString()}] [AI-FORM] 💡 This is the same delay used by testApplyAiFormWithSave()`);
+        await delay(waitMs);
+        
+        console.debug(`[${new Date().toISOString()}] [AI-FORM] ✅ Wait complete. React should have processed the state update.`);
+
+        // STEP 5: Save to Supabase - Same as testApplyAiFormWithSave
+        setAiProgress('Saving to Supabase...');
+        toast.loading('Saving AI-generated form to database...', { id: 'ai-save' });
+        
+        const saveStartTimestamp = new Date().toISOString();
+        console.debug(`[${saveStartTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+        console.debug(`[${saveStartTimestamp}] [AI-FORM] 💾 STEP 5: Triggering save to Supabase...`);
+        console.debug(`[${saveStartTimestamp}] [AI-FORM] 🔧 Calling saveForm(skipToast=true)`);
+        console.debug(`[${saveStartTimestamp}] [AI-FORM] 📊 Data to be saved:`, {
+          totalSections: newSections.length,
+          totalQuestions: totalQuestions,
+          sectionIds: newSections.map(s => s.id),
+          questionIds: newSections.flatMap(s => s.questions.map(q => q.id)),
+          note: 'saveForm() will read the sections state we just set with setSections()'
+        });
+        console.debug(`[${saveStartTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+        
+        // Automatically save to Supabase
+        try {
+          await saveForm(true);
+          
+          const saveSuccessTimestamp = new Date().toISOString();
+          console.debug(`[${saveSuccessTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+          console.debug(`[${saveSuccessTimestamp}] [AI-FORM] ✅✅✅ AI-GENERATED FORM SAVED TO SUPABASE! ✅✅✅`);
+          console.debug(`[${saveSuccessTimestamp}] [AI-FORM] 🎉 Successfully persisted to database!`);
+          console.debug(`[${saveSuccessTimestamp}] [AI-FORM] 📊 Final summary:`, {
+            sectionsCreated: newSections.length,
+            questionsCreated: totalQuestions,
+            totalDurationMs: new Date().getTime() - new Date(startTimestamp).getTime()
+          });
+          console.debug(`[${saveSuccessTimestamp}] [AI-FORM] ⏱️ Total AI process duration: ${new Date().getTime() - new Date(startTimestamp).getTime()}ms`);
+          console.debug(`[${saveSuccessTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+          
+          setAiProgress('');
+          toast.success(`✨ Successfully created and saved ${newSections.length} sections with ${totalQuestions} questions!`, {
+            id: 'ai-save',
+            duration: 4000
+          });
+          
+          setAiFormPreview(null);
+          
+          // Clear checkpoint since save was successful
+          setFormCheckpoint(null);
+          console.debug(`[${saveSuccessTimestamp}] [AI-FORM] 🧹 Cleared checkpoint and preview`);
+          
+        } catch (saveError) {
+          const saveErrorTimestamp = new Date().toISOString();
+          
+          console.error(`[${saveErrorTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+          console.error(`[${saveErrorTimestamp}] [AI-FORM] ❌❌❌ FAILED TO SAVE TO SUPABASE ❌❌❌`);
+          console.error(`[${saveErrorTimestamp}] [AI-FORM] 📋 Error object:`, saveError);
+          console.error(`[${saveErrorTimestamp}] [AI-FORM] 📋 Error details:`, {
+            message: saveError instanceof Error ? saveError.message : 'Unknown error',
+            stack: saveError instanceof Error ? saveError.stack : undefined,
+            name: saveError instanceof Error ? saveError.name : undefined
+          });
+          console.error(`[${saveErrorTimestamp}] [AI-FORM] 📊 AI-generated sections created: ${newSections.length}, questions: ${totalQuestions}`);
+          console.error(`[${saveErrorTimestamp}] [AI-FORM] 📋 Checkpoint available: ${!!formCheckpoint}`);
+          console.error(`[${saveErrorTimestamp}] [AI-FORM] 💡 You can use "Undo AI Changes" to revert, or click "Save" manually`);
+          console.error(`[${saveErrorTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+          
+          toast.error('AI form created but failed to save to database. Use "Undo AI Changes" to revert, or click "Save" manually.', {
+            id: 'ai-save',
+            duration: 6000
+          });
+          
+          // Don't clear preview so user can see what was generated
+          // Keep checkpoint so user can undo if needed
+        }
+      }
+
+    } catch (error) {
+      const errorTimestamp = new Date().toISOString();
+      
+      console.error(`[${errorTimestamp}] [AI-FORM] ❌ Error applying AI form`);
+      console.error(`[${errorTimestamp}] [AI-FORM] 📋 Full error object:`, error);
+      console.error(`[${errorTimestamp}] [AI-FORM] 📋 Error details:`, {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        cause: error instanceof Error ? error.cause : undefined
+      });
+      console.error(`[${errorTimestamp}] [AI-FORM] 📊 AI structure at time of error:`, {
+        sectionsBuiltInMemory: newSections?.length || 0,
+        questionsBuiltInMemory: totalQuestions || 0,
+        note: 'Error occurred while building or applying AI-generated form'
+      });
+      console.error(`[${errorTimestamp}] [AI-FORM] 📋 Checkpoint available: ${!!formCheckpoint}`);
+      console.error(`[${errorTimestamp}] [AI-FORM] 💡 Restoring from checkpoint to undo partial changes...`);
+      console.error(`[${errorTimestamp}] [AI-FORM] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      
+      toast.error('Failed to apply AI form. Restoring previous state...', {
+        duration: 4000
+      });
+      
+      console.debug(`[${errorTimestamp}] [AI-FORM] ⏮️ Restoring from checkpoint...`);
+      restoreCheckpoint();
+    } finally {
+      const finalTimestamp = new Date().toISOString();
+      setIsAiApplying(false);
+      setAiProgress('');
+      console.debug(`[${finalTimestamp}] [AI-FORM] 🏁 AI form application finished`);
+      console.debug(`[${finalTimestamp}] [AI-FORM] ⏱️ Total execution time: ${new Date().getTime() - new Date(startTimestamp).getTime()}ms`);
+    }
+  };
+
+  // PREVIEW-ONLY TEST: Build and show preview without saving (lightweight test)
+  // NOTE: This uses the same memory-build approach but skips the save step
+  const testApplyAiForm = async () => {
+    const testTimestamp = new Date().toISOString();
+    console.debug(`[${testTimestamp}] [AI-TEST-PREVIEW] 🧪 Starting PREVIEW-ONLY test (no save)`);
+    console.debug(`[${testTimestamp}] [AI-TEST-PREVIEW] 💡 Uses memory-build approach, skips Supabase save`);
+    
+    // Create a small test form structure
+    const testFormPreview: AIFormPreview = {
+      summary: "Test company for debugging AI form builder",
+      matchedOpportunityId: null,
+      sections: [
+        {
+          title: "Test Section 1",
+          description: "First test section",
+          questions: [
+            {
+              type: 'short_text',
+              question_text: "What is your test name?",
+              description: "Test description",
+              required: true,
+              placeholder: "Enter test name",
+              hint: "Test hint"
+            },
+            {
+              type: 'multiple_choice',
+              question_text: "Pick a test option",
+              description: "",
+              required: false,
+              placeholder: "",
+              hint: "",
+              options: ["Test Option A", "Test Option B", "Test Option C"]
+            }
+          ]
+        },
+        {
+          title: "Test Section 2",
+          description: "Second test section",
+          questions: [
+            {
+              type: 'long_text',
+              question_text: "Describe your test experience",
+              description: "Tell us more",
+              required: true,
+              placeholder: "Enter details",
+              hint: "Be descriptive"
+            }
+          ]
+        }
+      ],
+      sourcesUsed: ["Test data - preview only"],
+      companyName: "Test Company"
+    };
+    
+    console.debug(`[${testTimestamp}] [AI-TEST-PREVIEW] 📋 Test preview created:`, testFormPreview);
+    
+    // Build sections in memory (same as applyAiForm and testApplyAiFormWithSave)
+    const newSections: Section[] = [];
+    let totalQuestions = 0;
+    
+    for (let sIdx = 0; sIdx < testFormPreview.sections.length; sIdx++) {
+      const aiSection = testFormPreview.sections[sIdx];
+      const newSection: Section = {
+        id: crypto.randomUUID(),
+        title: aiSection.title,
+        description: aiSection.description || '',
+        order_index: sections.length + sIdx,
+        questions: []
+      };
+      
+      for (let qIdx = 0; qIdx < aiSection.questions.length; qIdx++) {
+        const aiQuestion = aiSection.questions[qIdx];
+        const newQuestion: Question = {
+          id: crypto.randomUUID(),
+          type: aiQuestion.type,
+          question_text: aiQuestion.question_text,
+          required: aiQuestion.required,
+          order_index: qIdx,
+          description: aiQuestion.description || '',
+          options: aiQuestion.options,
+          placeholder: aiQuestion.placeholder || '',
+          hint: aiQuestion.hint || '',
+          isConfigured: true
+        };
+        newSection.questions.push(newQuestion);
+        totalQuestions++;
+      }
+      newSections.push(newSection);
+    }
+    
+    console.debug(`[${testTimestamp}] [AI-TEST-PREVIEW] ✅ Built ${newSections.length} sections with ${totalQuestions} questions in memory`);
+    
+    // Update state with new sections (preview only - no save)
+    const updatedSections = [...sections, ...newSections];
+    setSections(updatedSections);
+    
+    console.debug(`[${testTimestamp}] [AI-TEST-PREVIEW] ✅ State updated with ${updatedSections.length} total sections`);
+    console.debug(`[${testTimestamp}] [AI-TEST-PREVIEW] 💡 Preview only - use "Apply & Save Test Form" to test with Supabase persistence`);
+    
+    toast.success(`Preview test: Added ${newSections.length} sections (${totalQuestions} questions) - NOT saved to database`);
+  };
+
+  // Helper delay function
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  // COMPREHENSIVE DEBUG TEST: Force apply and save a test form with full logging
+  const testApplyAiFormWithSave = async () => {
+    const testTimestamp = new Date().toISOString();
+    console.debug(`[${testTimestamp}] [AI-TEST] 🧪 Starting COMPREHENSIVE test with forced state and auto-save`);
+    console.debug(`[${testTimestamp}] [AI-TEST] 📋 This test will:`);
+    console.debug(`[${testTimestamp}] [AI-TEST]    1. Force aiFormPreview state with test data`);
+    console.debug(`[${testTimestamp}] [AI-TEST]    2. Create 2 sections with 3 questions each (6 total)`);
+    console.debug(`[${testTimestamp}] [AI-TEST]    3. Use existing addSection() and addQuestion() functions`);
+    console.debug(`[${testTimestamp}] [AI-TEST]    4. Track state locally (sections state variable won't update in closure)`);
+    console.debug(`[${testTimestamp}] [AI-TEST]    5. Wait for React to re-render with proper delays`);
+    console.debug(`[${testTimestamp}] [AI-TEST]    6. Call saveForm(true) to persist to Supabase`);
+    console.debug(`[${testTimestamp}] [AI-TEST]    7. Log all steps with timestamps and full state`);
+    
+    console.debug(`[${testTimestamp}] [AI-TEST] ⚠️ IMPORTANT: sections state variable is captured in closure and won't update`);
+    console.debug(`[${testTimestamp}] [AI-TEST] ⚠️ We'll track sections locally and trust addSection()/addQuestion() return values`);
+    
+    // Create comprehensive test form structure
+    const testFormPreview: AIFormPreview = {
+      summary: "Test company for debugging AI form builder persistence",
+      matchedOpportunityId: null,
+      sections: [
+        {
+          title: "Personal Information",
+          description: "Tell us about yourself",
+          questions: [
+            {
+              type: 'short_text',
+              question_text: "What is your full name?",
+              description: "Please provide your legal name",
+              required: true,
+              placeholder: "John Doe",
+              hint: "First and last name"
+            },
+            {
+              type: 'short_text',
+              question_text: "What is your email address?",
+              description: "We'll use this to contact you",
+              required: true,
+              placeholder: "john@example.com",
+              hint: "Make sure it's a valid email"
+            },
+            {
+              type: 'multiple_choice',
+              question_text: "What is your current status?",
+              description: "Select the option that best describes you",
+              required: true,
+              placeholder: "",
+              hint: "",
+              options: ["Student", "Recent Graduate", "Working Professional", "Career Changer"]
+            }
+          ]
+        },
+        {
+          title: "Experience & Skills",
+          description: "Share your background and expertise",
+          questions: [
+            {
+              type: 'long_text',
+              question_text: "Describe your relevant experience",
+              description: "Include internships, projects, coursework, or work history",
+              required: true,
+              placeholder: "I have experience in...",
+              hint: "Be specific about technologies, tools, and achievements"
+            },
+            {
+              type: 'checkboxes',
+              question_text: "Select your technical skills",
+              description: "Choose all that apply",
+              required: false,
+              placeholder: "",
+              hint: "Select multiple options",
+              options: ["JavaScript", "Python", "React", "Node.js", "SQL/Databases", "Git/GitHub", "Cloud (AWS/Azure)", "Machine Learning"]
+            },
+            {
+              type: 'dropdown',
+              question_text: "Years of programming experience",
+              description: "Approximate total experience",
+              required: true,
+              placeholder: "",
+              hint: "",
+              options: ["Less than 1 year", "1-2 years", "3-5 years", "5-10 years", "10+ years"]
+            }
+          ]
+        }
+      ],
+      sourcesUsed: ["Test data - Generated by debug test function"],
+      companyName: "Test Company Inc."
+    };
+    
+    console.debug(`[${testTimestamp}] [AI-TEST] 📋 Test preview created successfully`);
+    console.debug(`[${testTimestamp}] [AI-TEST] 📊 Test form structure:`, {
+      sectionCount: testFormPreview.sections.length,
+      totalQuestions: testFormPreview.sections.reduce((acc, s) => acc + s.questions.length, 0),
+      sections: testFormPreview.sections.map(s => ({
+        title: s.title,
+        questionCount: s.questions.length,
+        questionTypes: s.questions.map(q => q.type)
+      }))
+    });
+    
+    // FORCE set the preview state
+    console.debug(`[${testTimestamp}] [AI-TEST] 🔧 STEP 1: Forcing aiFormPreview state`);
+    setAiFormPreview(testFormPreview);
+    
+    // Set form title and description
+    const testFormTitle = "AI Test Application Form";
+    const testFormDescription = "This form was auto-generated by the comprehensive AI test function to verify persistence.";
+    
+    console.debug(`[${testTimestamp}] [AI-TEST] 📝 Setting form title: "${testFormTitle}"`);
+    setFormTitle(testFormTitle);
+    
+    console.debug(`[${testTimestamp}] [AI-TEST] 📝 Setting form description: "${testFormDescription}"`);
+    setFormDescription(testFormDescription);
+    
+    // Wait for state to update
+    console.debug(`[${testTimestamp}] [AI-TEST] ⏳ Waiting 150ms for state update...`);
+    await delay(150);
+    
+    console.debug(`[${new Date().toISOString()}] [AI-TEST] ✅ State updated successfully`);
+    console.debug(`[${new Date().toISOString()}] [AI-TEST] 📊 Current state snapshot:`, {
+      formTitle,
+      formDescription,
+      aiFormPreviewSet: !!testFormPreview,
+      isAiApplying: false,
+      currentSections: sections.length,
+      currentQuestions: sections.reduce((acc, s) => acc + s.questions.length, 0)
+    });
+    
+    // Create checkpoint before any modifications
+    console.debug(`[${new Date().toISOString()}] [AI-TEST] 💾 Creating checkpoint...`);
+    createCheckpoint();
+    console.debug(`[${new Date().toISOString()}] [AI-TEST] ✅ Checkpoint created`);
+    
+    // FORCE set applying state
+    console.debug(`[${new Date().toISOString()}] [AI-TEST] 🔧 STEP 2: Setting isAiApplying = true`);
+    setIsAiApplying(true);
+    setAiProgress('Test: Initializing...');
+    
+    // Initialize these at function scope so they're available in catch block
+    let newSections: Section[] = [];
+    let totalQuestions = 0;
+    
+    try {
+      const startApplyTimestamp = new Date().toISOString();
+      console.debug(`[${startApplyTimestamp}] [AI-TEST] 🚀 STEP 3: Building complete form structure IN MEMORY...`);
+      console.debug(`[${startApplyTimestamp}] [AI-TEST] 📊 Will create ${testFormPreview.sections.length} sections with questions`);
+      console.debug(`[${startApplyTimestamp}] [AI-TEST] 💡 NEW APPROACH: Build entire structure first, then update state ONCE`);
+      console.debug(`[${startApplyTimestamp}] [AI-TEST] ✅ This avoids all async state update timing issues!`);
+      
+      for (let sIdx = 0; sIdx < testFormPreview.sections.length; sIdx++) {
+        const aiSection = testFormPreview.sections[sIdx];
+        const sectionTimestamp = new Date().toISOString();
+        
+        setAiProgress(`Test: Building section ${sIdx + 1}/${testFormPreview.sections.length}: ${aiSection.title}...`);
+        
+        console.debug(`[${sectionTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+        console.debug(`[${sectionTimestamp}] [AI-TEST] 📝 Building section ${sIdx + 1}/${testFormPreview.sections.length} in memory`);
+        console.debug(`[${sectionTimestamp}] [AI-TEST] 📋 Section: "${aiSection.title}" with ${aiSection.questions.length} questions`);
+        
+        // Create section object
+        const newSection: Section = {
+          id: crypto.randomUUID(),
+          title: aiSection.title,
+          description: aiSection.description,
+          order_index: sIdx,
+          questions: []
+        };
+        
+        console.debug(`[${sectionTimestamp}] [AI-TEST] ✅ Section object created with ID: ${newSection.id}`);
+        
+        // Build all questions for this section
+        for (let qIdx = 0; qIdx < aiSection.questions.length; qIdx++) {
+          const aiQuestion = aiSection.questions[qIdx];
+          
+          console.debug(`[${sectionTimestamp}] [AI-TEST] 📝 Building question ${qIdx + 1}/${aiSection.questions.length}: "${aiQuestion.question_text.slice(0, 40)}..."`);
+          
+          const newQuestion: Question = {
+            id: crypto.randomUUID(),
+            type: aiQuestion.type,
+            question_text: aiQuestion.question_text,
+            required: aiQuestion.required,
+            order_index: qIdx,
+            description: aiQuestion.description || '',
+            options: aiQuestion.options,
+            placeholder: aiQuestion.placeholder || '',
+            hint: aiQuestion.hint || '',
+            maxLength: aiQuestion.type === 'short_text' || aiQuestion.type === 'long_text' ? undefined : undefined,
+            fileTypes: aiQuestion.type === 'file_upload' ? undefined : undefined,
+            maxFileSize: aiQuestion.type === 'file_upload' ? undefined : undefined,
+            maxDuration: aiQuestion.type === 'video_upload' ? undefined : undefined,
+            isConfigured: true
+          };
+          
+          newSection.questions.push(newQuestion);
+          totalQuestions++;
+          
+          console.debug(`[${sectionTimestamp}] [AI-TEST] ✅ Question object created with ID: ${newQuestion.id}`);
+        }
+        
+        newSections.push(newSection);
+        console.debug(`[${sectionTimestamp}] [AI-TEST] ✅ Section "${aiSection.title}" complete with ${newSection.questions.length} questions`);
+        await delay(100); // Small delay for visual feedback
+      }
+      
+      const completionTimestamp = new Date().toISOString();
+      console.debug(`[${completionTimestamp}] [AI-TEST] ✅✅✅ ALL FORM STRUCTURE BUILT IN MEMORY! ✅✅✅`);
+      console.debug(`[${completionTimestamp}] [AI-TEST] 📊 Structure summary:`, {
+        totalSections: newSections.length,
+        totalQuestions: totalQuestions,
+        sectionsDetail: newSections.map(s => ({
+          id: s.id,
+          title: s.title,
+          questionCount: s.questions.length
+        }))
+      });
+      
+      // NOW UPDATE STATE ALL AT ONCE
+      console.debug(`[${completionTimestamp}] [AI-TEST] 🔧 STEP 4: Updating React state with complete form structure...`);
+      console.debug(`[${completionTimestamp}] [AI-TEST] 💡 Calling setSections() ONCE with ${newSections.length} sections and ${totalQuestions} questions`);
+      console.debug(`[${completionTimestamp}] [AI-TEST] ✅ This is atomic - no async state update timing issues!`);
+      
+      setAiProgress('Test: Updating React state...');
+      setSections(newSections);
+      
+      console.debug(`[${completionTimestamp}] [AI-TEST] ✅ setSections() called with complete structure`);
+      console.debug(`[${completionTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      
+      // Wait for React state to fully process the update
+      setAiProgress('Test: Waiting for React state to process...');
+      const waitMs = 1500;
+      console.debug(`[${new Date().toISOString()}] [AI-TEST] ⏳ STEP 5: Waiting ${waitMs}ms for React to process the state update...`);
+      console.debug(`[${new Date().toISOString()}] [AI-TEST] ℹ️ Since we called setSections() once, this should be quick`);
+      await delay(waitMs);
+      
+      // TRIGGER SAVE TO SUPABASE
+      const saveStartTimestamp = new Date().toISOString();
+      console.debug(`[${saveStartTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      console.debug(`[${saveStartTimestamp}] [AI-TEST] 💾 STEP 6: TRIGGERING SAVE TO SUPABASE...`);
+      console.debug(`[${saveStartTimestamp}] [AI-TEST] 🔧 Calling saveForm(skipToast=true)`);
+      console.debug(`[${saveStartTimestamp}] [AI-TEST] 📊 Expected data to be saved:`, {
+        sections: newSections.length,
+        questions: totalQuestions,
+        note: 'saveForm() will see the complete structure we just set with setSections()'
+      });
+      console.debug(`[${saveStartTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      
+      setAiProgress('Test: Saving to Supabase database...');
+      toast.loading('Test: Saving form to database...', { id: 'ai-test-save' });
+      
+      // Call the existing saveForm function
+      await saveForm(true);
+      
+      const saveSuccessTimestamp = new Date().toISOString();
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] ✅✅✅ SAVE COMPLETED SUCCESSFULLY! ✅✅✅`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] 🎉 Test form successfully persisted to Supabase!`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] 📊 Final summary:`, {
+        sectionsCreatedAndSaved: newSections.length,
+        questionsCreatedAndSaved: totalQuestions,
+        totalDurationMs: new Date().getTime() - new Date(testTimestamp).getTime()
+      });
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] 💡 Check Supabase dashboard:`, {
+        formsTable: 'Verify form metadata updated',
+        formSectionsTable: `Should have ${newSections.length} new sections`,
+        formQuestionsTable: `Should have ${totalQuestions} new questions`
+      });
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      
+      toast.success(`✅ Test successful! Created and saved ${newSections.length} sections and ${totalQuestions} questions!`, {
+        id: 'ai-test-save',
+        duration: 5000
+      });
+      
+      // Clean up test state
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] 🧹 STEP 6: Cleaning up test state...`);
+      setAiFormPreview(null);
+      setFormCheckpoint(null);
+      setAiProgress('');
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] ✅ Test state cleaned up`);
+      
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] 🏁 TEST COMPLETE - VERIFICATION STEPS:`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST]    1. ✅ Built ${newSections.length} sections with ${totalQuestions} questions in memory`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST]    2. ✅ Updated React state with setSections() (atomic, no timing issues)`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST]    3. ✅ Called saveForm() successfully`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST]    4. ✅ Data persisted to Supabase`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST]    5. 🔍 Now check your Supabase dashboard to verify!`);
+      console.debug(`[${saveSuccessTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      
+    } catch (error) {
+      const errorTimestamp = new Date().toISOString();
+      console.error(`[${errorTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      console.error(`[${errorTimestamp}] [AI-TEST] ❌❌❌ TEST FAILED ❌❌❌`);
+      console.error(`[${errorTimestamp}] [AI-TEST] 📋 Error object:`, error);
+      console.error(`[${errorTimestamp}] [AI-TEST] 📋 Error details:`, {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
+      console.error(`[${errorTimestamp}] [AI-TEST] 📊 State at time of error:`, {
+        sectionsBuiltInMemory: newSections?.length || 0,
+        questionsBuiltInMemory: totalQuestions || 0,
+        note: 'Error occurred while building form structure in memory'
+      });
+      console.error(`[${errorTimestamp}] [AI-TEST] 📋 Checkpoint available:`, !!formCheckpoint);
+      console.error(`[${errorTimestamp}] [AI-TEST] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+      
+      toast.error(`❌ Test failed: ${error instanceof Error ? error.message : 'Unknown error'}. Check console for details.`, {
+        id: 'ai-test-save',
+        duration: 6000
+      });
+      
+      // Restore checkpoint to undo partial changes
+      console.debug(`[${errorTimestamp}] [AI-TEST] ⏮️ Restoring checkpoint to undo partial changes...`);
+      restoreCheckpoint();
+      console.debug(`[${errorTimestamp}] [AI-TEST] ✅ Checkpoint restored`);
+      
+    } finally {
+      const finalTimestamp = new Date().toISOString();
+      setIsAiApplying(false);
+      setAiProgress('');
+      console.debug(`[${finalTimestamp}] [AI-TEST] 🏁 Test function execution finished`);
+      console.debug(`[${finalTimestamp}] [AI-TEST] ⏱️ Total execution time: ${new Date().getTime() - new Date(testTimestamp).getTime()}ms`);
     }
   };
 
@@ -1289,6 +2512,20 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
                 </div>
               </div>
               <div className="flex items-center space-x-4">
+                {!isPublished && (
+                  <button
+                    onClick={() => setIsPanelOpen(!isPanelOpen)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium flex items-center space-x-2 transition-colors duration-200 ${
+                      isPanelOpen
+                        ? 'bg-purple-100 text-purple-700 border-2 border-purple-300'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                    title="AI Assistant"
+                  >
+                    <SparklesIcon className="h-5 w-5" />
+                    <span>AI Assistant</span>
+                  </button>
+                )}
                 {isPublished && (
                   <div className="flex items-center space-x-2 px-3 py-2 bg-green-100 text-green-700 rounded-md">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -1326,8 +2563,281 @@ export default function FormBuilder({ params: { companyId, formId } }: { params:
           </div>
         </div>
 
+        {/* AI Assistant Panel */}
+        {isPanelOpen && !isPublished && (
+          <div
+            className="fixed left-0 bg-white border-r border-gray-200 shadow-xl overflow-hidden"
+            style={{
+              top: '96px', // Below navbar
+              bottom: 0,
+              width: `${panelWidth}px`,
+              zIndex: 45,
+            }}
+          >
+            {/* Resize Handle */}
+            {!isWidthLocked && (
+              <div
+                className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-blue-500 hover:w-1.5 transition-all z-50"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  setIsResizing(true);
+                }}
+              >
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-16 bg-gray-300 rounded-l hover:bg-blue-500 transition-colors"></div>
+              </div>
+            )}
+
+            {/* Panel Header */}
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gradient-to-r from-purple-50 to-blue-50">
+              <div className="flex items-center gap-2">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+                  <SparklesIcon className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-sm font-bold text-gray-900">AI Form Builder</h2>
+                  <p className="text-xs text-gray-600">Generate tailored application forms</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setIsWidthLocked(!isWidthLocked);
+                }}
+                className="p-2 hover:bg-white/50 rounded transition-colors"
+                title={isWidthLocked ? "Unlock width" : "Lock width"}
+              >
+                {isWidthLocked ? (
+                  <LockSolid className="w-4 h-4 text-gray-600" />
+                ) : (
+                  <UnlockSolid className="w-4 h-4 text-gray-400" />
+                )}
+              </button>
+            </div>
+
+            {/* Panel Content */}
+            <div className="flex flex-col h-[calc(100%-80px)] overflow-hidden">
+              {!aiFormPreview ? (
+                /* Generation UI */
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h3 className="text-sm font-semibold text-blue-900 mb-2">How it works</h3>
+                      <ol className="text-xs text-blue-800 space-y-1 list-decimal list-inside">
+                        <li>AI scans your company profile & website</li>
+                        <li>Generates a tailored application form</li>
+                        <li>Preview before applying to your form</li>
+                        <li>Click "Apply" to add sections & questions</li>
+                      </ol>
+                    </div>
+
+                    {isAiGenerating ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600"></div>
+                          <span className="text-sm text-gray-700">{aiProgress || 'Generating...'}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full animate-pulse" style={{ width: '70%' }}></div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <button
+                          onClick={generateAiForm}
+                          disabled={isAiGenerating}
+                          className="w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 font-medium flex items-center justify-center space-x-2 shadow-md"
+                        >
+                          <SparklesIcon className="w-5 h-5" />
+                          <span>Generate Form</span>
+                        </button>
+                        
+                        {/* Debug Test Buttons */}
+                        <div className="pt-3 mt-3 border-t border-purple-200">
+                          <p className="text-xs font-semibold text-gray-700 mb-2.5 flex items-center">
+                            <span className="mr-1.5">🔧</span>
+                            Debug Tools
+                          </p>
+                          
+                          {/* Comprehensive Test Button - Forces state and saves */}
+                          <button
+                            onClick={testApplyAiFormWithSave}
+                            disabled={isAiApplying || isSaving}
+                            className="w-full px-3 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200 text-sm font-semibold flex items-center justify-center space-x-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed mb-2"
+                            title="Creates 2 sections with 6 questions total, then automatically saves to Supabase with full logging"
+                          >
+                            <span className="text-base">🧪</span>
+                            <span>Apply & Save Test Form</span>
+                          </button>
+                          <p className="text-xs text-gray-600 leading-relaxed mb-3 px-1">
+                            Creates 2 sections + 6 questions, waits for state to stabilize, then saves to Supabase. Full console logs included.
+                          </p>
+                          
+                          {/* Preview-only Test Button */}
+                          <button
+                            onClick={testApplyAiForm}
+                            disabled={isAiApplying}
+                            className="w-full px-3 py-2 bg-yellow-50 text-yellow-800 border border-yellow-300 rounded-lg hover:bg-yellow-100 transition-all duration-200 text-sm font-medium flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Test AI preview generation only (no save)"
+                          >
+                            <span>📋</span>
+                            <span>Preview Only Test</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Preview UI */
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div className="space-y-4">
+                    {/* Summary */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                      <h3 className="text-sm font-semibold text-green-900 mb-1">Company Analysis</h3>
+                      <p className="text-xs text-green-800">{aiFormPreview.summary}</p>
+                      {aiFormPreview.sourcesUsed.length > 0 && (
+                        <div className="mt-2 pt-2 border-t border-green-200">
+                          <p className="text-xs text-green-700 font-medium">Sources used:</p>
+                          <ul className="text-xs text-green-700 list-disc list-inside">
+                            {aiFormPreview.sourcesUsed.map((source, idx) => (
+                              <li key={idx}>{source}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Form Preview */}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-semibold text-gray-900">Form Preview</h3>
+                        <span className="text-xs text-gray-600">
+                          {aiFormPreview.sections.length} sections, {aiFormPreview.sections.reduce((acc, s) => acc + s.questions.length, 0)} questions
+                        </span>
+                      </div>
+
+                      {aiFormPreview.sections.map((section, sIdx) => (
+                        <div key={sIdx} className="bg-white border border-gray-200 rounded-lg p-3">
+                          <div className="font-medium text-sm text-gray-900 mb-1">{section.title}</div>
+                          {section.description && (
+                            <div className="text-xs text-gray-600 mb-2">{section.description}</div>
+                          )}
+                          <div className="space-y-1.5 mt-2">
+                            {section.questions.map((question, qIdx) => (
+                              <div key={qIdx} className="flex items-start space-x-2 text-xs">
+                                <CheckIcon className="w-3 h-3 text-green-600 mt-0.5 flex-shrink-0" />
+                                <div className="flex-1">
+                                  <span className="text-gray-700">{question.question_text}</span>
+                                  <span className="ml-1 text-gray-500">({question.type.replace('_', ' ')})</span>
+                                  {question.required && <span className="ml-1 text-red-500">*</span>}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setShowConfirmDialog(true)}
+                        disabled={isAiApplying}
+                        className="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-medium flex items-center justify-center space-x-2 shadow-md"
+                      >
+                        <PlayIcon className="w-5 h-5" />
+                        <span>Apply to Form</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setAiFormPreview(null);
+                          setAiProgress('');
+                        }}
+                        className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Progress Footer */}
+              {isAiApplying && (
+                <div className="border-t border-gray-200 p-4 bg-yellow-50">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-900">AI is working...</span>
+                      <button
+                        onClick={stopAiExecution}
+                        className="px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors text-xs font-medium flex items-center space-x-1"
+                      >
+                        <StopIcon className="w-3 h-3" />
+                        <span>Stop (ESC)</span>
+                      </button>
+                    </div>
+                    <div className="text-xs text-gray-700">{aiProgress}</div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Undo Footer */}
+              {formCheckpoint && !isAiApplying && (
+                <div className="border-t border-gray-200 p-4 bg-blue-50">
+                  <button
+                    onClick={restoreCheckpoint}
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium flex items-center justify-center space-x-2"
+                  >
+                    <ArrowPathIcon className="w-4 h-4" />
+                    <span>Undo AI Changes</span>
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Dialog */}
+        {showConfirmDialog && aiFormPreview && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl">
+              <h3 className="text-lg font-bold text-gray-900 mb-2">Confirm AI Application</h3>
+              <p className="text-sm text-gray-600 mb-4">
+                AI will add <strong>{aiFormPreview.sections.length} sections</strong> and{' '}
+                <strong>{aiFormPreview.sections.reduce((acc, s) => acc + s.questions.length, 0)} questions</strong> to your form.
+              </p>
+              <p className="text-sm text-gray-600 mb-4">
+                A checkpoint will be created so you can undo these changes if needed.
+              </p>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowConfirmDialog(false)}
+                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={applyAiForm}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-medium"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Container - adjust top padding to account for larger navbar */}
-        <div className="pt-48 relative" style={{ zIndex: 30 }}>
+        <div 
+          className="pt-48 relative transition-all duration-300" 
+          style={{ 
+            zIndex: 30,
+            marginLeft: isPanelOpen && !isPublished ? `${panelWidth}px` : '0px'
+          }}
+        >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {/* Progress Bar */}
             {sections.length > 0 && (

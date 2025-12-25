@@ -163,36 +163,36 @@ export default function InternGetStarted() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 relative overflow-hidden">
+      {/* Animated background elements - hidden in dark mode */}
+      <div className="absolute inset-0 overflow-hidden dark:hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full filter blur-xl opacity-50 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full filter blur-xl opacity-50 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full filter blur-xl opacity-50 animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Decorative grid pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 dark:opacity-[0.02]"></div>
 
       <div className="relative min-h-screen flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl"
+          className="max-w-md w-full space-y-8 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm p-8 rounded-2xl shadow-xl border border-white/20 dark:border-slate-700/50"
         >
           <div>
             <Link href="/" className="flex justify-center">
-              <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
                 Step Up
               </span>
             </Link>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
               Create your account
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
+            <p className="mt-2 text-center text-sm text-gray-600 dark:text-slate-400">
               Already have an account?{' '}
-              <Link href="/intern-sign-in" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link href="/intern-sign-in" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
                 Sign in
               </Link>
             </p>
@@ -225,7 +225,7 @@ export default function InternGetStarted() {
             {/* Essential Information */}
             <div className="space-y-4">
               <div>
-                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                   Full Name *
                 </label>
                 <input
@@ -236,17 +236,17 @@ export default function InternGetStarted() {
                   value={formData.fullName}
                   onChange={handleChange}
                   className={`mt-1 block w-full px-3 py-2 border ${
-                    errors.fullName ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white`}
+                    errors.fullName ? 'border-red-300 dark:border-red-500' : 'border-gray-300 dark:border-slate-600'
+                  } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-white bg-white dark:bg-slate-700 placeholder-gray-400 dark:placeholder-slate-400`}
                   placeholder="Enter your full name"
                 />
                 {errors.fullName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.fullName}</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                   Username *
                 </label>
                 <input
@@ -257,17 +257,17 @@ export default function InternGetStarted() {
                   value={formData.username}
                   onChange={handleChange}
                   className={`mt-1 block w-full px-3 py-2 border ${
-                    errors.username ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white`}
+                    errors.username ? 'border-red-300 dark:border-red-500' : 'border-gray-300 dark:border-slate-600'
+                  } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-white bg-white dark:bg-slate-700 placeholder-gray-400 dark:placeholder-slate-400`}
                   placeholder="Choose a username"
                 />
                 {errors.username && (
-                  <p className="mt-1 text-sm text-red-600">{errors.username}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.username}</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-slate-300">
                   Email Address *
                 </label>
                 <input
@@ -278,12 +278,12 @@ export default function InternGetStarted() {
                   value={formData.email}
                   onChange={handleChange}
                   className={`mt-1 block w-full px-3 py-2 border ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 bg-white`}
+                    errors.email ? 'border-red-300 dark:border-red-500' : 'border-gray-300 dark:border-slate-600'
+                  } rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900 dark:text-white bg-white dark:bg-slate-700 placeholder-gray-400 dark:placeholder-slate-400`}
                   placeholder="your.email@example.com"
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
                 )}
               </div>
 

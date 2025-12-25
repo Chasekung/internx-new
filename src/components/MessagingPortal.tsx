@@ -262,7 +262,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
   if (!user) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Please sign in to access messaging</p>
+        <p className="text-gray-500 dark:text-slate-400">Please sign in to access messaging</p>
       </div>
     );
   }
@@ -270,18 +270,18 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
   // Mobile view - show conversation list or selected conversation
   if (isMobileView) {
     return (
-      <div className="h-[600px] bg-white rounded-lg shadow-lg">
+      <div className="h-[600px] bg-white dark:bg-slate-800 rounded-lg shadow-lg">
         {!selectedConversation ? (
           // Mobile: Conversation List View
           <div className="h-full flex flex-col">
             {/* Tabs */}
-            <div className="flex border-b border-gray-200">
+            <div className="flex border-b border-gray-200 dark:border-slate-700">
               <button
                 onClick={() => setActiveTab('messages')}
                 className={`flex-1 px-4 py-3 text-sm font-medium ${
                   activeTab === 'messages'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                    : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300'
                 }`}
               >
                 Messages
@@ -290,8 +290,8 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                 onClick={() => setActiveTab('announcements')}
                 className={`flex-1 px-4 py-3 text-sm font-medium ${
                   activeTab === 'announcements'
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                    : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300'
                 }`}
               >
                 Announcements
@@ -303,7 +303,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
               {activeTab === 'messages' ? (
                 <div>
                   {conversations.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">
+                    <div className="p-4 text-center text-gray-500 dark:text-slate-400">
                       <p>No conversations yet</p>
                       <p className="text-sm mt-1">Start a conversation to begin messaging</p>
                     </div>
@@ -312,7 +312,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                       <div
                         key={conversation.id}
                         onClick={() => handleConversationSelect(conversation)}
-                        className="p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50"
+                        className="p-4 border-b border-gray-100 dark:border-slate-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700"
                       >
                         <div className="flex items-center space-x-3">
                           <div className="flex-shrink-0">
@@ -323,18 +323,18 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                                 className="w-12 h-12 rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center">
-                                <span className="text-gray-600 text-sm font-medium">
+                              <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-slate-600 flex items-center justify-center">
+                                <span className="text-gray-600 dark:text-slate-300 text-sm font-medium">
                                   {getConversationName(conversation).charAt(0)}
                                 </span>
                               </div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
                               {getConversationName(conversation)}
                             </p>
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 dark:text-slate-400">
                               {formatDate(conversation.updated_at)}
                             </p>
                           </div>
@@ -347,12 +347,12 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                 // Announcements List
                 <div>
                   {announcements.length === 0 ? (
-                    <div className="p-4 text-center text-gray-500">
+                    <div className="p-4 text-center text-gray-500 dark:text-slate-400">
                       <p>No announcements yet</p>
                     </div>
                   ) : (
                     announcements.map((announcement) => (
-                      <div key={announcement.id} className="p-4 border-b border-gray-100">
+                      <div key={announcement.id} className="p-4 border-b border-gray-100 dark:border-slate-700">
                         <div className="flex items-start space-x-3">
                           <div className="flex-shrink-0">
                             {announcement.company?.logo_url ? (
@@ -368,21 +368,21 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                                 className="w-8 h-8 rounded-full object-cover"
                               />
                             ) : (
-                              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                                <span className="text-gray-600 text-xs font-medium">
+                              <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-slate-600 flex items-center justify-center">
+                                <span className="text-gray-600 dark:text-slate-300 text-xs font-medium">
                                   {announcement.sender_type === 'company' ? 'C' : 'I'}
                                 </span>
                               </div>
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">
+                            <p className="text-sm font-medium text-gray-900 dark:text-white">
                               {announcement.title}
                             </p>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                               {announcement.content}
                             </p>
-                            <p className="text-xs text-gray-400 mt-1">
+                            <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
                               {formatDate(announcement.created_at)}
                             </p>
                           </div>
@@ -398,13 +398,13 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
           // Mobile: Selected Conversation View
           <div className="h-full flex flex-col">
             {/* Chat Header with Back Button */}
-            <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700">
               <div className="flex items-center space-x-3">
                 <button
                   onClick={handleBackToConversations}
-                  className="p-1 rounded-full hover:bg-gray-200 transition-colors"
+                  className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
                 >
-                  <ChevronLeftIcon className="h-6 w-6 text-gray-600" />
+                  <ChevronLeftIcon className="h-6 w-6 text-gray-600 dark:text-slate-300" />
                 </button>
                 <div className="flex items-center space-x-3 flex-1">
                   {getConversationAvatar(selectedConversation) ? (
@@ -414,14 +414,14 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                      <span className="text-gray-600 text-sm font-medium">
+                    <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-slate-600 flex items-center justify-center">
+                      <span className="text-gray-600 dark:text-slate-300 text-sm font-medium">
                         {getConversationName(selectedConversation).charAt(0)}
                       </span>
                     </div>
                   )}
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">
                       {getConversationName(selectedConversation)}
                     </h3>
                   </div>
@@ -430,7 +430,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-slate-800">
               {messages.map((message) => {
                 const isOwnMessage = message.sender_id === user?.id;
                 return (
@@ -442,12 +442,12 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                       className={`max-w-xs px-4 py-2 rounded-lg ${
                         isOwnMessage
                           ? 'bg-blue-600 text-white'
-                          : 'bg-white text-gray-900 border border-gray-200'
+                          : 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-600'
                       }`}
                     >
                       <p className="text-sm">{message.content}</p>
                       <p className={`text-xs mt-1 ${
-                        isOwnMessage ? 'text-blue-100' : 'text-gray-500'
+                        isOwnMessage ? 'text-blue-100' : 'text-gray-500 dark:text-slate-400'
                       }`}>
                         {formatTime(message.created_at)}
                       </p>
@@ -458,7 +458,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-gray-200">
+            <div className="p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
               <div className="flex space-x-2">
                 <input
                   type="text"
@@ -466,13 +466,13 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                   placeholder="Type a message..."
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black dark:text-white bg-white dark:bg-slate-700"
                   disabled={sending}
                 />
                 <button
                   onClick={sendMessage}
                   disabled={!newMessage.trim() || sending}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {sending ? 'Sending...' : 'Send'}
                 </button>
@@ -486,17 +486,17 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
 
   // Desktop view - show sidebar and chat area side by side
   return (
-    <div className="flex h-[600px] bg-white rounded-lg shadow-lg">
+    <div className="flex h-[600px] bg-white dark:bg-slate-800 rounded-lg shadow-lg">
       {/* Sidebar */}
-      <div className="w-80 border-r border-gray-200 flex flex-col">
+      <div className="w-80 border-r border-gray-200 dark:border-slate-700 flex flex-col">
         {/* Tabs */}
-        <div className="flex border-b border-gray-200">
+        <div className="flex border-b border-gray-200 dark:border-slate-700">
           <button
             onClick={() => setActiveTab('messages')}
             className={`flex-1 px-4 py-3 text-sm font-medium ${
               activeTab === 'messages'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300'
             }`}
           >
             Messages
@@ -505,8 +505,8 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
             onClick={() => setActiveTab('announcements')}
             className={`flex-1 px-4 py-3 text-sm font-medium ${
               activeTab === 'announcements'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+                : 'text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-300'
             }`}
           >
             Announcements
@@ -519,7 +519,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
             // Conversations List
             <div>
               {conversations.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
+                <div className="p-4 text-center text-gray-500 dark:text-slate-400">
                   <p>No conversations yet</p>
                   <p className="text-sm mt-1">Start a conversation to begin messaging</p>
                 </div>
@@ -528,8 +528,8 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                   <div
                     key={conversation.id}
                     onClick={() => setSelectedConversation(conversation)}
-                    className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-                      selectedConversation?.id === conversation.id ? 'bg-blue-50' : ''
+                    className={`p-4 border-b border-gray-100 dark:border-slate-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 ${
+                      selectedConversation?.id === conversation.id ? 'bg-blue-50 dark:bg-blue-900/30' : ''
                     }`}
                   >
                     <div className="flex items-center space-x-3">
@@ -541,18 +541,18 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                             className="w-10 h-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            <span className="text-gray-600 text-sm font-medium">
+                          <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-slate-600 flex items-center justify-center">
+                            <span className="text-gray-600 dark:text-slate-300 text-sm font-medium">
                               {getConversationName(conversation).charAt(0)}
                             </span>
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
                           {getConversationName(conversation)}
                         </p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-gray-500 dark:text-slate-400">
                           {formatDate(conversation.updated_at)}
                         </p>
                       </div>
@@ -565,12 +565,12 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
             // Announcements List
             <div>
               {announcements.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
+                <div className="p-4 text-center text-gray-500 dark:text-slate-400">
                   <p>No announcements yet</p>
                 </div>
               ) : (
                 announcements.map((announcement) => (
-                  <div key={announcement.id} className="p-4 border-b border-gray-100">
+                  <div key={announcement.id} className="p-4 border-b border-gray-100 dark:border-slate-700">
                     <div className="flex items-start space-x-3">
                       <div className="flex-shrink-0">
                         {announcement.company?.logo_url ? (
@@ -586,21 +586,21 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                             className="w-8 h-8 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                            <span className="text-gray-600 text-xs font-medium">
+                          <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-slate-600 flex items-center justify-center">
+                            <span className="text-gray-600 dark:text-slate-300 text-xs font-medium">
                               {announcement.sender_type === 'company' ? 'C' : 'I'}
                             </span>
                           </div>
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">
                           {announcement.title}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500 dark:text-slate-400 mt-1">
                           {announcement.content}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-gray-400 dark:text-slate-500 mt-1">
                           {formatDate(announcement.created_at)}
                         </p>
                       </div>
@@ -619,7 +619,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
           {selectedConversation ? (
             <>
               {/* Chat Header */}
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
+              <div className="p-4 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-700">
                 <div className="flex items-center space-x-3">
                   {getConversationAvatar(selectedConversation) ? (
                     <img
@@ -628,14 +628,14 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                       className="w-8 h-8 rounded-full object-cover"
                     />
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                      <span className="text-gray-600 text-sm font-medium">
+                    <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-slate-600 flex items-center justify-center">
+                      <span className="text-gray-600 dark:text-slate-300 text-sm font-medium">
                         {getConversationName(selectedConversation).charAt(0)}
                       </span>
                     </div>
                   )}
                   <div>
-                    <h3 className="text-sm font-medium text-gray-900">
+                    <h3 className="text-sm font-medium text-gray-900 dark:text-white">
                       {getConversationName(selectedConversation)}
                     </h3>
                   </div>
@@ -643,7 +643,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white dark:bg-slate-800">
                 {messages.map((message) => {
                   const isOwnMessage = message.sender_id === user?.id;
                   return (
@@ -655,12 +655,12 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                         className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
                           isOwnMessage
                             ? 'bg-blue-600 text-white'
-                            : 'bg-white text-gray-900 border border-gray-200'
+                            : 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-600'
                         }`}
                       >
                         <p className="text-sm">{message.content}</p>
                         <p className={`text-xs mt-1 ${
-                          isOwnMessage ? 'text-blue-100' : 'text-gray-500'
+                          isOwnMessage ? 'text-blue-100' : 'text-gray-500 dark:text-slate-400'
                         }`}>
                           {formatTime(message.created_at)}
                         </p>
@@ -671,7 +671,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
               </div>
 
               {/* Message Input */}
-              <div className="p-4 border-t border-gray-200">
+              <div className="p-4 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800">
                 <div className="flex space-x-2">
                   <input
                     type="text"
@@ -679,13 +679,13 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                     placeholder="Type a message..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black dark:text-white bg-white dark:bg-slate-700"
                     disabled={sending}
                   />
                   <button
                     onClick={sendMessage}
                     disabled={!newMessage.trim() || sending}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-md hover:bg-blue-700 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {sending ? 'Sending...' : 'Send'}
                   </button>
@@ -693,7 +693,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
               </div>
             </>
           ) : (
-            <div className="flex-1 flex items-center justify-center text-gray-500">
+            <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-slate-400">
               <div className="text-center">
                 <p className="text-lg font-medium">Select a conversation</p>
                 <p className="text-sm mt-1">Choose a conversation from the sidebar to start messaging</p>
@@ -704,7 +704,7 @@ export default function MessagingPortal({ selectedConversationId }: { selectedCo
       )}
 
       {activeTab === 'announcements' && (
-        <div className="flex-1 flex items-center justify-center text-gray-500">
+        <div className="flex-1 flex items-center justify-center text-gray-500 dark:text-slate-400">
           <div className="text-center">
             <p className="text-lg font-medium">Announcements</p>
             <p className="text-sm mt-1">View all your announcements here</p>
