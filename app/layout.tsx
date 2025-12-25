@@ -2,19 +2,21 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import ClientLayout from '@/components/ClientLayout'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
+  display: 'swap',
 })
 
 export const metadata: Metadata = {
   title: {
-    default: 'Step Up - AI-Powered High School Internship & Opportunity Platform',
+    default: 'Step Up - High School Internship & Opportunity Platform',
     template: '%s | Step Up'
   },
-  description: 'Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship for internships, volunteering, and skill-building experiences.',
-  keywords: ['high school internships', 'student opportunities', 'teen internships', 'career development', 'AI matching', 'volunteering opportunities', 'skill building'],
+  description: 'Breaking down barriers for high school students to connect with meaningful opportunities through internships, volunteering, and skill-building experiences.',
+  keywords: ['high school internships', 'student opportunities', 'teen internships', 'career development', 'volunteering opportunities', 'skill building'],
   authors: [{ name: 'Step Up Team' }],
   creator: 'Step Up',
   publisher: 'Step Up',
@@ -31,22 +33,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://joinstepup.com',
-    title: 'Step Up - AI-Powered High School Internship & Opportunity Platform',
-    description: 'Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship for internships, volunteering, and skill-building experiences.',
+    title: 'Step Up - High School Internship & Opportunity Platform',
+    description: 'Breaking down barriers for high school students to connect with meaningful opportunities through internships, volunteering, and skill-building experiences.',
     siteName: 'Step Up',
     images: [
       {
         url: '/stepup-logo.png',
         width: 1200,
         height: 630,
-        alt: 'Step Up - AI-Powered High School Internship Platform',
+        alt: 'Step Up - High School Internship Platform',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Step Up - AI-Powered High School Internship & Opportunity Platform',
-    description: 'Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship.',
+    title: 'Step Up - High School Internship & Opportunity Platform',
+    description: 'Breaking down barriers for high school students to connect with meaningful opportunities.',
     images: ['/stepup-logo.png'],
   },
   robots: {
@@ -61,7 +63,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'your-google-verification-code', // Add your Google verification code
+    google: 'your-google-verification-code',
   },
   icons: {
     icon: [
@@ -116,8 +118,23 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Prevent flash of wrong theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         {/* Structured Data for Organization */}
         <script
           type="application/ld+json"
@@ -128,7 +145,7 @@ export default function RootLayout({
               "name": "Step Up",
               "url": "https://joinstepup.com",
               "logo": "https://joinstepup.com/stepup-logo.png",
-              "description": "Breaking down barriers for high school students to connect with meaningful opportunities. Powered by AI-driven matching and mentorship for internships, volunteering, and skill-building experiences.",
+              "description": "Breaking down barriers for high school students to connect with meaningful opportunities through internships, volunteering, and skill-building experiences.",
               "foundingDate": "2025",
               "sameAs": [
                 "https://www.instagram.com/stepuphs.67/",
@@ -147,11 +164,13 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} antialiased min-h-screen flex flex-col bg-transparent relative`}>
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+      <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col relative`}>
+        <ThemeProvider>
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </ThemeProvider>
       </body>
     </html>
   )
-} 
+}

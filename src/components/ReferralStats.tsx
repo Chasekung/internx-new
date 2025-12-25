@@ -66,12 +66,12 @@ export default function ReferralStats({ userId, className = '' }: ReferralStatsP
 
   if (loading) {
     return (
-      <div className={`bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200 p-6 shadow-sm ${className}`}>
+      <div className={`bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm ${className}`}>
         <div className="animate-pulse">
-          <div className="h-6 bg-slate-200 rounded-xl w-1/3 mb-4"></div>
+          <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded-xl w-1/3 mb-4"></div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-20 bg-slate-200 rounded-xl"></div>
+              <div key={i} className="h-20 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
             ))}
           </div>
         </div>
@@ -81,12 +81,12 @@ export default function ReferralStats({ userId, className = '' }: ReferralStatsP
 
   if (error) {
     return (
-      <div className={`bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200 p-6 shadow-sm ${className}`}>
-        <div className="text-center text-red-600">
+      <div className={`bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm ${className}`}>
+        <div className="text-center text-red-600 dark:text-red-400">
           <p>Error loading referral stats: {error}</p>
           <button 
             onClick={fetchReferralStats}
-            className="mt-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl"
+            className="mt-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 dark:hover:from-blue-600 dark:hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
           >
             Retry
           </button>
@@ -102,47 +102,47 @@ export default function ReferralStats({ userId, className = '' }: ReferralStatsP
   const { stats, referrals, clicks } = data;
 
   return (
-    <div className={`bg-white/90 backdrop-blur-sm rounded-2xl border border-slate-200 p-6 shadow-sm ${className}`}>
-      <h3 className="text-xl font-bold text-slate-900 mb-6">Referral Performance</h3>
+    <div className={`bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm ${className}`}>
+      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6">Referral Performance</h3>
       
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+        <div className="bg-blue-50 dark:bg-blue-900/30 rounded-xl p-4 border border-blue-100 dark:border-blue-800">
           <div className="flex items-center">
-            <CursorArrowRaysIcon className="h-8 w-8 text-blue-600" />
+            <CursorArrowRaysIcon className="h-8 w-8 text-blue-600 dark:text-blue-400" />
             <div className="ml-3">
-              <p className="text-sm font-semibold text-slate-600">Total Clicks</p>
-              <p className="text-2xl font-bold text-slate-900">{stats.totalClicks}</p>
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Total Clicks</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totalClicks}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-100">
+        <div className="bg-indigo-50 dark:bg-indigo-900/30 rounded-xl p-4 border border-indigo-100 dark:border-indigo-800">
           <div className="flex items-center">
-            <UserGroupIcon className="h-8 w-8 text-indigo-600" />
+            <UserGroupIcon className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
             <div className="ml-3">
-              <p className="text-sm font-semibold text-slate-600">Total Referrals</p>
-              <p className="text-2xl font-bold text-slate-900">{stats.totalReferrals}</p>
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Total Referrals</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.totalReferrals}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-purple-50 rounded-xl p-4 border border-purple-100">
+        <div className="bg-purple-50 dark:bg-purple-900/30 rounded-xl p-4 border border-purple-100 dark:border-purple-800">
           <div className="flex items-center">
-            <CheckCircleIcon className="h-8 w-8 text-purple-600" />
+            <CheckCircleIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
             <div className="ml-3">
-              <p className="text-sm font-semibold text-slate-600">Completed</p>
-              <p className="text-2xl font-bold text-slate-900">{stats.completedReferrals}</p>
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Completed</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.completedReferrals}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+        <div className="bg-slate-50 dark:bg-slate-700/50 rounded-xl p-4 border border-slate-100 dark:border-slate-600">
           <div className="flex items-center">
-            <ChartBarIcon className="h-8 w-8 text-slate-600" />
+            <ChartBarIcon className="h-8 w-8 text-slate-600 dark:text-slate-400" />
             <div className="ml-3">
-              <p className="text-sm font-semibold text-slate-600">Conversion</p>
-              <p className="text-2xl font-bold text-slate-900">{stats.conversionRate}%</p>
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">Conversion</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">{stats.conversionRate}%</p>
             </div>
           </div>
         </div>
@@ -151,28 +151,28 @@ export default function ReferralStats({ userId, className = '' }: ReferralStatsP
       {/* Recent Referrals */}
       {referrals.length > 0 && (
         <div>
-          <h4 className="text-lg font-bold text-slate-900 mb-4">Recent Referrals</h4>
+          <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Recent Referrals</h4>
           <div className="space-y-3">
             {referrals.slice(0, 5).map((referral) => (
-              <div key={referral.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <div key={referral.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-700/50 rounded-xl border border-slate-200 dark:border-slate-600">
                 <div>
-                  <p className="font-semibold text-slate-900">
+                  <p className="font-semibold text-slate-900 dark:text-white">
                     {referral.full_name || 'Anonymous'}
                   </p>
-                  <p className="text-sm text-slate-600">
+                  <p className="text-sm text-slate-600 dark:text-slate-400">
                     {referral.email}
                   </p>
                   {referral.location && (
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       📍 {referral.location}
                     </p>
                   )}
                 </div>
                 <div className="text-right">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">
                     Completed
                   </span>
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     {new Date(referral.created_at).toLocaleDateString()}
                   </p>
                 </div>
@@ -184,8 +184,8 @@ export default function ReferralStats({ userId, className = '' }: ReferralStatsP
 
       {/* Location Analytics */}
       <div className="mt-8">
-        <h4 className="text-md font-semibold text-gray-900 mb-4">Location Analytics</h4>
-        <div className="bg-gray-50 rounded-lg p-4">
+        <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">Location Analytics</h4>
+        <div className="bg-gray-50 dark:bg-slate-700/50 rounded-lg p-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Top Click Referral Locations */}
             <div>

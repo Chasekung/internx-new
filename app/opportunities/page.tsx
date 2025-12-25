@@ -40,54 +40,54 @@ const OpportunityCard: React.FC<{ internship: Internship; onClick: () => void }>
     <motion.div
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="bg-white/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300"
+      className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg cursor-pointer hover:shadow-xl transition-all duration-300 border border-white/20 dark:border-slate-700/50"
       onClick={onClick}
     >
       <div className="flex flex-col gap-4">
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-xl font-semibold text-gray-900">{internship.company_name}</h3>
-            <p className="text-blue-600 font-medium">{internship.position}</p>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{internship.company_name}</h3>
+            <p className="text-blue-600 dark:text-blue-400 font-medium">{internship.position}</p>
           </div>
-          <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+          <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 rounded-full text-sm">
             {internship.for_profit === 'for-profit' ? 'For-Profit' : 'Non-Profit'}
           </span>
         </div>
         
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-gray-500">Category</p>
-            <p className="text-gray-900">{internship.category}</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Category</p>
+            <p className="text-gray-900 dark:text-slate-200">{internship.category}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Location</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Location</p>
             {internship.address ? (
               <a
                 href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${internship.address}, ${internship.city}, ${internship.state}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800"
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
                 onClick={(e) => e.stopPropagation()}
               >
                 {internship.city}, {internship.state}
               </a>
             ) : (
-              <p className="text-gray-900">{internship.city}, {internship.state}</p>
+              <p className="text-gray-900 dark:text-slate-200">{internship.city}, {internship.state}</p>
             )}
           </div>
           <div>
-            <p className="text-sm text-gray-500">Hours/Week</p>
-            <p className="text-gray-900">{internship.hours_per_week || 'N/A'}</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Hours/Week</p>
+            <p className="text-gray-900 dark:text-slate-200">{internship.hours_per_week || 'N/A'}</p>
           </div>
           <div>
-            <p className="text-sm text-gray-500">Pay</p>
-            <p className="text-gray-900">{internship.pay ? `$${internship.pay}/hr` : 'N/A'}</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Pay</p>
+            <p className="text-gray-900 dark:text-slate-200">{internship.pay ? `$${internship.pay}/hr` : 'N/A'}</p>
           </div>
         </div>
         
         <div className="mt-2">
-          <p className="text-sm text-gray-500">Contact</p>
-          <p className="text-gray-900">{internship.business_email}</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400">Contact</p>
+          <p className="text-gray-900 dark:text-slate-200">{internship.business_email}</p>
         </div>
       </div>
     </motion.div>
@@ -135,23 +135,23 @@ const OpportunitiesPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 relative overflow-hidden">
+      {/* Animated background elements - hidden in dark mode */}
+      <div className="absolute inset-0 overflow-hidden dark:hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full filter blur-xl opacity-50 animate-blob"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full filter blur-xl opacity-50 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full filter blur-xl opacity-50 animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Decorative grid pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 dark:opacity-[0.02]"></div>
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12">
         <div className="text-center mb-12">
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 sm:text-5xl"
+            className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 sm:text-5xl"
           >
             Opportunities Available
           </motion.h1>
@@ -159,7 +159,7 @@ const OpportunitiesPage: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-4 text-xl text-gray-600"
+            className="mt-4 text-xl text-gray-600 dark:text-slate-300"
           >
             Find your next opportunity
           </motion.p>
@@ -171,13 +171,13 @@ const OpportunitiesPage: React.FC = () => {
           transition={{ duration: 0.3 }}
           className="flex justify-end mb-6"
         >
-          <div className="bg-white/80 backdrop-blur-lg rounded-lg p-1 shadow-sm">
+          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-lg p-1 shadow-sm border border-white/20 dark:border-slate-700/50">
             <button
               onClick={() => setViewMode('card')}
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 viewMode === 'card' 
-                  ? 'bg-blue-100 text-blue-600' 
-                  : 'text-gray-600 hover:text-blue-600'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
               }`}
             >
               <BsGrid size={20} />
@@ -186,8 +186,8 @@ const OpportunitiesPage: React.FC = () => {
               onClick={() => setViewMode('list')}
               className={`px-3 py-2 rounded-md transition-colors duration-200 ${
                 viewMode === 'list' 
-                  ? 'bg-blue-100 text-blue-600' 
-                  : 'text-gray-600 hover:text-blue-600'
+                  ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' 
+                  : 'text-gray-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400'
               }`}
             >
               <BsList size={20} />

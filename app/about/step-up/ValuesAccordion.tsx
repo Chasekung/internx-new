@@ -31,11 +31,11 @@ export default function ValuesAccordion() {
   };
 
   return (
-    <div className="w-full divide-y divide-gray-200">
+    <div className="w-full divide-y divide-gray-200 dark:divide-slate-700">
       {ACCORDION.map((item, idx) => {
         const isOpen = openIndex === idx;
         return (
-          <div key={item.title} className="bg-white">
+          <div key={item.title} className="bg-white dark:bg-slate-800">
             <button
               className={`w-full flex flex-col items-start px-8 py-7 text-left focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 group`}
               onClick={() => handleToggle(idx)}
@@ -44,7 +44,7 @@ export default function ValuesAccordion() {
             >
               <div className="flex items-center w-full">
                 <span
-                  className={`text-xl font-bold mr-4 transition-all duration-300 ${isOpen ? 'bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent' : 'text-gray-900'}`}
+                  className={`text-xl font-bold mr-4 transition-all duration-300 ${isOpen ? 'bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent' : 'text-gray-900 dark:text-white'}`}
                   style={{ minWidth: 0 }}
                 >
                   {item.title}
@@ -52,12 +52,12 @@ export default function ValuesAccordion() {
                 <motion.span
                   animate={{ rotate: isOpen ? 90 : 0 }}
                   transition={{ duration: 0.3 }}
-                  className={`ml-auto text-2xl text-gray-400 group-hover:text-blue-600`}
+                  className={`ml-auto text-2xl text-gray-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400`}
                 >
                   ▶
                 </motion.span>
               </div>
-              <span className={`mt-2 text-base ${isOpen ? 'text-blue-700 font-semibold' : 'text-gray-500'} transition-colors duration-200`}>{item.subtitle}</span>
+              <span className={`mt-2 text-base ${isOpen ? 'text-blue-700 dark:text-blue-400 font-semibold' : 'text-gray-500 dark:text-slate-400'} transition-colors duration-200`}>{item.subtitle}</span>
             </button>
             <AnimatePresence initial={false}>
               {isOpen && (
@@ -68,7 +68,7 @@ export default function ValuesAccordion() {
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
-                  className="px-8 pb-8 pt-2 text-gray-700 text-lg overflow-hidden"
+                  className="px-8 pb-8 pt-2 text-gray-700 dark:text-slate-300 text-lg overflow-hidden"
                 >
                   {item.content}
                 </motion.div>

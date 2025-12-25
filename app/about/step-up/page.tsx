@@ -5,9 +5,9 @@ import ValuesAccordion from './ValuesAccordion';
 
 export default function AboutStepUpPage() {
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
       {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
+      <div className="absolute inset-0 overflow-hidden dark:hidden">
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 0.7 }}
@@ -33,7 +33,7 @@ export default function AboutStepUpPage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.05 }}
         transition={{ duration: 1 }}
-        className="absolute inset-0 bg-grid-pattern"
+        className="absolute inset-0 bg-grid-pattern dark:opacity-[0.02]"
       />
 
       {/* Main content */}
@@ -43,7 +43,7 @@ export default function AboutStepUpPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-lg font-semibold text-blue-600 uppercase tracking-wide"
+            className="text-lg font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide"
           >
             ABOUT STEP UP
           </motion.p>
@@ -52,17 +52,17 @@ export default function AboutStepUpPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="mt-6 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl md:text-6xl"
+            className="mt-6 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl md:text-6xl"
           >
-            <span className="block">Connecting <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">motivated students</span></span>
-            <span className="block">with <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">mission-driven organizations</span></span>
+            <span className="block">Connecting <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">motivated students</span></span>
+            <span className="block">with <span className="bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">mission-driven organizations</span></span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mt-8 max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed"
+            className="mt-8 max-w-3xl mx-auto text-xl text-gray-600 dark:text-slate-300 leading-relaxed"
           >
             The traditional opportunity landscape has overlooked high school talent for too long. At Step Up, we're changing that with an AI-powered platform that connects ambitious high school students to meaningful opportunities — internships, volunteering, and more — making the process seamless for both students and organizations.
           </motion.p>
@@ -71,7 +71,7 @@ export default function AboutStepUpPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="mt-6 max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed"
+            className="mt-6 max-w-3xl mx-auto text-xl text-gray-600 dark:text-slate-300 leading-relaxed"
           >
             No more barriers. No more missed connections. Just direct pathways to skills, experience, and growth for students — and a simple way for organizations to reach motivated, diverse, and skilled youth talent.
           </motion.p>
@@ -80,7 +80,7 @@ export default function AboutStepUpPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-6 max-w-3xl mx-auto text-xl text-gray-600 leading-relaxed"
+            className="mt-6 max-w-3xl mx-auto text-xl text-gray-600 dark:text-slate-300 leading-relaxed"
           >
             Step Up empowers every high school student to take their first step into the real world with confidence, while enabling organizations to build their future talent pipelines and make a positive impact.
           </motion.p>
@@ -96,7 +96,7 @@ export default function AboutStepUpPage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-lg font-semibold text-blue-600 uppercase tracking-wide mb-4"
+              className="text-lg font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wide mb-4"
             >
               Our Values
             </motion.p>
@@ -104,7 +104,7 @@ export default function AboutStepUpPage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1 }}
-              className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6"
+              className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6"
             >
               Empathy and Excellence in Action
             </motion.h2>
@@ -112,7 +112,7 @@ export default function AboutStepUpPage() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-lg text-gray-600 leading-relaxed"
+              className="text-lg text-gray-600 dark:text-slate-300 leading-relaxed"
             >
               At Step Up, we believe that true impact comes from a blend of empathy and a drive for excellence. We listen deeply, support each other, and always aim higher—whether we're serving students, partners, or our own team. Our values guide every connection, every opportunity, and every step forward.
             </motion.p>
@@ -128,23 +128,23 @@ export default function AboutStepUpPage() {
       {/* About the team Section */}
       <section className="relative z-20 w-full pb-32">
         {/* Full-width turquoise gradient background, from transparent to turquoise, starting higher */}
-        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent via-cyan-100 via-40% via-teal-200 to-teal-300 to-80% opacity-95 -z-10" />
+        <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-transparent via-cyan-100 via-40% via-teal-200 to-teal-300 to-80% opacity-95 dark:from-transparent dark:via-slate-800 dark:to-slate-800 dark:opacity-100 -z-10" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">About the team</h2>
-            <p className="text-lg text-gray-600">Founded by passionate high schoolers, starting from LaunchX</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">About the team</h2>
+            <p className="text-lg text-gray-600 dark:text-slate-300">Founded by passionate high schoolers, starting from LaunchX</p>
           </div>
           
           <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">The Co-founders</h3>
-            <p className="text-lg text-gray-700 max-w-3xl mx-auto">
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">The Co-founders</h3>
+            <p className="text-lg text-gray-700 dark:text-slate-300 max-w-3xl mx-auto">
               Meet the four passionate high school students who came together to revolutionize the internship and volunteering experience for students and companies alike.
             </p>
           </div>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 justify-items-center">
             {/* Chase Kung */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
               <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
                 <img
                   src="/Chase_LaunchX.jpg"
@@ -153,13 +153,13 @@ export default function AboutStepUpPage() {
                 />
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-gray-900 mb-2">Chase Kung</div>
-                <div className="text-sm text-gray-600">Chief Executive Officer</div>
+                <div className="text-xl font-bold text-gray-900 dark:text-white mb-2">Chase Kung</div>
+                <div className="text-sm text-gray-600 dark:text-slate-400">Chief Executive Officer</div>
               </div>
             </div>
 
             {/* Kyungjin Oh */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
               <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
                 <img
                   src="/KJ_LaunchX.jpg"
@@ -168,13 +168,13 @@ export default function AboutStepUpPage() {
                 />
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-gray-900 mb-2">Kyungjin Oh</div>
-                <div className="text-sm text-gray-600">Chief Operating Officer</div>
+                <div className="text-xl font-bold text-gray-900 dark:text-white mb-2">Kyungjin Oh</div>
+                <div className="text-sm text-gray-600 dark:text-slate-400">Chief Operating Officer</div>
               </div>
             </div>
 
             {/* Albert Zhang */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
               <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
                 <img
                   src="/Albert_LaunchX.jpg"
@@ -183,13 +183,13 @@ export default function AboutStepUpPage() {
                 />
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-gray-900 mb-2">Albert Zhang</div>
-                <div className="text-sm text-gray-600">Chief Marketing Officer</div>
+                <div className="text-xl font-bold text-gray-900 dark:text-white mb-2">Albert Zhang</div>
+                <div className="text-sm text-gray-600 dark:text-slate-400">Chief Marketing Officer</div>
               </div>
             </div>
 
             {/* Kymi Taniwan */}
-            <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 p-8 flex flex-col items-center w-full max-w-xs">
               <div className="w-40 h-40 rounded-xl bg-gradient-to-br from-blue-200 to-purple-200 mb-6 flex items-center justify-center overflow-hidden border-4 border-blue-500">
                 <img
                   src="/Kymi_LaunchX.jpg"
@@ -198,8 +198,8 @@ export default function AboutStepUpPage() {
                 />
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold text-gray-900 mb-2">Kymi Taniwan</div>
-                <div className="text-sm text-gray-600">Chief Financial Officer</div>
+                <div className="text-xl font-bold text-gray-900 dark:text-white mb-2">Kymi Taniwan</div>
+                <div className="text-sm text-gray-600 dark:text-slate-400">Chief Financial Officer</div>
               </div>
             </div>
 
