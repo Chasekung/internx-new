@@ -333,6 +333,12 @@ export default function UserNavbar() {
                       >
                         Contact
                       </Link>
+                      <Link
+                        href="/hs-news"
+                        className="block px-4 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors"
+                      >
+                        News
+                      </Link>
                     </div>
                   </div>
                 )}
@@ -351,6 +357,12 @@ export default function UserNavbar() {
                   className="nav-link px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors"
                 >
                   Network
+                </Link>
+                <Link
+                  href="/practice-interviews"
+                  className="nav-link px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors"
+                >
+                  Interviews
                 </Link>
                 <Link
                   href={`/messaging/${profileData?.id || ''}`}
@@ -558,6 +570,13 @@ export default function UserNavbar() {
                 >
                   About Us
                 </Link>
+                <Link
+                  href="/hs-news"
+                  className="block px-4 py-3 text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  News
+                </Link>
               </>
             )}
             {isSignedIn && (
@@ -575,6 +594,13 @@ export default function UserNavbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Network
+                </Link>
+                <Link
+                  href="/practice-interviews"
+                  className="block px-4 py-3 text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100/50 dark:hover:bg-slate-700/50 rounded-lg transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Interviews
                 </Link>
                 <Link
                   href={`/messaging/${profileData?.id || ''}`}

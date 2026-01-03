@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { calculateProfileCompleteness, ProfileData as ProfileCompletenessData } from '@/lib/profileCompleteness';
+import { getMinimumProfilePercentage } from '@/hooks/useProfileGate';
 
 interface ProfileData {
   fullName: string;
@@ -36,6 +38,10 @@ const states = [
 
 const EditPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isIncompleteRedirect = searchParams.get('incomplete') === 'true';
+  const [showIncompleteWarning, setShowIncompleteWarning] = useState(isIncompleteRedirect);
+  const [profileCompletion, setProfileCompletion] = useState<{ percentage: number; missingFields: string[] } | null>(null);
   const [activeSection, setActiveSection] = useState('contact');
   const [profileData, setProfileData] = useState<ProfileData>({
     email: '',
@@ -114,7 +120,7 @@ const EditPage = () => {
       const { data: profileData } = await response.json();
       console.log('Fetched profile data:', profileData);
 
-      setProfileData({
+      const transformedData = {
         fullName: profileData.full_name || '',
         email: profileData.email || '',
         username: profileData.username || '',
@@ -139,6 +145,15 @@ const EditPage = () => {
         linkedinUrl: profileData.linkedin_url || '',
         githubUrl: profileData.github_url || '',
         portfolioUrl: profileData.portfolio_url || '',
+      };
+      
+      setProfileData(transformedData);
+      
+      // Calculate profile completion
+      const completeness = calculateProfileCompleteness(transformedData as ProfileCompletenessData);
+      setProfileCompletion({
+        percentage: completeness.percentage,
+        missingFields: completeness.missingFields,
       });
     } catch (error) {
       console.error('Error fetching profile data:', error);
@@ -324,9 +339,60 @@ const EditPage = () => {
     }
   };
 
+  const minimumRequired = getMinimumProfilePercentage();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-indigo-50 to-purple-100 pt-32 pb-12">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Incomplete Profile Warning (shown when redirected from interview pages) */}
+        {showIncompleteWarning && profileCompletion && profileCompletion.percentage < minimumRequired && (
+          <div className="mb-6 p-5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-xl">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-1">
+                  Complete Your Profile to Access Interviews
+                </h3>
+                <p className="text-amber-700 dark:text-amber-300 text-sm mb-3">
+                  Your profile is <span className="font-bold">{profileCompletion.percentage}%</span> complete. 
+                  You need at least <span className="font-bold">{minimumRequired}%</span> completion to access AI mock interviews.
+                </p>
+                <div className="w-full h-2 bg-amber-200 dark:bg-amber-800 rounded-full overflow-hidden mb-3">
+                  <div 
+                    className="h-full bg-amber-500 dark:bg-amber-400 rounded-full transition-all duration-500"
+                    style={{ width: `${profileCompletion.percentage}%` }}
+                  />
+                </div>
+                {profileCompletion.missingFields.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    <span className="text-xs text-amber-600 dark:text-amber-400">Suggested fields:</span>
+                    {profileCompletion.missingFields.slice(0, 4).map((field) => (
+                      <span 
+                        key={field} 
+                        className="text-xs px-2 py-0.5 rounded-full bg-amber-200 dark:bg-amber-800 text-amber-700 dark:text-amber-300"
+                      >
+                        {field}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={() => setShowIncompleteWarning(false)}
+                className="text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Reminder Message */}
         {showReminder && (
           <div className="mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 rounded flex items-center justify-between">

@@ -8,6 +8,9 @@ const nextConfig = {
   // Configure allowed image domains
   images: {
     domains: ['bhoudamowgpsbwwmmuay.supabase.co'],
+    // Higher quality for better image rendering
+    minimumCacheTTL: 60,
+    formats: ['image/avif', 'image/webp'],
   },
   // Ensure proper encoding of file paths
   webpack: (config, { isServer }) => {

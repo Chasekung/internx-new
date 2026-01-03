@@ -103,6 +103,7 @@ const staggerContainer = {
 export default function HomeClient() {
   const animatedWords = ["Internship", "Non-Profit", "Research Experience", "Summer Program"];
   const [wordIndex, setWordIndex] = useState(0);
+  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -110,6 +111,20 @@ export default function HomeClient() {
     }, 2500);
     return () => clearInterval(interval);
   }, []);
+
+  // Check if notification was dismissed
+  useEffect(() => {
+    const dismissed = localStorage.getItem('hs-news-notification-dismissed');
+    if (!dismissed) {
+      // Show notification after a short delay
+      setTimeout(() => setShowNotification(true), 1000);
+    }
+  }, []);
+
+  const handleDismiss = () => {
+    setShowNotification(false);
+    localStorage.setItem('hs-news-notification-dismissed', 'true');
+  };
 
   // Stars data for reuse throughout the page
   const starsData = [
@@ -347,6 +362,61 @@ export default function HomeClient() {
           HERO SECTION - Clean, Confident, Minimal
       ═══════════════════════════════════════════════════════════════════ */}
       <section className="relative pt-16 pb-24 sm:pt-24 sm:pb-32 lg:pt-32 lg:pb-40">
+        {/* Floating Notification Popup */}
+        {showNotification && (
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ 
+              opacity: 1, 
+              x: 0,
+              y: [0, -8, 0]
+            }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ 
+              opacity: { duration: 0.5 },
+              x: { duration: 0.5 },
+              y: { 
+                duration: 3, 
+                repeat: Infinity, 
+                ease: "easeInOut" 
+              }
+            }}
+            className="fixed left-2 sm:left-4 top-1/3 sm:top-1/2 -translate-y-1/2 z-50 max-w-[280px] sm:max-w-sm"
+          >
+            <div className="glass-card p-4 sm:p-5 shadow-xl border border-white/20 dark:border-slate-700/50 relative">
+              {/* Close Button */}
+              <button
+                onClick={handleDismiss}
+                className="absolute top-2 right-2 p-1 rounded-full hover:bg-slate-100/50 dark:hover:bg-slate-700/50 transition-colors"
+                aria-label="Close notification"
+              >
+                <svg className="w-4 h-4 text-slate-500 dark:text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              
+              {/* Content */}
+              <div className="pr-6">
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-1">
+                  HOT NEWS!
+                </h3>
+                <p className="text-xs text-slate-600 dark:text-slate-400 mb-3">
+                  Check out Step Up&apos;s new AI Interview feature
+                </p>
+                <Link
+                  href="https://joinstepup.com/hs-news/6f6601f3-10d3-45af-bef0-12418868b56c"
+                  className="inline-flex items-center text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                >
+                  Learn More
+                  <svg className="w-3 h-3 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         <motion.div
           variants={staggerContainer}
           initial="hidden"

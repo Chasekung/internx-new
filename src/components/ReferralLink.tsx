@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ClipboardDocumentIcon, ShareIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ClipboardDocumentIcon, ShareIcon, CheckIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
 interface ReferralLinkProps {
@@ -13,7 +13,6 @@ interface ReferralLinkProps {
 export default function ReferralLink({ referralCode, className = '', onGenerateNew }: ReferralLinkProps) {
   const [copied, setCopied] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     // Generate the full referral URL - now points to homepage
@@ -25,10 +24,10 @@ export default function ReferralLink({ referralCode, className = '', onGenerateN
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      toast.success('Referral link copied to clipboard!');
+      toast.success('Link copied');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      toast.error('Failed to copy link');
+      toast.error('Failed to copy');
     }
   };
 
@@ -50,74 +49,53 @@ export default function ReferralLink({ referralCode, className = '', onGenerateN
     }
   };
 
-  const handleGenerateNew = async () => {
-    if (!onGenerateNew) return;
-    
-    setIsGenerating(true);
-    try {
-      await onGenerateNew();
-      toast.success('New referral code generated!');
-    } catch (error) {
-      toast.error('Failed to generate new code');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
-    <div className={`bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm ${className}`}>
-      <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-4">Your Referral Link</h3>
-      
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
-            Share this link with friends:
-          </label>
-          <div className="flex items-center space-x-3">
-            <input
-              type="text"
-              value={shareUrl}
-              readOnly
-              className="flex-1 px-4 py-3 border border-slate-300 dark:border-slate-600 rounded-xl bg-slate-50 dark:bg-slate-700 text-sm font-mono text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button
-              onClick={copyToClipboard}
-              className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
-                copied
-                  ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-700 shadow-sm'
-                  : 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 shadow-lg hover:shadow-xl'
-              }`}
-            >
-              <ClipboardDocumentIcon className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
-
-        <div className="flex space-x-3">
+    <div className={className}>
+      {/* Link input with copy button */}
+      <div className="flex items-stretch gap-2">
+        <div className="flex-1 relative">
+          <input
+            type="text"
+            value={shareUrl}
+            readOnly
+            className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg text-sm font-mono text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-400 dark:focus:ring-slate-500 pr-20"
+          />
           <button
-            onClick={shareLink}
-            className="flex-1 flex items-center justify-center px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 dark:hover:from-blue-600 dark:hover:to-blue-700 transition-all shadow-lg hover:shadow-xl"
+            onClick={copyToClipboard}
+            className={`absolute right-1 top-1 bottom-1 px-2.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
+              copied
+                ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                : 'bg-slate-200 dark:bg-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-500'
+            }`}
           >
-            <ShareIcon className="h-4 w-4 mr-2" />
-            Share
+            {copied ? (
+              <>
+                <CheckIcon className="w-3.5 h-3.5" />
+                Copied
+              </>
+            ) : (
+              <>
+                <ClipboardDocumentIcon className="w-3.5 h-3.5" />
+                Copy
+              </>
+            )}
           </button>
-          
-          {onGenerateNew && (
-            <button
-              onClick={handleGenerateNew}
-              disabled={isGenerating}
-              className="px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg hover:shadow-xl disabled:opacity-50"
-            >
-              <ArrowPathIcon className={`h-4 w-4 ${isGenerating ? 'animate-spin' : ''}`} />
-            </button>
-          )}
-        </div>
-
-        <div className="text-xs text-slate-500 bg-slate-50 rounded-xl p-3">
-          <p className="mb-1">• When someone signs up using your link, you'll be credited as their referrer</p>
-          <p>• Track your referral performance in your dashboard</p>
         </div>
       </div>
+
+      {/* Share button */}
+      <button
+        onClick={shareLink}
+        className="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
+      >
+        <ShareIcon className="w-4 h-4" />
+        Share Link
+      </button>
+
+      {/* Info text */}
+      <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+        Earn rewards when friends sign up using your link
+      </p>
     </div>
   );
-} 
+}

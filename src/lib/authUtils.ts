@@ -36,28 +36,68 @@ export const authUtils = {
 
       const user = JSON.parse(userStr);
       
-      // Verify token is still valid with timeout
+      // First try to get the current session - this is more reliable
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (session?.access_token) {
+        // Update localStorage with fresh token if different
+        if (session.access_token !== token) {
+          localStorage.setItem('token', session.access_token);
+        }
+        return { isSignedIn: true, user: { ...user, authUser: session.user } };
+      }
+      
+      // If no session, try to verify the stored token with timeout
       const authPromise = supabase.auth.getUser(token);
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Auth timeout')), 5000)
       );
       
+      try {
       const { data: { user: authUser }, error: authError } = await Promise.race([
         authPromise,
         timeoutPromise
       ]) as any;
       
-      if (authError || !authUser) {
+        if (authError) {
+          // Only clear tokens on definitive auth errors, not network issues
+          if (authError.message?.includes('invalid') || 
+              authError.message?.includes('expired') ||
+              authError.status === 401) {
+            console.log('Token invalid or expired, clearing auth data');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            return { isSignedIn: false, user: null };
+          }
+          // For other errors (network, etc.), assume still logged in
+          console.log('Auth verification failed, but keeping session:', authError.message);
+          return { isSignedIn: true, user };
+        }
+        
+        if (!authUser) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         return { isSignedIn: false, user: null };
       }
 
       return { isSignedIn: true, user: { ...user, authUser } };
+      } catch (timeoutError) {
+        // On timeout, don't clear tokens - just assume still logged in
+        console.log('Auth check timed out, assuming still logged in');
+        return { isSignedIn: true, user };
+      }
     } catch (error) {
-      console.error('Auth check error:', error);
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
+      // Don't clear tokens on general errors - could be network issues
+      console.error('Auth check error (keeping session):', error);
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          return { isSignedIn: true, user };
+        } catch {
+          return { isSignedIn: false, user: null };
+        }
+      }
       return { isSignedIn: false, user: null };
     } finally {
       authCheckInProgress = false;

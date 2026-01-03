@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useSupabase } from '@/hooks/useSupabase';
@@ -163,16 +164,7 @@ export default function InternGetStarted() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 relative overflow-hidden">
-      {/* Animated background elements - hidden in dark mode */}
-      <div className="absolute inset-0 overflow-hidden dark:hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-100 rounded-full filter blur-xl opacity-50 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-200 rounded-full filter blur-xl opacity-50 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-violet-100 rounded-full filter blur-xl opacity-50 animate-blob animation-delay-4000"></div>
-      </div>
-
-      {/* Decorative grid pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5 dark:opacity-[0.02]"></div>
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 relative overflow-hidden">
 
       <div className="relative min-h-screen flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -183,9 +175,14 @@ export default function InternGetStarted() {
         >
           <div>
             <Link href="/" className="flex justify-center">
-              <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
-                Step Up
-              </span>
+              <Image
+                src="/stepupflat.png"
+                alt="Step Up"
+                width={150}
+                height={50}
+                className="object-contain"
+                priority
+              />
             </Link>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
               Create your account
@@ -367,7 +364,7 @@ export default function InternGetStarted() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-slate-900 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 dark:disabled:hover:bg-blue-500"
               >
                 {isLoading ? 'Creating account...' : 'Create Intern Account'}
               </button>
@@ -376,33 +373,6 @@ export default function InternGetStarted() {
         </motion.div>
       </div>
 
-      {/* Add custom styles for animations */}
-      <style jsx global>{`
-        @keyframes blob {
-          0% { transform: translate(0px, 0px) scale(1); }
-          33% { transform: translate(30px, -50px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
-          100% { transform: translate(0px, 0px) scale(1); }
-        }
-
-        .animate-blob {
-          animation: blob 7s infinite;
-        }
-
-        .animation-delay-2000 {
-          animation-delay: 2s;
-        }
-
-        .animation-delay-4000 {
-          animation-delay: 4s;
-        }
-
-        .bg-grid-pattern {
-          background-image: linear-gradient(to right, #a78bfa 1px, transparent 1px),
-            linear-gradient(to bottom, #a78bfa 1px, transparent 1px);
-          background-size: 24px 24px;
-        }
-      `}</style>
     </div>
   );
 } 

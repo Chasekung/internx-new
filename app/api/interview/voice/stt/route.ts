@@ -4,6 +4,13 @@ import OpenAI from 'openai';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Common filler words to detect
+const FILLER_WORDS = [
+  'um', 'uh', 'er', 'ah', 'like', 'you know', 'basically', 'actually', 
+  'literally', 'kind of', 'sort of', 'i mean', 'right', 'so yeah',
+  'well', 'okay so', 'i guess', 'honestly'
+];
+
 // Helper function to create OpenAI client when needed
 function getOpenAIClient(): OpenAI | null {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -11,10 +18,111 @@ function getOpenAIClient(): OpenAI | null {
   return new OpenAI({ apiKey });
 }
 
+// Analyze transcript for filler words
+function analyzeFillerWords(transcript: string): { count: number; percentage: number; found: string[] } {
+  const lowerText = transcript.toLowerCase();
+  const words = lowerText.split(/\s+/);
+  const totalWords = words.length;
+  
+  const foundFillers: string[] = [];
+  let fillerCount = 0;
+  
+  for (const filler of FILLER_WORDS) {
+    const regex = new RegExp(`\\b${filler}\\b`, 'gi');
+    const matches = lowerText.match(regex);
+    if (matches) {
+      fillerCount += matches.length;
+      foundFillers.push(filler);
+    }
+  }
+  
+  return {
+    count: fillerCount,
+    percentage: totalWords > 0 ? Math.round((fillerCount / totalWords) * 100) : 0,
+    found: [...new Set(foundFillers)]
+  };
+}
+
+// Analyze voice quality indicators from transcript
+async function analyzeVoiceQuality(
+  openai: OpenAI, 
+  transcript: string,
+  durationSeconds: number
+): Promise<{
+  clarity: number;
+  confidence: number;
+  pacing: string;
+  tone: string;
+  suggestions: string[];
+}> {
+  const wordCount = transcript.split(/\s+/).length;
+  const wordsPerMinute = durationSeconds > 0 ? Math.round((wordCount / durationSeconds) * 60) : 0;
+  
+  // Analyze pacing based on words per minute
+  let pacing = 'good';
+  if (wordsPerMinute > 180) pacing = 'too fast';
+  else if (wordsPerMinute < 100) pacing = 'too slow';
+  else if (wordsPerMinute >= 140 && wordsPerMinute <= 160) pacing = 'excellent';
+  
+  try {
+    // Quick AI analysis for tone and confidence
+    const analysis = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'Analyze this interview response for communication quality. Respond with ONLY a JSON object.'
+        },
+        {
+          role: 'user',
+          content: `Analyze this interview response transcript. Consider:
+- Clarity: How clear and well-structured is the response? (0-100)
+- Confidence: Does the language indicate confidence or uncertainty? (0-100)
+- Tone: What is the overall tone? (professional/casual/nervous/enthusiastic/neutral)
+- Suggestions: 1-2 brief tips to improve
+
+Transcript: "${transcript}"
+
+Respond with JSON only:
+{"clarity": 85, "confidence": 75, "tone": "professional", "suggestions": ["tip 1", "tip 2"]}`
+        }
+      ],
+      max_tokens: 150,
+      temperature: 0.3
+    });
+
+    const responseText = analysis.choices[0]?.message?.content || '';
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      return {
+        clarity: Math.min(100, Math.max(0, parsed.clarity || 75)),
+        confidence: Math.min(100, Math.max(0, parsed.confidence || 70)),
+        pacing,
+        tone: parsed.tone || 'neutral',
+        suggestions: parsed.suggestions || []
+      };
+    }
+  } catch {
+    // Fallback to basic analysis
+  }
+  
+  // Fallback basic analysis
+  return {
+    clarity: 75,
+    confidence: 70,
+    pacing,
+    tone: 'neutral',
+    suggestions: []
+  };
+}
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const audioFile = formData.get('audio') as File;
+    const includeAnalysis = formData.get('analyze') !== 'false';
 
     if (!audioFile) {
       return NextResponse.json({ error: 'No audio file provided' }, { status: 400 });
@@ -49,10 +157,10 @@ export async function POST(request: Request) {
     const transcript = await openai.audio.transcriptions.create({
       file: file,
       model: "whisper-1",
-      response_format: "text", // Faster than verbose_json
-      language: "en", // Specifying language speeds up processing
-      temperature: 0.1, // Even lower temperature for faster, more consistent results
-      prompt: "This is a high school student interview. Focus on clear speech and common interview vocabulary.", // Helps with accuracy and speed
+      response_format: "text",
+      language: "en",
+      temperature: 0.1,
+      prompt: "This is a high school student interview. Focus on clear speech and common interview vocabulary.",
     });
 
     // Validate transcript result
@@ -64,16 +172,42 @@ export async function POST(request: Request) {
       }, { status: 400 });
     }
 
-    return NextResponse.json({
-      transcript: transcript.trim(),
-      confidence: 0.95, // Mock confidence score - could be enhanced with actual confidence from API
-      word_count: transcript.trim().split(/\s+/).length,
-      duration_estimate: Math.max(1, Math.round(audioBuffer.byteLength / 16000)), // Rough estimate
-    });
+    const trimmedTranscript = transcript.trim();
+    const wordCount = trimmedTranscript.split(/\s+/).length;
+    const durationEstimate = Math.max(1, Math.round(audioBuffer.byteLength / 16000));
+    
+    // Analyze filler words
+    const fillerAnalysis = analyzeFillerWords(trimmedTranscript);
+    
+    // Base response
+    const response: {
+      transcript: string;
+      word_count: number;
+      duration_estimate: number;
+      filler_words: { count: number; percentage: number; found: string[] };
+      voice_analysis?: {
+        clarity: number;
+        confidence: number;
+        pacing: string;
+        tone: string;
+        suggestions: string[];
+      };
+    } = {
+      transcript: trimmedTranscript,
+      word_count: wordCount,
+      duration_estimate: durationEstimate,
+      filler_words: fillerAnalysis
+    };
+    
+    // Add voice quality analysis if requested (async, in parallel with response)
+    if (includeAnalysis && wordCount > 5) {
+      const voiceAnalysis = await analyzeVoiceQuality(openai, trimmedTranscript, durationEstimate);
+      response.voice_analysis = voiceAnalysis;
+    }
+
+    return NextResponse.json(response);
 
   } catch (error) {
-    console.error('STT error:', error);
-    
     // More specific error handling
     if (error instanceof Error) {
       if (error.message.includes('rate limit')) {

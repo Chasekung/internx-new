@@ -3,11 +3,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  PlayCircleIcon, 
+  PlayIcon, 
   ClockIcon, 
-  StarIcon, 
-  CheckCircleIcon,
-  ExclamationTriangleIcon 
+  SparklesIcon, 
+  ChatBubbleLeftRightIcon,
+  ExclamationTriangleIcon,
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 
 interface InterviewStatus {
@@ -69,10 +70,10 @@ export default function AIInterviewGate({ children, onStartInterview }: AIInterv
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="w-8 h-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-600 dark:border-t-slate-300 rounded-full animate-spin mx-auto" />
+          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading...</p>
         </div>
       </div>
     );
@@ -80,14 +81,16 @@ export default function AIInterviewGate({ children, onStartInterview }: AIInterv
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center bg-white p-8 rounded-2xl shadow-lg max-w-md">
-          <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-          <p className="text-gray-600 mb-4">{error}</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <ExclamationTriangleIcon className="w-6 h-6 text-red-600 dark:text-red-400" />
+          </div>
+          <h2 className="text-lg font-medium text-slate-900 dark:text-white mb-2">Something went wrong</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">{error}</p>
           <button
             onClick={checkInterviewStatus}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-lg transition-colors"
           >
             Try Again
           </button>
@@ -102,140 +105,137 @@ export default function AIInterviewGate({ children, onStartInterview }: AIInterv
     return <>{children}</>;
   }
 
-  // Show interview requirement screen
+  // Show interview requirement screen - minimalistic design
   console.log('⚠️ Interview not completed, showing gate. Status:', interviewStatus);
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      {/* Subtle background pattern */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none opacity-[0.015] dark:opacity-[0.03]" />
+      
+      <div className="relative max-w-2xl mx-auto px-4 sm:px-6 pt-24 pb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          transition={{ duration: 0.4 }}
+          className="text-center mb-10"
         >
-          <div className="flex flex-col items-center mb-4">
-            <img 
-              src="/stepupflat.png" 
-              alt="Step Up" 
-              className="h-16 sm:h-20 mb-4"
-            />
-            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 sm:text-5xl">
-              Welcome!
-            </h1>
-          </div>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Before you can access your dashboard and browse internships, please complete our 
-            AI-powered interview to help us better match you with opportunities.
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight mb-3">
+            Complete Your Profile
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+            A quick AI interview helps us match you with the best opportunities
           </p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-white/80 backdrop-blur-lg rounded-3xl p-8 shadow-xl mb-8"
+          transition={{ duration: 0.4, delay: 0.1 }}
+          className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden"
         >
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-              <PlayCircleIcon className="h-8 w-8 text-blue-600" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              AI Interview Assessment
-            </h2>
-            <p className="text-gray-600">
-              A personalized 20-minute conversation to understand your skills, interests, and goals
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="text-center p-6 bg-blue-50 rounded-2xl">
-              <ClockIcon className="h-8 w-8 text-blue-600 mx-auto mb-3" />
-              <h3 className="font-semibold text-gray-900 mb-2">20 Minutes</h3>
-              <p className="text-sm text-gray-600">
-                A friendly conversation with our AI interviewer
-              </p>
-            </div>
-
-            <div className="text-center p-6 bg-green-50 rounded-2xl">
-              <StarIcon className="h-8 w-8 text-green-600 mx-auto mb-3" />
-              <h3 className="font-semibold text-gray-900 mb-2">Personalized</h3>
-              <p className="text-sm text-gray-600">
-                Questions tailored to your background and interests
-              </p>
-            </div>
-
-            <div className="text-center p-6 bg-purple-50 rounded-2xl">
-              <CheckCircleIcon className="h-8 w-8 text-purple-600 mx-auto mb-3" />
-              <h3 className="font-semibold text-gray-900 mb-2">Smart Matching</h3>
-              <p className="text-sm text-gray-600">
-                Get personalized internship recommendations
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 mb-8">
-            <h3 className="font-semibold text-gray-900 mb-3">What to expect:</h3>
-            <ul className="space-y-2 text-gray-700">
-              <li className="flex items-start">
-                <span className="inline-block w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                Questions about your technical skills and project experience
-              </li>
-              <li className="flex items-start">
-                <span className="inline-block w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                Discussion of your interests, hobbies, and career goals
-              </li>
-              <li className="flex items-start">
-                <span className="inline-block w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                Behavioral questions about teamwork and problem-solving
-              </li>
-              <li className="flex items-start">
-                <span className="inline-block w-2 h-2 bg-blue-600 rounded-full mt-2 mr-3 flex-shrink-0"></span>
-                Optional video recording for better communication assessment
-              </li>
-            </ul>
-          </div>
-
-          <div className="text-center">
-            {interviewStatus?.active_session ? (
-              <div className="mb-6">
-                <div className="inline-flex items-center px-4 py-2 bg-amber-100 text-amber-800 rounded-full mb-4">
-                  <ClockIcon className="h-4 w-4 mr-2" />
-                  Interview in progress
-                </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  You have an active interview session. Click below to continue.
+          {/* Main content */}
+          <div className="p-6">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="p-3 bg-slate-100 dark:bg-slate-700 rounded-xl">
+                <ChatBubbleLeftRightIcon className="w-6 h-6 text-slate-600 dark:text-slate-400" />
+              </div>
+              <div>
+                <h2 className="text-lg font-medium text-slate-900 dark:text-white">
+                  AI Interview
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  ~20 minutes • Conversational format
                 </p>
               </div>
-            ) : null}
-            
+            </div>
+
+            {/* Features grid */}
+            <div className="grid sm:grid-cols-3 gap-4 mb-6">
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                <ClockIcon className="w-5 h-5 text-slate-500 dark:text-slate-400 mb-2" />
+                <p className="text-sm font-medium text-slate-900 dark:text-white">20 Minutes</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Friendly conversation</p>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                <SparklesIcon className="w-5 h-5 text-slate-500 dark:text-slate-400 mb-2" />
+                <p className="text-sm font-medium text-slate-900 dark:text-white">Personalized</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Tailored questions</p>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg">
+                <svg className="w-5 h-5 text-slate-500 dark:text-slate-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                <p className="text-sm font-medium text-slate-900 dark:text-white">Smart Matching</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Better recommendations</p>
+              </div>
+            </div>
+
+            {/* What to expect */}
+            <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 mb-6">
+              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-3">What to expect</p>
+              <ul className="space-y-2">
+                {[
+                  'Questions about your skills and experience',
+                  'Discussion of your interests and goals',
+                  'Behavioral scenarios',
+                ].map((item, i) => (
+                  <li key={i} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                    <span className="w-1 h-1 bg-slate-400 rounded-full flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Active session notice */}
+            {interviewStatus?.active_session && (
+              <div className="flex items-center gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg mb-6">
+                <ClockIcon className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+                <p className="text-sm text-amber-700 dark:text-amber-400">
+                  You have an interview in progress
+                </p>
+              </div>
+            )}
+
+            {/* CTA */}
             <button
               onClick={onStartInterview}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-medium rounded-lg hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors"
             >
-              {interviewStatus?.active_session ? 'Continue Interview' : 'Start Interview'}
+              {interviewStatus?.active_session ? (
+                <>
+                  Continue Interview
+                  <ArrowRightIcon className="w-4 h-4" />
+                </>
+              ) : (
+                <>
+                  <PlayIcon className="w-4 h-4" />
+                  Start Interview
+                </>
+              )}
             </button>
-            
-            <p className="text-xs text-gray-500 mt-4">
-              Don't worry - you can take your time and there are no wrong answers!
+          </div>
+
+          {/* Footer note */}
+          <div className="px-6 py-4 bg-slate-50 dark:bg-slate-750 border-t border-slate-100 dark:border-slate-700">
+            <p className="text-xs text-center text-slate-500 dark:text-slate-400">
+              Take your time — there are no wrong answers
             </p>
           </div>
         </motion.div>
 
-        <motion.div
+        <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center text-sm text-gray-500"
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="text-center text-xs text-slate-500 dark:text-slate-400 mt-8"
         >
-          <p>
-            Need help? Contact us at{' '}
-            <a href="mailto:stepuphs.67@gmail.com" className="text-blue-600 hover:underline">
-              stepuphs.67@gmail.com
-            </a>
-          </p>
-        </motion.div>
+          Need help?{' '}
+          <a href="mailto:stepuphs.67@gmail.com" className="text-slate-700 dark:text-slate-300 hover:underline">
+            Contact support
+          </a>
+        </motion.p>
       </div>
     </div>
   );
-} 
+}

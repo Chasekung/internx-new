@@ -15,7 +15,8 @@ function getOpenAIClient(): OpenAI | null {
 
 export async function POST(request: NextRequest) {
   try {
-    const { sessionId } = await request.json();
+    const body = await request.json();
+    const { sessionId, duration_seconds, questions_answered } = body;
     
     if (!sessionId) {
       return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
@@ -28,6 +29,25 @@ export async function POST(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
+
+    // Get the session data first (to access transcript fallback)
+    const { data: sessionData } = await supabase
+      .from('interview_sessions')
+      .select('transcript')
+      .eq('id', sessionId)
+      .eq('intern_id', user.id)
+      .single();
+
+    // Update the interview session status
+    await supabase
+      .from('interview_sessions')
+      .update({
+        session_status: 'completed',
+        completed_at: new Date().toISOString(),
+        duration_seconds: duration_seconds || null
+      })
+      .eq('id', sessionId)
+      .eq('intern_id', user.id);
 
     // Get intern profile data
     const { data: internData, error: internError } = await supabase
@@ -47,8 +67,57 @@ export async function POST(request: NextRequest) {
       .eq('session_id', sessionId)
       .order('asked_at', { ascending: true });
 
+    // Check for transcript fallback if no responses in database
+    let transcriptForAnalysis = '';
+    let actualQuestionsAnswered = responses?.length || 0;
+    
     if (responsesError || !responses || responses.length === 0) {
-      return NextResponse.json({ error: 'No interview responses found' }, { status: 404 });
+      // Try transcript fallback
+      if (sessionData?.transcript && sessionData.transcript.trim()) {
+        transcriptForAnalysis = sessionData.transcript;
+        const qMatches = transcriptForAnalysis.match(/Q\d+:/g);
+        actualQuestionsAnswered = qMatches ? qMatches.length : (questions_answered || 0);
+        console.log(`📝 Using transcript fallback with ${actualQuestionsAnswered} Q&A pairs for analysis`);
+      } else if (questions_answered && questions_answered > 0) {
+        // No transcript either - use placeholder
+        const completionRate = Math.round((questions_answered / 12) * 100);
+        const baseScore = questions_answered >= 12 ? 70 : Math.round((questions_answered / 12) * 60);
+        
+        // Update session with placeholder - user can regenerate with AI
+        await supabase
+          .from('interview_sessions')
+          .update({
+            session_status: 'completed',
+            completed_at: new Date().toISOString(),
+            duration_seconds: duration_seconds || null,
+            overall_score: baseScore,
+            feedback_summary: questions_answered >= 12 
+              ? 'Interview completed! Click "Generate AI Feedback" for detailed analysis of your performance.'
+              : `Completed ${questions_answered}/12 questions. Generate feedback for personalized analysis.`,
+            detailed_feedback: 'Click the "Generate AI Feedback" button above to receive a detailed analysis of your interview performance, including communication skills, confidence, and actionable improvement suggestions.',
+            skill_scores: {},
+            strengths: [],
+            improvements: []
+          })
+          .eq('id', sessionId);
+
+        return NextResponse.json({
+          success: true,
+          message: 'Interview session completed - generate feedback for detailed analysis',
+          needs_feedback: true,
+          scores: {
+            questions_answered,
+            duration_seconds,
+            completion_rate: completionRate
+          }
+        });
+      } else {
+        return NextResponse.json({ error: 'No interview responses found' }, { status: 404 });
+      }
+    } else {
+      // Build transcript from responses
+      transcriptForAnalysis = responses.map(r => `Q: ${r.question_text}\nA: ${r.response_text}`).join('\n\n');
+      console.log(`📝 Using ${responses.length} responses from interview_responses table`);
     }
 
     // Check profile completion threshold
@@ -80,7 +149,7 @@ USER PROFILE (ONLY for this specific user):
 - Grade Level: ${internData.grade_level || 'Not provided'}
 
 INTERVIEW TRANSCRIPT (ONLY for this specific user):
-${responses.map(r => `Q: ${r.question_text}\nA: ${r.response_text}`).join('\n\n')}
+${transcriptForAnalysis}
 
 PROFILE COMPLETION: ${profileCompletionScore}% (${isProfileComplete ? 'Complete' : 'Incomplete'})
 
@@ -216,6 +285,25 @@ Respond in JSON format:
       }
 
       console.log('✅ Interview completion saved successfully!', updateData);
+
+      // Also update the interview_sessions table with feedback for display
+      await supabase
+        .from('interview_sessions')
+        .update({
+          session_status: 'completed',
+          completed_at: new Date().toISOString(),
+          overall_score: aiAnalysis.overall_match_score || 0,
+          feedback_summary: aiAnalysis.interview_summary || 'Interview completed successfully.',
+          detailed_feedback: aiAnalysis.interview_feedback || '',
+          skill_scores: {
+            skill: aiAnalysis.skill_score || 0,
+            experience: aiAnalysis.experience_score || 0,
+            personality: aiAnalysis.personality_score || 0
+          },
+          strengths: aiAnalysis.interview_tags?.slice(0, 3) || [],
+          improvements: []
+        })
+        .eq('id', sessionId);
 
       return NextResponse.json({
         success: true,

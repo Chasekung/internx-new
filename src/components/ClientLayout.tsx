@@ -16,6 +16,9 @@ function ClientLayout({
   const companyPages = ['/company', '/company-get-started', '/company-sign-in', '/company-forgot-password', '/company-reset-password', '/company-dash', '/company/opportunities', '/company/search', '/company/messaging', '/company/postings', '/company/view-responses', '/company/form-builder', '/company/public-profile', '/company/edit-page'];
   
   const isCompanyPage = companyPages.some(page => pathname?.startsWith(page));
+  
+  // Hide navbar and footer on interview session pages (full-screen interview mode)
+  const isInterviewSession = pathname?.includes('/interview/') && pathname?.includes('/session/');
 
   return (
     <>
@@ -30,14 +33,16 @@ function ClientLayout({
       
       {/* Main content */}
       <div className="relative z-10">
-        {isCompanyPage ? <CompanyNavbar /> : <UserNavbar />}
+        {/* Hide navbar during interview sessions */}
+        {!isInterviewSession && (isCompanyPage ? <CompanyNavbar /> : <UserNavbar />)}
         
-        {/* Adjusted padding for floating navbar */}
-        <main className="mobile-safe-area pt-24">
+        {/* Adjusted padding for floating navbar (no padding on interview sessions) */}
+        <main className={`mobile-safe-area ${isInterviewSession ? 'pt-0' : 'pt-24'}`}>
           {children}
         </main>
         
-        {/* Refined Footer */}
+        {/* Refined Footer - Hidden during interview sessions */}
+        {!isInterviewSession && (
         <footer className="mt-auto border-t border-slate-200/50 dark:border-slate-700/30 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
           <div className="mobile-container py-12 sm:py-16">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
@@ -162,6 +167,7 @@ function ClientLayout({
             </div>
           </div>
         </footer>
+        )}
       </div>
     </>
   );

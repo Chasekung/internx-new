@@ -2,8 +2,26 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  ChevronDownIcon, 
+  ChevronRightIcon,
+  DocumentTextIcon,
+  CalendarIcon,
+  MapPinIcon,
+  CurrencyDollarIcon,
+  ArrowTopRightOnSquareIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  XCircleIcon,
+  SparklesIcon,
+  ArrowPathIcon,
+  DocumentArrowDownIcon,
+  LinkIcon,
+  ChartBarIcon,
+  BriefcaseIcon,
+  AcademicCapIcon,
+} from '@heroicons/react/24/outline';
 import ReferralLink from '@/components/ReferralLink';
 import ReferralStats from '@/components/ReferralStats';
 import AIInterviewGate from '@/components/AIInterviewGate';
@@ -93,9 +111,117 @@ const createGoogleMapsLink = (address?: string, city?: string, state?: string) =
 
 // Helper function to display location
 const formatDisplayLocation = (city?: string, state?: string) => {
-  if (!city && !state) return 'N/A';
+  if (!city && !state) return 'Not specified';
   return [city, state].filter(Boolean).join(', ');
 };
+
+// Status badge component
+const StatusBadge = ({ status }: { status: string }) => {
+  const config: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
+    accepted: { 
+      bg: 'bg-emerald-50 dark:bg-emerald-900/20', 
+      text: 'text-emerald-700 dark:text-emerald-400',
+      icon: <CheckCircleIcon className="w-3.5 h-3.5" />
+    },
+    rejected: { 
+      bg: 'bg-red-50 dark:bg-red-900/20', 
+      text: 'text-red-700 dark:text-red-400',
+      icon: <XCircleIcon className="w-3.5 h-3.5" />
+    },
+    in_progress: { 
+      bg: 'bg-amber-50 dark:bg-amber-900/20', 
+      text: 'text-amber-700 dark:text-amber-400',
+      icon: <ClockIcon className="w-3.5 h-3.5" />
+    },
+    pending: { 
+      bg: 'bg-slate-100 dark:bg-slate-700/50', 
+      text: 'text-slate-600 dark:text-slate-400',
+      icon: <ClockIcon className="w-3.5 h-3.5" />
+    },
+    submitted: { 
+      bg: 'bg-blue-50 dark:bg-blue-900/20', 
+      text: 'text-blue-700 dark:text-blue-400',
+      icon: <DocumentTextIcon className="w-3.5 h-3.5" />
+    },
+  };
+
+  const { bg, text, icon } = config[status] || config.pending;
+  const label = status === 'in_progress' ? 'In Progress' 
+    : status === 'submitted' || status === 'pending' ? 'Submitted'
+    : status.charAt(0).toUpperCase() + status.slice(1);
+
+  return (
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium ${bg} ${text}`}>
+      {icon}
+      {label}
+    </span>
+  );
+};
+
+// Metric card component
+const MetricCard = ({ 
+  label, 
+  value, 
+  subtext,
+  icon: Icon 
+}: { 
+  label: string; 
+  value: string | number; 
+  subtext?: string;
+  icon: React.ElementType;
+}) => (
+  <div className="flex items-start gap-3 p-4 bg-white/60 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/60 rounded-lg">
+    <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-md">
+      <Icon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+    </div>
+    <div className="min-w-0 flex-1">
+      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">{label}</p>
+      <p className="text-xl font-semibold text-slate-900 dark:text-white mt-0.5">{value}</p>
+      {subtext && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{subtext}</p>}
+    </div>
+  </div>
+);
+
+// Tab navigation component
+type TabId = 'applications' | 'referrals';
+
+const TabNav = ({ 
+  activeTab, 
+  setActiveTab,
+  applicationCount,
+}: { 
+  activeTab: TabId;
+  setActiveTab: (tab: TabId) => void;
+  applicationCount: number;
+}) => (
+  <div className="flex gap-1 p-1 bg-slate-100 dark:bg-slate-800 rounded-lg w-fit">
+    <button
+      onClick={() => setActiveTab('applications')}
+      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+        activeTab === 'applications' 
+          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
+          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+      }`}
+    >
+      Applications
+      {applicationCount > 0 && (
+        <span className="ml-1.5 px-1.5 py-0.5 text-xs bg-slate-200 dark:bg-slate-600 rounded">
+          {applicationCount}
+        </span>
+      )}
+    </button>
+    <button
+      onClick={() => setActiveTab('referrals')}
+      className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+        activeTab === 'referrals' 
+          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' 
+          : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+      }`}
+    >
+      Referrals
+    </button>
+  </div>
+);
 
 export default function InternDash() {
   const router = useRouter();
@@ -106,18 +232,12 @@ export default function InternDash() {
   const [error, setError] = useState<string | null>(null);
   const [isGeneratingCode, setIsGeneratingCode] = useState(false);
   const [isRegeneratingScores, setIsRegeneratingScores] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showInterviewInterface, setShowInterviewInterface] = useState(false);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [profileUpdated, setProfileUpdated] = useState(false);
   const [lastProfileUpdate, setLastProfileUpdate] = useState<Date | null>(null);
+  const [activeTab, setActiveTab] = useState<TabId>('applications');
   const { supabase, error: supabaseError } = useSupabase();
-
-  // Initialize Supabase client when component mounts
-  useEffect(() => {
-    
-    
-  }, []);
 
   // Helper function to make authenticated API calls
   const makeAuthenticatedRequest = async (url: string, options: RequestInit = {}) => {
@@ -367,6 +487,25 @@ export default function InternDash() {
     }
   };
 
+  const handleViewReport = () => {
+    if (currentSessionId) {
+      window.open(`/api/interview/generate-pdf?session_id=${currentSessionId}`, '_blank');
+    } else {
+      makeAuthenticatedRequest('/api/interview/get-latest-session')
+        .then(response => response.json())
+        .then(responseData => {
+          if (responseData.session_id) {
+            window.open(`/api/interview/generate-pdf?session_id=${responseData.session_id}`, '_blank');
+          } else {
+            alert('Unable to generate report. Please try refreshing the page.');
+          }
+        })
+        .catch(() => {
+          alert('Unable to generate report. Please try refreshing the page.');
+        });
+    }
+  };
+
   // Show interview interface if currently in an interview
   if (showInterviewInterface && currentSessionId) {
     return (
@@ -379,80 +518,67 @@ export default function InternDash() {
     );
   }
 
-  // The main dashboard content with beautiful bubbly design
+  // The main dashboard content with minimalistic design
   const dashboardContent = (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Beautiful Animated Gradient Blobs Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900">
-        {/* Animated gradient blobs - hidden in dark mode */}
-        <div className="gradient-blob gradient-blob-1 dark:hidden"></div>
-        <div className="gradient-blob gradient-blob-2 dark:hidden"></div>
-        <div className="gradient-blob gradient-blob-3 dark:hidden"></div>
-        <div className="gradient-blob gradient-blob-4 dark:hidden"></div>
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      {/* Subtle background pattern */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none opacity-[0.015] dark:opacity-[0.03]" />
       
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-10 dark:opacity-[0.02]"></div>
-      
-      {/* Content Container */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-12">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-12"
+      {/* Main content */}
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+        {/* Header - Compact */}
+        <motion.header 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mb-8"
         >
-          <div>
-            <h1 className="text-5xl font-bold text-slate-900 dark:text-white">
-              Welcome, {internData?.full_name?.split(' ')[0] || 'there'}!
-            </h1>
-            <p className="text-slate-600 dark:text-slate-300 mt-3 text-xl">
-              This is your personal dashboard where you can manage your internship applications and profile.
-            </p>
+          <div className="flex items-baseline justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">
+                Welcome back, {internData?.full_name?.split(' ')[0] || 'there'}
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+                Manage your applications and track your progress
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/opportunities')}
+              className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1.5"
+            >
+              Browse opportunities
+              <ArrowTopRightOnSquareIcon className="w-4 h-4" />
+            </button>
           </div>
-        </motion.div>
+        </motion.header>
 
-        {/* Interview Completion Banner */}
+        {/* Interview Completion Banner - Compact */}
         {internData?.interview_completed && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
+          <motion.section
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/90 dark:bg-slate-800/90 backdrop-blur-lg border border-slate-200 dark:border-slate-700 rounded-3xl p-8 mb-12 shadow-xl"
+            className="mb-6"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <div className="flex items-center mb-6">
-                  <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-2xl flex items-center justify-center mr-6 shadow-lg">
-                    <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-4">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                    <CheckCircleIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                   </div>
                   <div>
-                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                      Interview Complete
-                    </h3>
-                    <p className="text-slate-600 dark:text-slate-300 text-lg">
-                      Your personalized match scores are now being calculated for all internships.
-                    </p>
-                  </div>
-                </div>
-                
-                {internData?.overall_match_score && (
-                  <div className="flex items-center space-x-8">
-                    <div className="bg-blue-100 dark:bg-blue-900/50 rounded-3xl p-6 shadow-lg border border-blue-200 dark:border-blue-700">
-                      <div className="text-sm text-slate-500 dark:text-slate-400 mb-2">Overall Score</div>
-                      <div className="text-4xl font-bold text-black dark:text-white">
-                        {internData.overall_match_score}/100
-                      </div>
-                      <div className="text-xs text-slate-400 mt-1">Rated out of 100</div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-medium text-slate-900 dark:text-white">Interview Complete</h3>
+                      {internData?.overall_match_score && (
+                        <span className="px-2 py-0.5 text-xs font-medium bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded">
+                          Score: {internData.overall_match_score}/100
+                        </span>
+                      )}
                     </div>
-                    
                     {internData.interview_tags && internData.interview_tags.length > 0 && (
-                      <div className="flex flex-wrap gap-3">
-                        {internData.interview_tags.slice(0, 3).map((tag, index) => (
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        {internData.interview_tags.slice(0, 4).map((tag, index) => (
                           <span
                             key={index}
-                            className="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-black dark:text-slate-200 text-sm rounded-2xl font-medium border border-blue-200 dark:border-blue-700"
+                            className="px-2 py-0.5 text-xs bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 rounded"
                           >
                             {tag}
                           </span>
@@ -460,330 +586,307 @@ export default function InternDash() {
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-              
-              <div className="flex flex-col space-y-4 ml-8">
-                <button
-                  onClick={() => router.push('/opportunities')}
-                  className="bg-blue-500 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-blue-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-                >
-                  Browse Personalized Matches
-                </button>
+                </div>
                 
-                <button
-                  onClick={() => {
-                    if (currentSessionId) {
-                      window.open(`/api/interview/generate-pdf?session_id=${currentSessionId}`, '_blank');
-                    } else {
-                      makeAuthenticatedRequest('/api/interview/get-latest-session')
-                        .then(response => response.json())
-                        .then(responseData => {
-                          if (responseData.session_id) {
-                            window.open(`/api/interview/generate-pdf?session_id=${responseData.session_id}`, '_blank');
-                          } else {
-                            alert('Unable to generate report. Please try refreshing the page.');
-                          }
-                        })
-                        .catch(() => {
-                          alert('Unable to generate report. Please try refreshing the page.');
-                        });
-                    }
-                  }}
-                  className="bg-white dark:bg-slate-700 text-slate-700 dark:text-white px-8 py-4 rounded-2xl font-semibold hover:bg-blue-50 dark:hover:bg-slate-600 transition-all border border-blue-200 dark:border-slate-600 shadow-lg hover:shadow-xl"
-                >
-                  View Detailed Report
-                </button>
-                
-                {profileUpdated && (
+                <div className="flex items-center gap-2 flex-wrap">
                   <button
-                    onClick={refreshPDFScores}
-                    className="bg-indigo-500 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-indigo-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
+                    onClick={handleViewReport}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
                   >
-                    Refresh Profile Scores
-                    <div className="text-xs text-indigo-100 mt-1">
-                      Profile updated {lastProfileUpdate ? 
-                        `${Math.round((new Date().getTime() - lastProfileUpdate.getTime()) / (1000 * 60 * 60))} hours ago` 
-                        : 'recently'}
-                    </div>
+                    <DocumentArrowDownIcon className="w-4 h-4" />
+                    Report
                   </button>
-                )}
-                
-                {internData?.interview_completed && (
+                  
                   <button
                     onClick={regenerateAIScores}
                     disabled={isRegeneratingScores}
-                    className="bg-purple-500 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-purple-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
                   >
-                    {isRegeneratingScores ? (
-                      <div className="flex items-center space-x-2">
-                        <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                        <span>Regenerating AI Scores...</span>
-                      </div>
-                    ) : (
-                      <span>Regenerate AI Scores</span>
-                    )}
+                    <ArrowPathIcon className={`w-4 h-4 ${isRegeneratingScores ? 'animate-spin' : ''}`} />
+                    {isRegeneratingScores ? 'Updating...' : 'Refresh Scores'}
                   </button>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Stats Cards - Bubble Style */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Total Applications</h3>
-                          <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/50 rounded-2xl flex items-center justify-center shadow-lg">
-              <img src="/penandpaperemoji.webp" alt="Pen and Paper" className="w-8 h-8" />
-            </div>
-            </div>
-            <p className="text-5xl font-bold text-black dark:text-white mb-3">{totalApplications}</p>
-            <p className="text-slate-500 dark:text-slate-400 text-lg">All time applications</p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">This Month</h3>
-                          <div className="w-16 h-16 bg-indigo-100 dark:bg-indigo-900/50 rounded-2xl flex items-center justify-center shadow-lg">
-              <img src="/calendaremoji.webp" alt="Calendar" className="w-8 h-8" />
-            </div>
-            </div>
-            <p className="text-5xl font-bold text-black dark:text-white mb-3">{applicationsThisMonth}</p>
-            <p className="text-slate-500 dark:text-slate-400 text-lg">Applications submitted</p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300 transform hover:scale-105"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Profile Score</h3>
-                          <div className="w-16 h-16 bg-purple-100 dark:bg-purple-900/50 rounded-2xl flex items-center justify-center shadow-lg">
-              <img src="/targetemoji.webp" alt="Target" className="w-8 h-8" />
-            </div>
-            </div>
-            <p className="text-5xl font-bold text-black dark:text-white mb-3">
-              {internData?.overall_match_score || 'N/A'}
-              {internData?.overall_match_score && '/100'}
-            </p>
-            <p className="text-slate-500 dark:text-slate-400 text-lg">
-              {internData?.interview_completed ? 'Based on AI interview (0-100 scale)' : 'Complete interview to unlock'}
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Recent Applications - Bubble Style */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300 mb-12"
-        >
-          <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Recent Applications</h3>
-          
-          {isLoading ? (
-            <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mx-auto mb-6"></div>
-              <p className="text-slate-600 dark:text-slate-300 text-xl">Loading applications...</p>
-            </div>
-          ) : !Array.isArray(applications) || applications.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 bg-blue-100 dark:bg-blue-900/50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <svg className="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <p className="text-slate-600 dark:text-slate-300 mb-8 text-xl">No applications yet</p>
-              <button
-                onClick={() => router.push('/opportunities')}
-                className="bg-blue-500 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-blue-600 transition-all shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                Browse Opportunities
-              </button>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {Array.isArray(applications) && applications.slice(0, 5).map((application) => (
-                <div
-                  key={application.id}
-                  className="bg-white/60 dark:bg-slate-700/60 backdrop-blur-sm border border-white/20 dark:border-slate-600/50 rounded-2xl p-6 hover:bg-white/80 dark:hover:bg-slate-700/80 transition-all cursor-pointer shadow-lg hover:shadow-xl transform hover:scale-105"
-                  onClick={() => setExpanded(expanded === application.id ? null : application.id)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h4 className="font-bold text-slate-900 dark:text-white text-xl">
-                        {application.internships.companies?.company_name || 'Unknown Company'}
-                      </h4>
-                      <p className="text-blue-600 dark:text-blue-400 font-semibold text-lg">{application.internships.position}</p>
-                      <p className="text-slate-500 dark:text-slate-400 text-base">
-                        Applied: {new Date(application.applied_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <span
-                      className={`px-6 py-3 rounded-2xl text-sm font-semibold ${
-                        application.status === 'accepted'
-                          ? 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-700'
-                          : application.status === 'rejected'
-                          ? 'bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-700'
-                          : application.status === 'in_progress'
-                          ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-800 dark:text-purple-300 border border-purple-200 dark:border-purple-700'
-                          : application.status === 'pending'
-                          ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-700'
-                          : 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-700'
-                      }`}
+                  
+                  {profileUpdated && (
+                    <button
+                      onClick={refreshPDFScores}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-lg transition-colors"
                     >
-                      {
-                        application.status === 'in_progress'
-                          ? 'In Progress'
-                          : application.status === 'submitted' || application.status === 'pending'
-                          ? 'Submitted'
-                          : application.status.charAt(0).toUpperCase() + application.status.slice(1)
-                      }
-                    </span>
-                  </div>
-
-                  {expanded === application.id && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="mt-6 pt-6 border-t border-slate-200"
-                    >
-                      <div className="grid md:grid-cols-2 gap-6 text-base">
-                        <div>
-                          <strong className="text-slate-900">Location:</strong>{' '}
-                          <span className="text-slate-600">
-                            {formatDisplayLocation(
-                              application.internships.city,
-                              application.internships.state
-                            )}
-                          </span>
-                        </div>
-                        <div>
-                          <strong className="text-slate-900">Duration:</strong>{' '}
-                          <span className="text-slate-600">
-                            {application.internships.duration || 'Not specified'}
-                          </span>
-                        </div>
-                        {application.internships.pay && (
-                          <div>
-                            <strong className="text-slate-900">Pay:</strong>{' '}
-                            <span className="text-slate-600">${application.internships.pay}/hr</span>
-                          </div>
-                        )}
-                        {application.internships.start_date && (
-                          <div>
-                            <strong className="text-slate-900">Start Date:</strong>{' '}
-                            <span className="text-slate-600">
-                              {new Date(application.internships.start_date).toLocaleDateString()}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      {application.internships.description && (
-                        <div className="mt-6">
-                          <strong className="text-slate-900">Description:</strong>
-                          <p className="text-slate-600 mt-2 leading-relaxed">
-                            {application.internships.description}
-                          </p>
-                        </div>
-                      )}
-                    </motion.div>
+                      <SparklesIcon className="w-4 h-4" />
+                      Sync Profile
+                    </button>
                   )}
                 </div>
-              ))}
+              </div>
+            </div>
+          </motion.section>
+        )}
+
+        {/* Stats Grid - Compact */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+          className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8"
+        >
+          <MetricCard
+            label="Total"
+            value={totalApplications}
+            subtext="All applications"
+            icon={BriefcaseIcon}
+          />
+          <MetricCard
+            label="This Month"
+            value={applicationsThisMonth}
+            subtext="Recent activity"
+            icon={CalendarIcon}
+          />
+          <MetricCard
+            label="Match Score"
+            value={internData?.overall_match_score ? `${internData.overall_match_score}` : '—'}
+            subtext={internData?.interview_completed ? 'AI assessment' : 'Complete interview'}
+            icon={AcademicCapIcon}
+          />
+        </motion.section>
+
+        {/* Tab Navigation */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="mb-6"
+        >
+          <TabNav 
+            activeTab={activeTab} 
+            setActiveTab={setActiveTab}
+            applicationCount={totalApplications}
+          />
+        </motion.section>
+
+        {/* Tab Content */}
+        <AnimatePresence mode="wait">
+          {activeTab === 'applications' ? (
+            <motion.section
+              key="applications"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden"
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center py-16">
+                  <div className="animate-spin rounded-full h-8 w-8 border-2 border-slate-300 dark:border-slate-600 border-t-slate-600 dark:border-t-slate-300" />
+                </div>
+              ) : !Array.isArray(applications) || applications.length === 0 ? (
+                <div className="text-center py-16 px-4">
+                  <div className="w-12 h-12 bg-slate-100 dark:bg-slate-700 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <DocumentTextIcon className="w-6 h-6 text-slate-400" />
+                  </div>
+                  <h3 className="font-medium text-slate-900 dark:text-white mb-1">No applications yet</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                    Start exploring opportunities to find your perfect internship
+                  </p>
+                  <button
+                    onClick={() => router.push('/opportunities')}
+                    className="text-sm font-medium text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
+                  >
+                    Browse opportunities →
+                  </button>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                  {applications.slice(0, 10).map((application) => (
+                    <div key={application.id}>
+                      <button
+                        onClick={() => setExpanded(expanded === application.id ? null : application.id)}
+                        className="w-full p-4 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors text-left"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-slate-900 dark:text-white truncate">
+                                {application.internships.position}
+                              </h4>
+                              <StatusBadge status={application.status} />
+                            </div>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                              {application.internships.companies?.company_name || 'Company'}
+                            </p>
+                            <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
+                              Applied {new Date(application.applied_at).toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </p>
+                          </div>
+                          <ChevronDownIcon 
+                            className={`w-5 h-5 text-slate-400 transition-transform flex-shrink-0 ${
+                              expanded === application.id ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </div>
+                      </button>
+
+                      <AnimatePresence>
+                        {expanded === application.id && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-4 pb-4 pt-0">
+                              <div className="bg-slate-50 dark:bg-slate-750 rounded-lg p-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                                  <div>
+                                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 mb-1">
+                                      <MapPinIcon className="w-3.5 h-3.5" />
+                                      <span className="text-xs font-medium">Location</span>
+                                    </div>
+                                    <p className="text-slate-900 dark:text-white">
+                                      {formatDisplayLocation(application.internships.city, application.internships.state)}
+                                    </p>
+                                  </div>
+                                  <div>
+                                    <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 mb-1">
+                                      <ClockIcon className="w-3.5 h-3.5" />
+                                      <span className="text-xs font-medium">Duration</span>
+                                    </div>
+                                    <p className="text-slate-900 dark:text-white">
+                                      {application.internships.duration || 'Not specified'}
+                                    </p>
+                                  </div>
+                                  {application.internships.pay && (
+                                    <div>
+                                      <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 mb-1">
+                                        <CurrencyDollarIcon className="w-3.5 h-3.5" />
+                                        <span className="text-xs font-medium">Pay</span>
+                                      </div>
+                                      <p className="text-slate-900 dark:text-white">
+                                        ${application.internships.pay}/hr
+                                      </p>
+                                    </div>
+                                  )}
+                                  {application.internships.start_date && (
+                                    <div>
+                                      <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 mb-1">
+                                        <CalendarIcon className="w-3.5 h-3.5" />
+                                        <span className="text-xs font-medium">Starts</span>
+                                      </div>
+                                      <p className="text-slate-900 dark:text-white">
+                                        {new Date(application.internships.start_date).toLocaleDateString('en-US', { 
+                                          month: 'short', 
+                                          day: 'numeric'
+                                        })}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                                {application.internships.description && (
+                                  <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-3">
+                                      {application.internships.description}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
+                </div>
+              )}
               
-              {Array.isArray(applications) && applications.length > 5 && (
-                <div className="text-center pt-8">
+              {Array.isArray(applications) && applications.length > 10 && (
+                <div className="p-4 border-t border-slate-100 dark:border-slate-700 text-center">
                   <button
                     onClick={() => router.push('/applications')}
-                    className="text-blue-600 hover:text-blue-700 font-semibold text-xl hover:underline"
+                    className="text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
                   >
-                    View all applications ({Array.isArray(applications) ? applications.length : 0})
+                    View all {applications.length} applications →
                   </button>
                 </div>
               )}
-            </div>
+            </motion.section>
+          ) : (
+            <motion.section
+              key="referrals"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="grid lg:grid-cols-2 gap-4">
+                {/* Referral Link */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <LinkIcon className="w-4 h-4 text-slate-500" />
+                    <h3 className="font-medium text-slate-900 dark:text-white">Your Referral Link</h3>
+                  </div>
+                  
+                  {internData?.referral_code ? (
+                    <ReferralLink referralCode={internData.referral_code} />
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <LinkIcon className="w-5 h-5 text-slate-400" />
+                      </div>
+                      <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                        Generate your unique referral code to invite friends
+                      </p>
+                      <button
+                        onClick={generateReferralCode}
+                        disabled={isGeneratingCode}
+                        className="px-4 py-2 text-sm font-medium bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {isGeneratingCode ? 'Generating...' : 'Generate Code'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Referral Stats */}
+                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-4">
+                    <ChartBarIcon className="w-4 h-4 text-slate-500" />
+                    <h3 className="font-medium text-slate-900 dark:text-white">Performance</h3>
+                  </div>
+                  
+                  {internData?.referral_code ? (
+                    <ReferralStats userId={internData.id} />
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-10 h-10 bg-slate-100 dark:bg-slate-700 rounded-lg flex items-center justify-center mx-auto mb-3">
+                        <ChartBarIcon className="w-5 h-5 text-slate-400" />
+                      </div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        Generate your referral code to see stats
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.section>
           )}
-        </motion.div>
+        </AnimatePresence>
 
-        {/* Referral Section - Bubble Style */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300"
-          >
-            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Your Referral Link</h3>
-            {internData?.referral_code ? (
-              <div className="space-y-6">
-                <ReferralLink referralCode={internData.referral_code} />
-              </div>
-            ) : (
-              <div className="text-center">
-                <div className="w-20 h-20 bg-purple-100 dark:bg-purple-900/50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <svg className="w-10 h-10 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7" />
-                  </svg>
-                </div>
-                <p className="text-slate-600 dark:text-slate-300 mb-8 text-xl">
-                  Generate your unique referral code to invite friends and earn rewards.
-                </p>
-                <button
-                  onClick={generateReferralCode}
-                  disabled={isGeneratingCode}
-                  className="bg-purple-500 dark:bg-purple-600 text-white px-8 py-4 rounded-2xl font-semibold hover:bg-purple-600 dark:hover:bg-purple-500 transition-all shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50"
-                >
-                  {isGeneratingCode ? 'Generating...' : 'Generate Referral Code'}
-                </button>
-              </div>
-            )}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20 dark:border-slate-700/50 hover:shadow-3xl transition-all duration-300"
-          >
-            <h3 className="text-3xl font-bold text-slate-900 dark:text-white mb-8">Referral Performance</h3>
-            {internData?.referral_code ? (
-              <ReferralStats userId={internData.id} />
-            ) : (
-              <div className="text-center py-12">
-                <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <svg className="w-10 h-10 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                </div>
-                <p className="text-slate-600 dark:text-slate-300 text-xl">
-                  Generate your referral code to see your performance stats.
-                </p>
-              </div>
-            )}
-          </motion.div>
-        </div>
-
-        {error && (
-          <div className="fixed bottom-4 right-4 bg-red-100 dark:bg-red-900/50 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 px-6 py-4 rounded-2xl shadow-lg">
-            {error}
-          </div>
-        )}
+        {/* Error Toast */}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="fixed bottom-6 right-6 bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg shadow-lg text-sm"
+            >
+              {error}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -794,4 +897,4 @@ export default function InternDash() {
       {dashboardContent}
     </AIInterviewGate>
   );
-} 
+}
