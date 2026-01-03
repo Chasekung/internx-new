@@ -255,6 +255,11 @@ export default function InterviewSessionPage() {
     
     if (type === 'code') {
       submissionMessage = 'I\'ve submitted my code solution.';
+      // Dev logging for code
+      const codeContent = content as any;
+      const language = codeContent.language || 'unknown';
+      const codeLines = codeContent.code ? codeContent.code.split('\n').length : 0;
+      devLogger.logCodeDetected(language, codeLines);
     } else if (type === 'math') {
       // Handle new MathStep[] format
       if (Array.isArray(content) && content.length > 0 && 'content' in content[0]) {
@@ -268,23 +273,23 @@ export default function InterviewSessionPage() {
           // Render math in user-friendly format
           const mathDisplay = step.content.parts.map(part => {
             if (part.type === 'number' || part.type === 'variable' || part.type === 'text') {
-              return part.value;
+              return part.value || '';
             } else if (part.type === 'operator') {
               const opMap: Record<string, string> = {
                 '+': '+', '-': '−', '*': '×', '/': '÷', '=': '=',
                 '<=': '≤', '>=': '≥', '!=': '≠'
               };
-              return opMap[part.value] || part.value;
+              return opMap[part.value || ''] || part.value || '';
             } else if (part.type === 'fraction' && part.numerator && part.denominator) {
-              const num = part.numerator.map(p => p.value).join('');
-              const den = part.denominator.map(p => p.value).join('');
+              const num = part.numerator.map(p => p.value || '').join('');
+              const den = part.denominator.map(p => p.value || '').join('');
               return `(${num})/(${den})`;
             } else if (part.type === 'power' && part.base && part.exponent) {
-              const base = part.base.map(p => p.value).join('');
-              const exp = part.exponent.map(p => p.value).join('');
+              const base = part.base.map(p => p.value || '').join('');
+              const exp = part.exponent.map(p => p.value || '').join('');
               return `${base}^${exp}`;
             } else if (part.type === 'root' && part.radicand) {
-              const rad = part.radicand.map(p => p.value).join('');
+              const rad = part.radicand.map(p => p.value || '').join('');
               return `√(${rad})`;
             }
             return '';
@@ -311,12 +316,6 @@ export default function InterviewSessionPage() {
         submissionMessage = 'I\'ve submitted my mathematical work.';
         latestMathStepsRef.current = null;
       }
-    } else if (type === 'code') {
-      // Dev logging for code
-      const codeContent = content as any;
-      const language = codeContent.language || 'unknown';
-      const codeLines = codeContent.code ? codeContent.code.split('\n').length : 0;
-      devLogger.logCodeDetected(language, codeLines);
     } else if (type === 'whiteboard') {
       submissionMessage = 'I\'ve completed my whiteboard diagram.';
       latestMathStepsRef.current = null;

@@ -17,7 +17,7 @@ export interface MathContent {
 
 export interface MathPart {
   type: 'number' | 'variable' | 'operator' | 'function' | 'fraction' | 'power' | 'root' | 'parentheses' | 'text' | 'subscript';
-  value: string;
+  value?: string;
   children?: MathPart[];
   numerator?: MathPart[];
   denominator?: MathPart[];
@@ -89,7 +89,7 @@ export default function MathEditorEnhanced({ onStepAdd, onStepRemove, steps, onS
       case 'number':
       case 'variable':
       case 'text':
-        return <span>{part.value}</span>;
+        return <span>{part.value || ''}</span>;
       
       case 'operator':
         const opMap: Record<string, string> = {
@@ -105,10 +105,10 @@ export default function MathEditorEnhanced({ onStepAdd, onStepRemove, steps, onS
           '!=': '≠',
           'approx': '≈'
         };
-        return <span>{opMap[part.value] || part.value}</span>;
+        return <span>{opMap[part.value || ''] || part.value || ''}</span>;
       
       case 'function':
-        return <span className="italic">{part.value}(</span>;
+        return <span className="italic">{part.value || ''}(</span>;
       
       case 'fraction':
         if (part.numerator && part.denominator) {
@@ -165,7 +165,7 @@ export default function MathEditorEnhanced({ onStepAdd, onStepRemove, steps, onS
       
       case 'subscript':
         if (part.subscript) {
-          const base = part.value;
+          const base = part.value || '';
           const sub = part.subscript.map((p, i) => (
             <span key={i} className="text-xs align-sub">{renderMathPart(p)}</span>
           ));

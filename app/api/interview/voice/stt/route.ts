@@ -39,7 +39,7 @@ function analyzeFillerWords(transcript: string): { count: number; percentage: nu
   return {
     count: fillerCount,
     percentage: totalWords > 0 ? Math.round((fillerCount / totalWords) * 100) : 0,
-    found: [...new Set(foundFillers)]
+    found: Array.from(new Set(foundFillers))
   };
 }
 

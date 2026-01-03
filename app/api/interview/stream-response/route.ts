@@ -256,7 +256,7 @@ export async function POST(request: NextRequest) {
           const workMatch = user_response.match(/step\(s\):\n\n([\s\S]+)/);
           if (workMatch) {
             const stepsText = workMatch[1];
-            const steps = stepsText.split('\n').filter(s => s.trim()).map(step => {
+            const steps = stepsText.split('\n').filter((s: string) => s.trim()).map((step: string) => {
               const stepMatch = step.match(/Step (\d+): (.+?)(?:\s*\((.+)\))?$/);
               if (stepMatch) {
                 return {
@@ -274,7 +274,7 @@ export async function POST(request: NextRequest) {
                 steps: steps,
                 submitted_at: new Date().toISOString()
               };
-              mathLatex = steps.map(s => s.latex).join(' \\\\\n');
+              mathLatex = steps.map((s: any) => s.latex).join(' \\\\\n');
             }
           }
         }
@@ -454,7 +454,7 @@ ${taskSubmission ? '- Since they submitted mathematical work, your acknowledgmen
           const { error: transcriptError } = await supabase
             .from('interview_sessions')
             .update({
-              transcript: supabase.rpc ? undefined : transcriptEntry, // Use concat if available
+              transcript: transcriptEntry,
               ai_notes: `${new Date().toISOString()}: Response saved to transcript as fallback due to insert error: ${insertError.message}`
             })
             .eq('id', session_id);

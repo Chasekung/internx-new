@@ -14,7 +14,7 @@ function partToLatex(part: MathPart): string {
     case 'number':
     case 'variable':
     case 'text':
-      return part.value;
+      return part.value || '';
     
     case 'operator':
       const opMap: Record<string, string> = {
@@ -29,7 +29,7 @@ function partToLatex(part: MathPart): string {
         '>=': '\\geq',
         '!=': '\\neq'
       };
-      return opMap[part.value] || part.value;
+      return opMap[part.value || ''] || part.value || '';
     
     case 'function':
       const funcMap: Record<string, string> = {
@@ -108,7 +108,7 @@ function partToLatex(part: MathPart): string {
         // Root
         'sqrt': '\\sqrt'
       };
-      return funcMap[part.value] || `\\text{${part.value}}`;
+      return funcMap[part.value || ''] || `\\text{${part.value || ''}}`;
     
     case 'fraction':
       const num = part.numerator?.map(partToLatex).join('') || '';

@@ -14,8 +14,8 @@ export interface MathContent {
 }
 
 export interface MathPart {
-  type: 'number' | 'variable' | 'operator' | 'function' | 'fraction' | 'power' | 'root' | 'parentheses' | 'text';
-  value: string;
+  type: 'number' | 'variable' | 'operator' | 'function' | 'fraction' | 'power' | 'root' | 'parentheses' | 'text' | 'subscript';
+  value?: string;
   children?: MathPart[]; // For fractions, powers, roots
   numerator?: MathPart[];
   denominator?: MathPart[];
@@ -23,6 +23,7 @@ export interface MathPart {
   exponent?: MathPart[];
   radicand?: MathPart[];
   content?: MathPart[];
+  subscript?: MathPart[];
 }
 
 interface MathEditorProps {
@@ -47,7 +48,7 @@ export default function MathEditor({ onStepAdd, onStepRemove, steps, onSubmit }:
       case 'number':
       case 'variable':
       case 'text':
-        return part.value;
+        return part.value || '';
       case 'operator':
         const opMap: Record<string, string> = {
           '+': '+',
@@ -61,7 +62,7 @@ export default function MathEditor({ onStepAdd, onStepRemove, steps, onSubmit }:
           '>=': '≥',
           '!=': '≠'
         };
-        return opMap[part.value] || part.value;
+        return opMap[part.value || ''] || part.value || '';
       case 'function':
         return `${part.value}(`;
       case 'fraction':
