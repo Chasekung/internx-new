@@ -163,7 +163,7 @@ const EditArticlePage: React.FC = () => {
           .from('interns')
           .select('username')
           .eq('id', session.user.id)
-          .eq('username', 'chasekung')
+          .in('username', ['chasekung', 'Albert'])
           .single();
 
         if (error || !data) {

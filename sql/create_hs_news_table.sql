@@ -27,7 +27,7 @@ FOR SELECT
 TO public
 USING (true);
 
--- Policy: Only admin (chasekung) can insert
+-- Policy: Only admin (chasekung or Albert) can insert
 CREATE POLICY "Admin can insert hs_news"
 ON public.hs_news
 FOR INSERT
@@ -36,11 +36,11 @@ WITH CHECK (
     EXISTS (
         SELECT 1 FROM public.interns
         WHERE interns.id = auth.uid()
-        AND interns.username = 'chasekung'
+        AND interns.username IN ('chasekung', 'Albert')
     )
 );
 
--- Policy: Only admin (chasekung) can update
+-- Policy: Only admin (chasekung or Albert) can update
 CREATE POLICY "Admin can update hs_news"
 ON public.hs_news
 FOR UPDATE
@@ -49,18 +49,18 @@ USING (
     EXISTS (
         SELECT 1 FROM public.interns
         WHERE interns.id = auth.uid()
-        AND interns.username = 'chasekung'
+        AND interns.username IN ('chasekung', 'Albert')
     )
 )
 WITH CHECK (
     EXISTS (
         SELECT 1 FROM public.interns
         WHERE interns.id = auth.uid()
-        AND interns.username = 'chasekung'
+        AND interns.username IN ('chasekung', 'Albert')
     )
 );
 
--- Policy: Only admin (chasekung) can delete
+-- Policy: Only admin (chasekung or Albert) can delete
 CREATE POLICY "Admin can delete hs_news"
 ON public.hs_news
 FOR DELETE
@@ -69,7 +69,7 @@ USING (
     EXISTS (
         SELECT 1 FROM public.interns
         WHERE interns.id = auth.uid()
-        AND interns.username = 'chasekung'
+        AND interns.username IN ('chasekung', 'Albert')
     )
 );
 

@@ -186,14 +186,14 @@ You Might Thrive If You:
         transition={{ duration: 0.6, delay: 0.2 }}
         className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
       >
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+        <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-blue-600" />
             </div>
             <div>
-              <h3 className="text-white font-bold text-lg">AI Job Description Assistant</h3>
-              <p className="text-blue-100 text-sm">Powered by advanced AI</p>
+              <h3 className="text-gray-900 font-bold text-lg">AI Job Description Assistant</h3>
+              <p className="text-gray-600 text-sm">Powered by advanced AI</p>
             </div>
           </div>
         </div>
@@ -277,14 +277,14 @@ You Might Thrive If You:
         transition={{ duration: 0.6, delay: 0.4 }}
         className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
       >
-        <div className="bg-gradient-to-r from-purple-600 to-pink-600 px-6 py-4">
+        <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <FileText className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-purple-50 border border-purple-100 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-purple-600" />
             </div>
             <div>
-              <h3 className="text-white font-bold text-lg">Generated Description</h3>
-              <p className="text-purple-100 text-sm">AI-powered & optimized</p>
+              <h3 className="text-gray-900 font-bold text-lg">Generated Description</h3>
+              <p className="text-gray-600 text-sm">AI-powered & optimized</p>
             </div>
           </div>
         </div>
@@ -317,7 +317,7 @@ You Might Thrive If You:
 
         {generatedDescription && (
           <div className="p-6 bg-white border-t border-gray-200">
-            <button className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:opacity-90 transition-opacity font-medium flex items-center justify-center gap-2">
+            <button className="w-full px-6 py-3 bg-purple-600 text-white rounded-xl hover:bg-purple-700 transition-colors font-medium flex items-center justify-center gap-2 shadow-sm">
               Insert into Posting
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -424,14 +424,14 @@ function ScoutTalentDemo() {
         transition={{ duration: 0.6, delay: 0.2 }}
         className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
       >
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+        <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-6 py-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Search className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center">
+              <Search className="w-6 h-6 text-indigo-600" />
             </div>
             <div>
-              <h3 className="text-white font-bold text-lg">AI Candidate Search</h3>
-              <p className="text-indigo-100 text-sm">Smart talent discovery</p>
+              <h3 className="text-gray-900 font-bold text-lg">AI Candidate Search</h3>
+              <p className="text-gray-600 text-sm">Smart talent discovery</p>
             </div>
           </div>
         </div>
@@ -513,15 +513,15 @@ function ScoutTalentDemo() {
         transition={{ duration: 0.6, delay: 0.4 }}
         className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
       >
-        <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
+        <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 rounded-lg bg-green-50 border border-green-100 flex items-center justify-center">
+                <GraduationCap className="w-6 h-6 text-green-600" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-lg">Top Matches</h3>
-                <p className="text-green-100 text-sm">{students.length} candidates found</p>
+                <h3 className="text-gray-900 font-bold text-lg">Top Matches</h3>
+                <p className="text-gray-600 text-sm">{students.length} candidates found</p>
               </div>
             </div>
           </div>
@@ -547,7 +547,7 @@ function ScoutTalentDemo() {
                 className="bg-white rounded-xl p-4 border border-gray-200 hover:border-green-300 hover:shadow-lg transition-all cursor-pointer"
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-green-100 border border-green-200 flex items-center justify-center text-green-700 font-bold text-lg flex-shrink-0">
                     {student.name.charAt(0)}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -660,18 +660,18 @@ function FormBuilderDemo() {
         transition={{ duration: 0.6, delay: 0.2 }}
         className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
       >
-        <div className="bg-gradient-to-r from-pink-600 to-rose-600 px-8 py-6">
+        <div className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50 px-8 py-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                <Building2 className="w-7 h-7 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-pink-50 border border-pink-100 flex items-center justify-center">
+                <Building2 className="w-7 h-7 text-pink-600" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-2xl">AI Form Builder</h3>
-                <p className="text-pink-100 text-sm">Create custom application forms instantly</p>
+                <h3 className="text-gray-900 font-bold text-2xl">AI Form Builder</h3>
+                <p className="text-gray-600 text-sm">Create custom application forms instantly</p>
               </div>
             </div>
-            <span className="px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs font-semibold">
+            <span className="px-3 py-1 bg-gray-100 border border-gray-200 rounded-full text-gray-700 text-xs font-semibold">
               Coming Soon
             </span>
           </div>
@@ -687,7 +687,7 @@ function FormBuilderDemo() {
             <button
               onClick={handleGenerate}
               disabled={isGenerating}
-              className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl hover:opacity-90 transition-opacity font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full sm:w-auto px-8 py-4 bg-pink-600 text-white rounded-xl hover:bg-pink-700 transition-colors font-semibold flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm"
             >
               <Wand2 className="w-5 h-5" />
               {isGenerating ? 'Generating Form...' : 'Generate Form with AI'}
@@ -704,7 +704,7 @@ function FormBuilderDemo() {
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
-                      className="h-full bg-gradient-to-r from-pink-600 to-rose-600"
+                      className="h-full bg-pink-600"
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-700">{progress}%</span>
@@ -768,7 +768,7 @@ function FormBuilderDemo() {
                     animate={{ opacity: 1, y: 0 }}
                     className="pt-4"
                   >
-                    <button className="w-full px-6 py-4 bg-gradient-to-r from-pink-600 to-rose-600 text-white rounded-xl hover:opacity-90 transition-opacity font-semibold">
+                    <button className="w-full px-6 py-4 bg-pink-600 text-white rounded-xl hover:bg-pink-700 transition-colors font-semibold shadow-sm">
                       Publish Application Form
                     </button>
                   </motion.div>

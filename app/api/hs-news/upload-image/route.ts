@@ -4,14 +4,14 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
-// Helper to check if user is admin (chasekung)
+// Helper to check if user is admin (chasekung or Albert)
 async function isAdmin(userId: string): Promise<boolean> {
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
   const { data, error } = await supabase
     .from('interns')
     .select('username')
     .eq('id', userId)
-    .eq('username', 'chasekung')
+    .in('username', ['chasekung', 'Albert'])
     .single();
   
   return !error && !!data;
